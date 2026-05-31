@@ -41,6 +41,16 @@ class MyApp extends StatelessWidget {
             ),
           ),
         ),
+        cardTheme: const CardThemeData(
+          color: Colors.transparent,
+          shape: Border(
+            right: BorderSide(
+              color:  Color.fromARGB(255, 68, 22, 148),
+              width: 1,
+            ),
+          ),
+          elevation: 4,
+        ),
         textTheme: TextTheme(
           headlineLarge: GoogleFonts.cinzelDecorative(
                             fontSize: 48,
@@ -70,7 +80,6 @@ class MyHomePage extends StatefulWidget {
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
-
 
 class _MyHomePageState extends State<MyHomePage> {
 
@@ -199,15 +208,61 @@ class CreaturesPage extends StatefulWidget {
 
 class _CreaturesPageState extends State<CreaturesPage> {
 
+  // int _selectedIndex = 0;
+
+  static const List<String> creatureButtons = [
+    'Return',
+    'Add Creature',
+    'Edit Creature',
+    'Delete Creature',
+  ];
+
+  final List<Widget> creaturePages = [
+    const MyHomePage(),
+    const EncountersPage(),
+    const PlayersPage(),
+    const CreaturesPage(),
+    // Add other pages here
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Creatures'),
-      ),
-      body: const Center(
-        child: Text('Creatures Page'),
-      ),
+      // appBar: AppBar(
+      //   title: const Text('Creatures'),
+      // ),
+      body: Row(
+        children: [
+          SizedBox(
+            width: 300,
+            child: Card(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                spacing: 16,
+                children: [
+                  ...List.generate(
+                    creatureButtons.length,
+                    (index) => Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          if (index == 0) {
+                            Navigator.pop(context);
+                            return;
+                          } else {
+                            null;
+                          }
+                        },
+                        child: Text(creatureButtons[index]),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      )
     );
   }
 }
