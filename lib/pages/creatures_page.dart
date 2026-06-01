@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/apptheme.dart';
+import '../components/creature_card.dart';
 
 class CreaturesPage extends StatefulWidget {
   const CreaturesPage({super.key});
@@ -99,8 +100,17 @@ class _BrowseCreatureWidgetState extends State<BrowseCreatureWidget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: const Center(
-        child: Text('Browse Creatures'),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          spacing: 8,
+          children: [
+            CreatureCard(name: 'Goblin', type: 'Humanoid', size: 'Small', cr: '1/4', source: 'Monster Manual'),
+            CreatureCard(name: 'Goblin', type: 'Humanoid', size: 'Small', cr: '1/4', source: 'Monster Manual'),
+            CreatureCard(name: 'Goblin', type: 'Humanoid', size: 'Small', cr: '1/4', source: 'Monster Manual'),
+            CreatureCards(name: 'Goblin', type: 'Humanoid', size: 'Small', cr: '1/4', source: 'Monster Manual'),
+          ],
+        ),
       ),
     );
   }

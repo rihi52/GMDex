@@ -33,6 +33,7 @@ class AppTheme {
           ),
         ),
       ),
+
       listTileTheme: ListTileThemeData(
         dense: false,
         shape: RoundedRectangleBorder(
@@ -46,6 +47,7 @@ class AppTheme {
           color: AppColors.hoverGrey,
         )
       ),
+
       textTheme: TextTheme(
         headlineLarge: GoogleFonts.cinzelDecorative(
                           fontSize: 48,
@@ -59,6 +61,11 @@ class AppTheme {
                         ),
         bodyMedium: GoogleFonts.metamorphous(
                           fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primary,
+                        ),
+        bodySmall: GoogleFonts.metamorphous(
+                          fontSize: 16,
                           fontWeight: FontWeight.bold,
                           color: AppColors.primary,
                         ),
