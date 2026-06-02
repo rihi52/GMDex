@@ -6,8 +6,10 @@ class AppColors {
   static const Color background = Color.fromARGB(255, 24, 24, 24);
   static const Color accent = Color.fromARGB(255, 101, 39, 207);
   static const Color appBlack = Colors.black;
-  static const Color selectGrey = Color.fromARGB(255, 35, 35, 35);
+  static const Color sideSelectGrey = Color.fromARGB(255, 35, 35, 35);
   static const Color hoverGrey = Colors.grey;
+  static const Color cardBackground = Color.fromARGB(255, 68, 68, 68);
+  static const Color cardSelected = Color.fromARGB(120, 255, 255, 255);
 
   AppColors._(); // Private constructor to prevent instantiation
 }
@@ -18,6 +20,18 @@ class AppTheme {
       brightness: Brightness.dark,
       primaryColor: AppColors.primary,
       scaffoldBackgroundColor: AppColors.background,
+
+      appBarTheme: const AppBarTheme(
+        backgroundColor: AppColors.background,
+        foregroundColor: AppColors.primary,
+        elevation: 0,
+        shape: BorderDirectional(
+          bottom: BorderSide(
+            color: AppColors.primary,
+            width: 1,
+          ),
+        ),
+      ),
 
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -40,7 +54,7 @@ class AppTheme {
           borderRadius: BorderRadius.circular(8),
         ),
         selectedColor: AppColors.accent,
-        selectedTileColor: AppColors.selectGrey,
+        selectedTileColor: AppColors.sideSelectGrey,
         titleTextStyle: GoogleFonts.metamorphous(
           fontSize: 16,
           fontWeight: FontWeight.bold,
@@ -67,7 +81,7 @@ class AppTheme {
         bodySmall: GoogleFonts.metamorphous(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.primary,
+                          color: AppColors.appBlack,
                         ),
       ),
     );

@@ -55,7 +55,7 @@ class CreatureCard extends StatelessWidget {
 class CreatureCards extends StatelessWidget {
   final bool selected;
   final VoidCallback? onTap;
-  
+
   final String name;
   final String type;
   final String size;
@@ -75,26 +75,29 @@ class CreatureCards extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
+    return Padding( padding: const EdgeInsets.symmetric(vertical: 6),
+      child:ListTile(
       selected: selected,
-      onTap: () {},
-      title: Text(name, style: AppTheme.dark().textTheme.bodySmall),
+      onTap: onTap,
+      tileColor: AppColors.cardBackground,
+      selectedTileColor:  AppColors.cardSelected,
+      selectedColor: AppColors.accent,
       subtitle: Column(
         children: [
-          Row(
-            children: [
-              Text(type),
-              Text(size),
-            ]
-          ),
-          Row(
-            children: [
-              Text('CR $cr'),
-              Text(source),
-            ]
-          ),
+          Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            Text(name, style: Theme.of(context).textTheme.bodySmall)
+          ]),
+          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+            Text(type, style: Theme.of(context).textTheme.bodySmall),
+            Text(size, style: Theme.of(context).textTheme.bodySmall),
+          ]),
+          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+            Text('CR $cr', style: Theme.of(context).textTheme.bodySmall),
+            Text(source, style: Theme.of(context).textTheme.bodySmall),
+          ]),
         ],
       ),
+    ),
     );
   }
 }
