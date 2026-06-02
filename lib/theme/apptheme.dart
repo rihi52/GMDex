@@ -26,10 +26,7 @@ class AppTheme {
         foregroundColor: AppColors.primary,
         elevation: 0,
         shape: BorderDirectional(
-          bottom: BorderSide(
-            color: AppColors.primary,
-            width: 1,
-          ),
+          bottom: BorderSide(color: AppColors.primary, width: 1),
         ),
       ),
 
@@ -50,39 +47,37 @@ class AppTheme {
 
       listTileTheme: ListTileThemeData(
         dense: false,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         selectedColor: AppColors.accent,
         selectedTileColor: AppColors.sideSelectGrey,
         titleTextStyle: GoogleFonts.metamorphous(
           fontSize: 16,
           fontWeight: FontWeight.bold,
           color: AppColors.hoverGrey,
-        )
+        ),
       ),
 
       textTheme: TextTheme(
         headlineLarge: GoogleFonts.cinzelDecorative(
-                          fontSize: 48,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.primary,
-                        ),
+          fontSize: 48,
+          fontWeight: FontWeight.bold,
+          color: AppColors.primary,
+        ),
         headlineMedium: GoogleFonts.cinzelDecorative(
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.primary,
-                        ),
+          fontSize: 32,
+          fontWeight: FontWeight.bold,
+          color: AppColors.primary,
+        ),
         bodyMedium: GoogleFonts.metamorphous(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.primary,
-                        ),
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+          color: AppColors.primary,
+        ),
         bodySmall: GoogleFonts.metamorphous(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.appBlack,
-                        ),
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+          color: AppColors.appBlack,
+        ),
       ),
     );
   }

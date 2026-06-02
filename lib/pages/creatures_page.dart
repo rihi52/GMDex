@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import '../theme/apptheme.dart';
 import '../components/creature_card.dart';
+import '../components/statblock.dart';
+import '../load/read.dart';
+
 
 class CreaturesPage extends StatefulWidget {
   const CreaturesPage({super.key});
@@ -15,61 +18,59 @@ class _CreaturesPageState extends State<CreaturesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Row(
-      children: [
-        Container(
-          width: 250,
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-          decoration: const BoxDecoration(
+      body: Row(
+        children: [
+          Container(
+            width: 250,
+            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+            decoration: const BoxDecoration(
               border: Border(
-                  right: BorderSide(
-            color: AppColors.primary,
-            width: 1,
-          ))),
-          child: Column(
-            spacing: 8,
-            children: [
-              ListTile(
-                selected: false,
-                title: const Text('Return'),
-                onTap: () => Navigator.pop(context),
+                right: BorderSide(color: AppColors.primary, width: 1),
               ),
-              ListTile(
-                selected: _selectedIndex == 0,
-                title: const Text('Browse'),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  side: BorderSide(
-                    color: _selectedIndex == 0
-                        ? AppColors.hoverGrey
-                        : Colors.transparent,
-                    width: 1,
-                  ),
+            ),
+            child: Column(
+              spacing: 8,
+              children: [
+                ListTile(
+                  selected: false,
+                  title: const Text('Return'),
+                  onTap: () => Navigator.pop(context),
                 ),
-                onTap: () => setState(() => _selectedIndex = 0),
-              ),
-              ListTile(
-                selected: _selectedIndex == 1,
-                title: const Text('Create'),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  side: BorderSide(
-                    color: _selectedIndex == 1
-                        ? AppColors.hoverGrey
-                        : Colors.transparent,
-                    width: 1,
+                ListTile(
+                  selected: _selectedIndex == 0,
+                  title: const Text('Browse'),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    side: BorderSide(
+                      color: _selectedIndex == 0
+                          ? AppColors.hoverGrey
+                          : Colors.transparent,
+                      width: 1,
+                    ),
                   ),
+                  onTap: () => setState(() => _selectedIndex = 0),
                 ),
-                onTap: () => setState(() => _selectedIndex = 1),
-              ),
-            ],
+                ListTile(
+                  selected: _selectedIndex == 1,
+                  title: const Text('Create'),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    side: BorderSide(
+                      color: _selectedIndex == 1
+                          ? AppColors.hoverGrey
+                          : Colors.transparent,
+                      width: 1,
+                    ),
+                  ),
+                  onTap: () => setState(() => _selectedIndex = 1),
+                ),
+              ],
+            ),
           ),
-        ),
-        Expanded(
-          child: _buildContent(),
-        )
-      ],
-    ));
+          Expanded(child: _buildContent()),
+        ],
+      ),
+    );
   }
 
   Widget _buildContent() {
@@ -93,76 +94,96 @@ class BrowseCreatureWidget extends StatefulWidget {
 
 class _BrowseCreatureWidgetState extends State<BrowseCreatureWidget> {
   final creatures = [
-      (
-        name: 'Goblin',
-        type: 'Humanoid',
-        size: 'Small',
-        cr: '1/4',
-        source: 'Monster Manual'
-      ),
-      (
-        name: 'Orc',
-        type: 'Humanoid',
-        size: 'Medium',
-        cr: '1/2',
-        source: 'Monster Manual'
-      ),
-      (
-        name: 'Young Red Dragon',
-        type: 'Dragon',
-        size: 'Large',
-        cr: '10',
-        source: 'Monster Manual'
-      ),
-      (
-        name: 'Glin',
-        type: 'Humanoid',
-        size: 'Small',
-        cr: '1/4',
-        source: 'Monster Manual'
-      ),
-      (
-        name: 'rc',
-        type: 'Humanoid',
-        size: 'Medium',
-        cr: '1/2',
-        source: 'Monster Manual'
-      ),
-      (
-        name: ' Red Dragon',
-        type: 'Dragon',
-        size: 'Large',
-        cr: '10',
-        source: 'Monster Manual'
-      ),
-      (
-        name: 'Gob',
-        type: 'Humanoid',
-        size: 'Small',
-        cr: '1/4',
-        source: 'Monster Manual'
-      ),
-      (
-        name: 'Or',
-        type: 'Humanoid',
-        size: 'Medium',
-        cr: '1/2',
-        source: 'Monster Manual'
-      ),
-      (
-        name: 'Young Dragon',
-        type: 'Dragon',
-        size: 'Large',
-        cr: '10',
-        source: 'Monster Manual'
-      ),
-    ];
+    (
+      name: 'Goblin',
+      type: 'Humanoid',
+      size: 'Small',
+      cr: '1/4',
+      source: 'Monster Manual',
+    ),
+    (
+      name: 'Orc',
+      type: 'Humanoid',
+      size: 'Medium',
+      cr: '1/2',
+      source: 'Monster Manual',
+    ),
+    (
+      name: 'Young Red Dragon',
+      type: 'Dragon',
+      size: 'Large',
+      cr: '10',
+      source: 'Monster Manual',
+    ),
+    (
+      name: 'Glin',
+      type: 'Humanoid',
+      size: 'Small',
+      cr: '1/4',
+      source: 'Monster Manual',
+    ),
+    (
+      name: 'rc',
+      type: 'Humanoid',
+      size: 'Medium',
+      cr: '1/2',
+      source: 'Monster Manual',
+    ),
+    (
+      name: ' Red Dragon',
+      type: 'Dragon',
+      size: 'Large',
+      cr: '10',
+      source: 'Monster Manual',
+    ),
+    (
+      name: 'Gob',
+      type: 'Humanoid',
+      size: 'Small',
+      cr: '1/4',
+      source: 'Monster Manual',
+    ),
+    (
+      name: 'Or',
+      type: 'Humanoid',
+      size: 'Medium',
+      cr: '1/2',
+      source: 'Monster Manual',
+    ),
+    (
+      name: 'Young Dragon',
+      type: 'Dragon',
+      size: 'Large',
+      cr: '10',
+      source: 'Monster Manual',
+    ),
+  ];
+
+  Creature? monster;
+
+  @override
+  void initState() {
+    super.initState();
+    loadMonster();
+  }
+
+  Future<void> loadMonster() async {
+    try {
+      final result = await test();
+      setState(() => monster = result);
+    } catch (e) {
+      debugPrint('Failed to load monster: $e');
+      // Optionally set an error state here
+    }
+  }
+  
   int _selectedIndex = -1;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        scrolledUnderElevation: 0,
         automaticallyImplyLeading: false,
         actions: [
           IconButton(
@@ -188,32 +209,52 @@ class _BrowseCreatureWidgetState extends State<BrowseCreatureWidget> {
             },
           ),
         ),
-
       ),
-      body: Padding( padding: const EdgeInsets.all(16),
-        child: SizedBox(
-          width: 350,
-          child:ListView.builder(
-          itemCount: creatures.length,
-          itemBuilder: (context, index){
-            final creature = creatures[index];
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Expanded(
+              flex: 3,
+              child: SizedBox(
+                width: 350,
+                child: ListView.builder(
+                  itemCount: creatures.length,
+                  itemBuilder: (context, index) {
+                    final creature = creatures[index];
 
-            return SizedBox(
-              height: 100,
-              child: CreatureCards(
-                name: creature.name,
-                type: creature.type,
-                size: creature.size,
-                cr: creature.cr,
-                source: creature.source,
-                selected: _selectedIndex == index,
-                onTap: () => setState(() => _selectedIndex = index),
+                    return SizedBox(
+                      height: 100,
+                      child: CreatureCard(
+                        name: creature.name,
+                        type: creature.type,
+                        size: creature.size,
+                        cr: creature.cr,
+                        source: creature.source,
+                        selected: _selectedIndex == index,
+                        onTap: () => setState(() => _selectedIndex = index),
+                      ),
+                    );
+                  },
+                ),
               ),
-            );
-          }
-        )
-      )
-    ),
+            ),
+            Expanded(
+              flex: 7,
+              child: SizedBox(
+                child: Column(
+                  children: [
+                    monster == null
+                      ? const Text("Loading...")
+                      : Text(monster!.name),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
+
