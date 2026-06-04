@@ -78,6 +78,12 @@ class AppTheme {
           fontWeight: FontWeight.bold,
           color: AppColors.appBlack,
         ),
+        labelSmall: GoogleFonts.metamorphous(
+          fontSize: 14,
+          fontWeight: FontWeight.bold,
+          color: AppColors.appBlack,
+        ),
+
       ),
     );
   }

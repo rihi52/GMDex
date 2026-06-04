@@ -4,7 +4,6 @@ import '../components/creature_card.dart';
 import '../components/statblock.dart';
 import '../load/read.dart';
 
-
 class CreaturesPage extends StatefulWidget {
   const CreaturesPage({super.key});
 
@@ -176,7 +175,7 @@ class _BrowseCreatureWidgetState extends State<BrowseCreatureWidget> {
       // Optionally set an error state here
     }
   }
-  
+
   int _selectedIndex = -1;
 
   @override
@@ -219,6 +218,7 @@ class _BrowseCreatureWidgetState extends State<BrowseCreatureWidget> {
               child: SizedBox(
                 width: 350,
                 child: ListView.builder(
+                  padding: const EdgeInsets.only(right: 8),
                   itemCount: creatures.length,
                   itemBuilder: (context, index) {
                     final creature = creatures[index];
@@ -239,17 +239,10 @@ class _BrowseCreatureWidgetState extends State<BrowseCreatureWidget> {
                 ),
               ),
             ),
+            Container(width: 8),
             Expanded(
               flex: 7,
-              child: SizedBox(
-                child: Column(
-                  children: [
-                    monster == null
-                      ? const Text("Loading...")
-                      : Text(monster!.name),
-                  ],
-                ),
-              ),
+              child: monster != null ? CreatureStatBlock(creature: monster) : SizedBox.shrink(),
             ),
           ],
         ),
@@ -257,4 +250,3 @@ class _BrowseCreatureWidgetState extends State<BrowseCreatureWidget> {
     );
   }
 }
-

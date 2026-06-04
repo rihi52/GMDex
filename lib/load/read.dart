@@ -10,16 +10,39 @@ Future<dynamic> loadMonsters() async {
   return data;
 }
 
+const sizeNames = {
+  'T': 'Tiny',
+  'S': 'Small',
+  'M': 'Medium',
+  'L': 'Large',
+  'H': 'Huge',
+  'G': 'Gargantuan',
+};
+
+const alignmentNames = {
+  'L': 'Lawful',
+  'N': 'Neutral',
+  'C': 'Chaotic',
+  'G': 'Good',
+  'E': 'Evil',
+  'U': 'Unaligned',
+  'A': 'Any',
+};
+
 Future<Creature> test() async {
   final data = await loadMonsters();
   final skills = data['skill'] ?? {};
   final save = data['save'] ?? {};
   final creature = Creature(
     name: data['name'],
-    size: data['size'][0],
+    size: sizeNames[data['size'][0]] ?? data['size'][0],
     type: data['type'],
-    alignment: (data['alignment'] as List?)?.join(' ') ?? 'Unaligned',
-    armorClass: data['ac'][0]['ac'],
+    alignment: 
+      (data['alignment'] as List?)?.map((a) => alignmentNames[a] ?? a).join(' ') ?? 'Unaligned',
+    armorClass: CreatureArmorClass(
+      ac: data['ac'][0]['ac'],
+      type: (data['ac'][0]['from'] as List?)?.first ?? 'Unknown',
+    ),
     hitPoints: data['hp']['average'],
     hitPointFormula: data['hp']['formula'] ?? '',
     challengeRating: data['cr'],
