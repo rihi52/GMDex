@@ -12,17 +12,19 @@ class CreatureStatBlock extends StatelessWidget {
     if (creature == null) return const Text("Loading...");
 
     return Container(
-      // color: AppColors.cardBackground,
       decoration: BoxDecoration(
         color: AppColors.cardBackground,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(AppSpacing.spacingSmall),
       ),
-      padding: EdgeInsets.all(8),
+      padding: EdgeInsets.all(AppSpacing.spacingSmall),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Container(
-            padding: const EdgeInsets.all(0),
+            padding: const EdgeInsets.only(
+              bottom: AppSpacing.spacingSmall,
+              top: AppSpacing.spacingSmall,
+            ),
             decoration: BoxDecoration(
               border: Border(
                 bottom: BorderSide(color: AppColors.primary, width: 1),
@@ -33,7 +35,10 @@ class CreatureStatBlock extends StatelessWidget {
                 : Text(creature!.name),
           ),
           Container(
-            padding: const EdgeInsets.all(0),
+            padding: const EdgeInsets.only(
+              bottom: AppSpacing.spacingSmall,
+              top: AppSpacing.spacingSmall,
+            ),
             decoration: BoxDecoration(
               border: Border(
                 bottom: BorderSide(color: AppColors.primary, width: 1),
@@ -57,7 +62,10 @@ class CreatureStatBlock extends StatelessWidget {
             ),
           ),
           Container(
-            padding: const EdgeInsets.all(0),
+            padding: const EdgeInsets.only(
+              bottom: AppSpacing.spacingSmall,
+              top: AppSpacing.spacingSmall,
+            ),
             decoration: BoxDecoration(
               border: Border(
                 bottom: BorderSide(color: AppColors.primary, width: 1),
@@ -134,21 +142,107 @@ class CreatureStatBlock extends StatelessWidget {
               ],
             ),
           ),
-          Row(
-            children: [
-              Column(
+          Container(
+            padding: const EdgeInsets.only(
+              bottom: AppSpacing.spacingSmall,
+              top: AppSpacing.spacingSmall,
+            ),
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(color: AppColors.primary, width: 1),
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Column(
+                  children: [
+                    Text('STR', style: Theme.of(context).textTheme.labelSmall),
+                    Text(
+                      '${creature!.abilityScores.strength} (${creature!.abilityScores.strengthModifier >= 0 ? '+' : ''}${creature!.abilityScores.strengthModifier})',
+                      style: Theme.of(context).textTheme.labelSmall,
+                    ),
+                  ],
+                ),
+                const SizedBox(width: AppSpacing.abilityBoxes),
+                Column(
+                  children: [
+                    Text('DEX', style: Theme.of(context).textTheme.labelSmall),
+                    Text(
+                      '${creature!.abilityScores.dexterity} (${creature!.abilityScores.dexterityModifier >= 0 ? '+' : ''}${creature!.abilityScores.dexterityModifier})',
+                      style: Theme.of(context).textTheme.labelSmall,
+                    ),
+                  ],
+                ),
+                const SizedBox(width: AppSpacing.abilityBoxes),
+                Column(
+                  children: [
+                    Text('CON', style: Theme.of(context).textTheme.labelSmall),
+                    Text(
+                      '${creature!.abilityScores.constitution} (${creature!.abilityScores.constitutionModifier >= 0 ? '+' : ''}${creature!.abilityScores.constitutionModifier})',
+                      style: Theme.of(context).textTheme.labelSmall,
+                    ),
+                  ],
+                ),
+                const SizedBox(width: AppSpacing.abilityBoxes),
+                Column(
+                  children: [
+                    Text('INT', style: Theme.of(context).textTheme.labelSmall),
+                    Text(
+                      '${creature!.abilityScores.intelligence} (${creature!.abilityScores.intelligenceModifier >= 0 ? '+' : ''}${creature!.abilityScores.intelligenceModifier})',
+                      style: Theme.of(context).textTheme.labelSmall,
+                    ),
+                  ],
+                ),
+                const SizedBox(width: AppSpacing.abilityBoxes),
+                Column(
+                  children: [
+                    Text('WIS', style: Theme.of(context).textTheme.labelSmall),
+                    Text(
+                      '${creature!.abilityScores.wisdom} (${creature!.abilityScores.wisdomModifier >= 0 ? '+' : ''}${creature!.abilityScores.wisdomModifier})',
+                      style: Theme.of(context).textTheme.labelSmall,
+                    ),
+                  ],
+                ),
+                const SizedBox(width: AppSpacing.abilityBoxes),
+                Column(
+                  children: [
+                    Text('CHA', style: Theme.of(context).textTheme.labelSmall),
+                    Text(
+                      '${creature!.abilityScores.charisma} (${creature!.abilityScores.charismaModifier >= 0 ? '+' : ''}${creature!.abilityScores.charismaModifier})',
+                      style: Theme.of(context).textTheme.labelSmall,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.only(
+              bottom: AppSpacing.spacingSmall,
+              top: AppSpacing.spacingSmall,
+            ),
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(color: AppColors.primary, width: 1),
+              ),
+            ),
+            child: Column(children: [
+              Row(
                 children:[
                   Text(
-                    'STR',
-                    style: Theme.of(context).textTheme.labelSmall,
+                    'Saving Throws: ', 
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      fontStyle: FontStyle.italic,
+                    ),
                   ),
-                  Text(
-                    '${creature!.abilityScores.strength}',
-                    style: Theme.of(context).textTheme.labelSmall,
-                  )
-                ]
-              ),
-            ],
+                  if((creature!.savingThrows.strength ?? 0) > 0)
+                      Text(
+                        ', fly ${creature!.savingThrows.strength}',
+                        style: Theme.of(context).textTheme.labelSmall,
+                      ),
+                ],
+              ), Row(), Row(), Row(), Row()]),
           ),
           /* NEXT CHILD GOES HERE */
         ],
@@ -221,19 +315,31 @@ class CreatureSpeed {
 
 class CreatureAbilityScores {
   final int strength;
+  final int strengthModifier;
   final int dexterity;
+  final int dexterityModifier;
   final int constitution;
+  final int constitutionModifier;
   final int intelligence;
+  final int intelligenceModifier;
   final int wisdom;
+  final int wisdomModifier;
   final int charisma;
+  final int charismaModifier;
 
   const CreatureAbilityScores({
     required this.strength,
+    required this.strengthModifier,
     required this.dexterity,
+    required this.dexterityModifier,
     required this.constitution,
+    required this.constitutionModifier,
     required this.intelligence,
+    required this.intelligenceModifier,
     required this.wisdom,
+    required this.wisdomModifier,
     required this.charisma,
+    required this.charismaModifier,
   });
 }
 

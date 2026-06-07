@@ -55,11 +55,17 @@ Future<Creature> test() async {
     ),
     abilityScores: CreatureAbilityScores(
       strength: data['str'],
+      strengthModifier: ((data['str'] - 10) / 2).floor(),
       dexterity: data['dex'],
+      dexterityModifier: ((data['dex'] - 10) / 2).floor(),
       constitution: data['con'],
+      constitutionModifier: ((data['con'] - 10) / 2).floor(),
       intelligence: data['int'],
+      intelligenceModifier: ((data['int'] - 10) / 2).floor(),
       wisdom: data['wis'],
+      wisdomModifier: ((data['wis'] - 10) / 2).floor(),
       charisma: data['cha'],
+      charismaModifier: ((data['cha'] - 10) / 2).floor(),
     ),
     skills: CreatureSkills(
       athletics: skills['athletics']?.toString() ?? '0',
