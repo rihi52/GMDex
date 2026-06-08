@@ -37,8 +37,11 @@ Future<Creature> test() async {
     name: data['name'],
     size: sizeNames[data['size'][0]] ?? data['size'][0],
     type: data['type'],
-    alignment: 
-      (data['alignment'] as List?)?.map((a) => alignmentNames[a] ?? a).join(' ') ?? 'Unaligned',
+    alignment:
+        (data['alignment'] as List?)
+            ?.map((a) => alignmentNames[a] ?? a)
+            .join(' ') ??
+        'Unaligned',
     armorClass: CreatureArmorClass(
       ac: data['ac'][0]['ac'],
       type: (data['ac'][0]['from'] as List?)?.first ?? 'Unknown',
@@ -87,12 +90,12 @@ Future<Creature> test() async {
       performance: skills['performance']?.toString() ?? '0',
     ),
     savingThrows: CreatureSavingThrows(
-      strength: int.tryParse(save['str'] ?? '0') ?? 0,
-      dexterity: int.tryParse(save['dex'] ?? '0') ?? 0,
-      constitution: int.tryParse(save['con'] ?? '0') ?? 0,
-      intelligence: int.tryParse(save['int'] ?? '0') ?? 0,
-      wisdom: int.tryParse(save['wis'] ?? '0') ?? 0,
-      charisma: int.tryParse(save['cha'] ?? '0') ?? 0,
+      strength: int.tryParse(save['str']?.toString() ?? ''),
+      dexterity: int.tryParse(save['dex']?.toString() ?? ''),
+      constitution: int.tryParse(save['con']?.toString() ?? ''),
+      intelligence: int.tryParse(save['int']?.toString() ?? ''),
+      wisdom: int.tryParse(save['wis']?.toString() ?? ''),
+      charisma: int.tryParse(save['cha']?.toString() ?? ''),
     ),
     actions: List<CreatureAction>.from(
       (data['action'] as List? ?? []).map(

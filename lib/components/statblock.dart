@@ -227,22 +227,54 @@ class CreatureStatBlock extends StatelessWidget {
                 bottom: BorderSide(color: AppColors.primary, width: 1),
               ),
             ),
-            child: Column(children: [
-              Row(
-                children:[
-                  Text(
-                    'Saving Throws: ', 
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      fontStyle: FontStyle.italic,
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      'Saving Throws: ',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        fontStyle: FontStyle.italic,
+                      ),
                     ),
-                  ),
-                  if((creature!.savingThrows.strength ?? 0) > 0)
+                    if (creature!.savingThrows.strength != null)
                       Text(
-                        ', fly ${creature!.savingThrows.strength}',
+                        'Str ${creature!.savingThrows.strength! >= 0 ? '+' : ''}${creature!.savingThrows.strength}',
                         style: Theme.of(context).textTheme.labelSmall,
                       ),
-                ],
-              ), Row(), Row(), Row(), Row()]),
+                    if (creature!.savingThrows.dexterity != null)
+                      Text(
+                        'Dex ${creature!.savingThrows.dexterity! >= 0 ? '+' : ''}${creature!.savingThrows.dexterity}, ',
+                        style: Theme.of(context).textTheme.labelSmall,
+                      ),
+                    if (creature!.savingThrows.constitution != null)
+                      Text(
+                        'Con ${creature!.savingThrows.constitution! >= 0 ? '+' : ''}${creature!.savingThrows.constitution}, ',
+                        style: Theme.of(context).textTheme.labelSmall,
+                      ),
+                    if (creature!.savingThrows.intelligence != null)
+                      Text(
+                        'Int ${creature!.savingThrows.intelligence! >= 0 ? '+' : ''}${creature!.savingThrows.intelligence}, ',
+                        style: Theme.of(context).textTheme.labelSmall,
+                      ),
+                    if (creature!.savingThrows.wisdom != null)
+                      Text(
+                        'Wis ${creature!.savingThrows.wisdom! >= 0 ? '+' : ''}${creature!.savingThrows.wisdom}, ',
+                        style: Theme.of(context).textTheme.labelSmall,
+                      ),
+                    if (creature!.savingThrows.charisma != null)
+                      Text(
+                        'Cha ${creature!.savingThrows.charisma! >= 0 ? '+' : ''}${creature!.savingThrows.charisma}, ',
+                        style: Theme.of(context).textTheme.labelSmall,
+                      ),
+                  ],
+                ),
+                Row(),
+                Row(),
+                Row(),
+                Row(),
+              ],
+            ),
           ),
           /* NEXT CHILD GOES HERE */
         ],
@@ -384,12 +416,12 @@ class CreatureSkills {
 }
 
 class CreatureSavingThrows {
-  final int strength;
-  final int dexterity;
-  final int constitution;
-  final int intelligence;
-  final int wisdom;
-  final int charisma;
+  final int? strength;
+  final int? dexterity;
+  final int? constitution;
+  final int? intelligence;
+  final int? wisdom;
+  final int? charisma;
 
   const CreatureSavingThrows({
     required this.strength,
