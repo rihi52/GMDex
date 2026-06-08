@@ -99,15 +99,27 @@ Future<Creature> test() async {
       wisdom: int.tryParse(save['wis']?.toString() ?? ''),
       charisma: int.tryParse(save['cha']?.toString() ?? ''),
     ),
-    actions: List<CreatureAction>.from(
-      (data['action'] as List? ?? []).map(
-        (action) => CreatureAction(
-          name: action['name'],
-          description: (action['entries'] as List).join('\n'),
-          type: ActionType.action,
-        ),
-      ),
-    ),
+    actions: [
+      for (final (key, type) in [
+        ('action', ActionType.action),
+        ('legendary', ActionType.legendary),
+        ('bonus', ActionType.bonusAction),
+        ('reaction', ActionType.reaction),
+        ('lair', ActionType.lair),
+        ('special', ActionType.special),
+        ('villain', ActionType.villainAction),
+      ])
+        if (data[key] != null)
+          ...List<CreatureAction>.from(
+            (data[key] as List).map(
+              (action) => CreatureAction(
+                name: action['name'],
+                description: (action['entries'] as List).join('\n'),
+                type: type,
+              ),
+            ),
+          ),
+    ],
     traits: List<CreatureTrait>.from(
       (data['trait'] as List? ?? []).map(
         (trait) => CreatureTrait(
