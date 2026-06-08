@@ -71,24 +71,26 @@ Future<Creature> test() async {
       charismaModifier: ((data['cha'] - 10) / 2).floor(),
     ),
     skills: CreatureSkills(
-      athletics: skills['athletics']?.toString() ?? '0',
-      acrobatics: skills['acrobatics']?.toString() ?? '0',
-      sleightOfHand: skills['sleightOfHand']?.toString() ?? '0',
-      stealth: skills['stealth']?.toString() ?? '0',
-      arcana: skills['arcana']?.toString() ?? '0',
-      history: skills['history']?.toString() ?? '0',
-      investigation: skills['investigation']?.toString() ?? '0',
-      nature: skills['nature']?.toString() ?? '0',
-      religion: skills['religion']?.toString() ?? '0',
-      animalHandling: skills['animalHandling']?.toString() ?? '0',
-      insight: skills['insight']?.toString() ?? '0',
-      medicine: skills['medicine']?.toString() ?? '0',
-      perception: skills['perception']?.toString() ?? '0',
-      survival: skills['survival']?.toString() ?? '0',
-      deception: skills['deception']?.toString() ?? '0',
-      intimidation: skills['intimidation']?.toString() ?? '0',
-      performance: skills['performance']?.toString() ?? '0',
+      athletics: skills['athletics']?.toString(),
+      acrobatics: skills['acrobatics']?.toString(),
+      sleightOfHand: skills['sleightOfHand']?.toString(),
+      stealth: skills['stealth']?.toString(),
+      arcana: skills['arcana']?.toString(),
+      history: skills['history']?.toString(),
+      investigation: skills['investigation']?.toString(),
+      nature: skills['nature']?.toString(),
+      religion: skills['religion']?.toString(),
+      animalHandling: skills['animalHandling']?.toString(),
+      insight: skills['insight']?.toString(),
+      medicine: skills['medicine']?.toString(),
+      perception: skills['perception']?.toString(),
+      survival: skills['survival']?.toString(),
+      deception: skills['deception']?.toString(),
+      intimidation: skills['intimidation']?.toString(),
+      performance: skills['performance']?.toString(),
     ),
+    senses: (data['senses'] as List?)?.join(', ') ?? '',
+    languages: (data['languages'] as List?)?.join(', ') ?? '',
     savingThrows: CreatureSavingThrows(
       strength: int.tryParse(save['str']?.toString() ?? ''),
       dexterity: int.tryParse(save['dex']?.toString() ?? ''),
@@ -110,7 +112,7 @@ Future<Creature> test() async {
       (data['trait'] as List? ?? []).map(
         (trait) => CreatureTrait(
           name: trait['name'],
-          description: (trait['entries'] as List).join('\n'),
+          description: parseEntries(trait['entries'] as List),
         ),
       ),
     ),
@@ -118,4 +120,77 @@ Future<Creature> test() async {
     id: 1,
   );
   return creature;
+}
+
+String parseEntries(List entries) {
+  String text = entries.join('\n');
+
+  // Attack types
+  text = text.replaceAll('{@atk mw}', 'Melee Weapon Attack:');
+  text = text.replaceAll('{@atk rw}', 'Ranged Weapon Attack:');
+  text = text.replaceAll('{@atk mw,rw}', 'Melee or Ranged Weapon Attack:');
+  text = text.replaceAll('{@atk ms}', 'Melee Spell Attack:');
+  text = text.replaceAll('{@atk rs}', 'Ranged Spell Attack:');
+
+  // DC
+  text = text.replaceAllMapped(
+    RegExp(r'\{@dc (\d+)\}'),
+    (match) => 'DC ${match.group(1)}',
+  );
+
+  // Hit bonus
+  text = text.replaceAllMapped(
+    RegExp(r'\{@hit (\d+)\}'),
+    (match) => '+${match.group(1)}',
+  );
+
+  // Hit result
+  text = text.replaceAllMapped(
+    RegExp(r'\{@h\}(\d+)'),
+    (match) => 'Hit: ${match.group(1)}',
+  );
+
+  // Dice and damage
+  text = text.replaceAllMapped(
+    RegExp(r'\{@dice ([^}]+)\}'),
+    (match) => match.group(1)!,
+  );
+  text = text.replaceAllMapped(
+    RegExp(r'\{@damage ([^}]+)\}'),
+    (match) => match.group(1)!,
+  );
+
+  // Conditions, skills, spells, creatures, items, actions
+  text = text.replaceAllMapped(
+    RegExp(r'\{@condition ([^}]+)\}'),
+    (match) => match.group(1)!,
+  );
+  text = text.replaceAllMapped(
+    RegExp(r'\{@skill ([^}]+)\}'),
+    (match) => match.group(1)!,
+  );
+  text = text.replaceAllMapped(
+    RegExp(r'\{@spell ([^}]+)\}'),
+    (match) => match.group(1)!,
+  );
+  text = text.replaceAllMapped(
+    RegExp(r'\{@creature ([^}]+)\}'),
+    (match) => match.group(1)!,
+  );
+  text = text.replaceAllMapped(
+    RegExp(r'\{@item ([^}]+)\}'),
+    (match) => match.group(1)!,
+  );
+  text = text.replaceAllMapped(
+    RegExp(r'\{@action ([^}]+)\}'),
+    (match) => match.group(1)!,
+  );
+
+  // Catch-all for any remaining {@tag content} patterns
+  text = text.replaceAllMapped(
+    RegExp(r'\{@\w+ ([^}]+)\}'),
+    (match) => match.group(1)!,
+  );
+
+  return text;
 }

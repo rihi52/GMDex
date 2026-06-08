@@ -32,7 +32,8 @@ class CreatureStatBlock extends StatelessWidget {
             ),
             child: creature == null
                 ? const Text("Loading...")
-                : Text(creature!.name),
+                : Text(creature!.name,
+                style: Theme.of(context).textTheme.titleMedium),
           ),
           Container(
             padding: const EdgeInsets.only(
@@ -77,9 +78,7 @@ class CreatureStatBlock extends StatelessWidget {
                   children: [
                     Text(
                       'Armor Class:  ',
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        fontStyle: FontStyle.italic,
-                      ),
+                      style: Theme.of(context).textTheme.titleSmall
                     ),
                     Text(
                       '${creature!.armorClass.ac.toString()}, ${creature!.armorClass.type}',
@@ -91,9 +90,7 @@ class CreatureStatBlock extends StatelessWidget {
                   children: [
                     Text(
                       'Hit Points:  ',
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        fontStyle: FontStyle.italic,
-                      ),
+                      style: Theme.of(context).textTheme.titleSmall
                     ),
                     Text(
                       '${creature!.hitPoints}',
@@ -109,9 +106,7 @@ class CreatureStatBlock extends StatelessWidget {
                   children: [
                     Text(
                       'Speed: ',
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        fontStyle: FontStyle.italic,
-                      ),
+                      style: Theme.of(context).textTheme.titleSmall
                     ),
                     Text(
                       '${creature!.speed.walk ?? 0} ft.',
@@ -157,7 +152,7 @@ class CreatureStatBlock extends StatelessWidget {
               children: [
                 Column(
                   children: [
-                    Text('STR', style: Theme.of(context).textTheme.labelSmall),
+                    Text('STR', style: Theme.of(context).textTheme.titleSmall),
                     Text(
                       '${creature!.abilityScores.strength} (${creature!.abilityScores.strengthModifier >= 0 ? '+' : ''}${creature!.abilityScores.strengthModifier})',
                       style: Theme.of(context).textTheme.labelSmall,
@@ -167,7 +162,7 @@ class CreatureStatBlock extends StatelessWidget {
                 const SizedBox(width: AppSpacing.abilityBoxes),
                 Column(
                   children: [
-                    Text('DEX', style: Theme.of(context).textTheme.labelSmall),
+                    Text('DEX', style: Theme.of(context).textTheme.titleSmall),
                     Text(
                       '${creature!.abilityScores.dexterity} (${creature!.abilityScores.dexterityModifier >= 0 ? '+' : ''}${creature!.abilityScores.dexterityModifier})',
                       style: Theme.of(context).textTheme.labelSmall,
@@ -177,7 +172,7 @@ class CreatureStatBlock extends StatelessWidget {
                 const SizedBox(width: AppSpacing.abilityBoxes),
                 Column(
                   children: [
-                    Text('CON', style: Theme.of(context).textTheme.labelSmall),
+                    Text('CON', style: Theme.of(context).textTheme.titleSmall),
                     Text(
                       '${creature!.abilityScores.constitution} (${creature!.abilityScores.constitutionModifier >= 0 ? '+' : ''}${creature!.abilityScores.constitutionModifier})',
                       style: Theme.of(context).textTheme.labelSmall,
@@ -187,7 +182,7 @@ class CreatureStatBlock extends StatelessWidget {
                 const SizedBox(width: AppSpacing.abilityBoxes),
                 Column(
                   children: [
-                    Text('INT', style: Theme.of(context).textTheme.labelSmall),
+                    Text('INT', style: Theme.of(context).textTheme.titleSmall),
                     Text(
                       '${creature!.abilityScores.intelligence} (${creature!.abilityScores.intelligenceModifier >= 0 ? '+' : ''}${creature!.abilityScores.intelligenceModifier})',
                       style: Theme.of(context).textTheme.labelSmall,
@@ -197,7 +192,7 @@ class CreatureStatBlock extends StatelessWidget {
                 const SizedBox(width: AppSpacing.abilityBoxes),
                 Column(
                   children: [
-                    Text('WIS', style: Theme.of(context).textTheme.labelSmall),
+                    Text('WIS', style: Theme.of(context).textTheme.titleSmall),
                     Text(
                       '${creature!.abilityScores.wisdom} (${creature!.abilityScores.wisdomModifier >= 0 ? '+' : ''}${creature!.abilityScores.wisdomModifier})',
                       style: Theme.of(context).textTheme.labelSmall,
@@ -207,7 +202,7 @@ class CreatureStatBlock extends StatelessWidget {
                 const SizedBox(width: AppSpacing.abilityBoxes),
                 Column(
                   children: [
-                    Text('CHA', style: Theme.of(context).textTheme.labelSmall),
+                    Text('CHA', style: Theme.of(context).textTheme.titleSmall),
                     Text(
                       '${creature!.abilityScores.charisma} (${creature!.abilityScores.charismaModifier >= 0 ? '+' : ''}${creature!.abilityScores.charismaModifier})',
                       style: Theme.of(context).textTheme.labelSmall,
@@ -233,9 +228,7 @@ class CreatureStatBlock extends StatelessWidget {
                   children: [
                     Text(
                       'Saving Throws: ',
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        fontStyle: FontStyle.italic,
-                      ),
+                      style: Theme.of(context).textTheme.titleSmall
                     ),
                     if (creature!.savingThrows.strength != null)
                       Text(
@@ -269,19 +262,154 @@ class CreatureStatBlock extends StatelessWidget {
                       ),
                   ],
                 ),
-                Row(),
-                Row(),
-                Row(),
-                Row(),
+                Row(
+                  children: [
+                    Text(
+                      'Skills: ',
+                      style: Theme.of(context).textTheme.titleSmall
+                    ),
+                    Text(
+                      [
+                        if (creature!.skills.acrobatics != null)
+                          'Acrobatics ${creature!.skills.acrobatics!}',
+                        if (creature!.skills.animalHandling != null)
+                          'Animal Handling ${creature!.skills.animalHandling!}',
+                        if (creature!.skills.arcana != null)
+                          'Arcana ${creature!.skills.arcana!}',
+                        if (creature!.skills.athletics != null)
+                          'Athletics ${creature!.skills.athletics!}',
+                        if (creature!.skills.deception != null)
+                          'Deception ${creature!.skills.deception!}',
+                        if (creature!.skills.history != null)
+                          'History ${creature!.skills.history!}',
+                        if (creature!.skills.insight != null)
+                          'Insight ${creature!.skills.insight!}',
+                        if (creature!.skills.intimidation != null)
+                          'Intimidation ${creature!.skills.intimidation!}',
+                        if (creature!.skills.investigation != null)
+                          'Investigation ${creature!.skills.investigation!}',
+                        if (creature!.skills.medicine != null)
+                          'Medicine ${creature!.skills.medicine!}',
+                        if (creature!.skills.nature != null)
+                          'Nature ${creature!.skills.nature!}',
+                        if (creature!.skills.perception != null)
+                          'Perception ${creature!.skills.perception!}',
+                        if (creature!.skills.performance != null)
+                          'Performance ${creature!.skills.performance!}',
+                        if (creature!.skills.religion != null)
+                          'Religion ${creature!.skills.religion!}',
+                        if (creature!.skills.sleightOfHand != null)
+                          'Sleight of Hand ${creature!.skills.sleightOfHand!}',
+                        if (creature!.skills.stealth != null)
+                          'Stealth ${creature!.skills.stealth!}',
+                        if (creature!.skills.survival != null)
+                          'Survival ${creature!.skills.survival!}',
+                      ].join(', '),
+                      style: Theme.of(context).textTheme.labelSmall,
+                    ),
+                  ],
+                ),
+                Row(
+                  children: [
+                    Text(
+                      'Senses: ',
+                      style: Theme.of(context).textTheme.titleSmall
+                    ),
+                    if (creature!.senses != null)
+                      Text(
+                        creature!.senses!,
+                        style: Theme.of(context).textTheme.labelSmall,
+                      ),
+                  ],
+                ),
+                Row(
+                  children: [
+                    Text(
+                      'Languages: ',
+                      style: Theme.of(context).textTheme.titleSmall
+                    ),
+                    if (creature!.languages != null)
+                      Text(
+                        creature!.languages!,
+                        style: Theme.of(context).textTheme.labelSmall,
+                      ),
+                  ],
+                ),
+                Row(
+                  children: [
+                    Text(
+                      'Challenge: ',
+                      style: Theme.of(context).textTheme.titleSmall
+                    ),
+                    Text(
+                      '${creature!.challengeRating} (${crToXp[creature!.challengeRating] ?? '0'} XP)',
+                      style: Theme.of(context).textTheme.labelSmall,
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
-          /* NEXT CHILD GOES HERE */
+          ...creature!.traits
+              .map(
+                (trait) => Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      trait.name,
+                      style: Theme.of(context).textTheme.titleSmall
+                    ),
+                    Text(
+                      trait.description,
+                      style: Theme.of(context).textTheme.labelSmall,
+                    ),
+                    const SizedBox(height: 8),
+                  ],
+                ),
+              )
+              /* NEXT CHILD GOES HERE */,
         ],
       ),
     );
   }
 }
+
+const crToXp = {
+  '0': '10',
+  '1/8': '25',
+  '1/4': '50',
+  '1/2': '100',
+  '1': '200',
+  '2': '450',
+  '3': '700',
+  '4': '1,100',
+  '5': '1,800',
+  '6': '2,300',
+  '7': '2,900',
+  '8': '3,900',
+  '9': '5,000',
+  '10': '5,900',
+  '11': '7,200',
+  '12': '8,400',
+  '13': '10,000',
+  '14': '11,500',
+  '15': '13,000',
+  '16': '15,000',
+  '17': '18,000',
+  '18': '20,000',
+  '19': '22,000',
+  '20': '25,000',
+  '21': '33,000',
+  '22': '41,000',
+  '23': '50,000',
+  '24': '62,000',
+  '25': '75,000',
+  '26': '90,000',
+  '27': '105,000',
+  '28': '120,000',
+  '29': '135,000',
+  '30': '155,000',
+};
 
 class Creature {
   final String name;
@@ -295,6 +423,8 @@ class Creature {
   final CreatureSpeed speed;
   final CreatureAbilityScores abilityScores;
   final CreatureSkills skills;
+  final String? senses;
+  final String? languages;
   final CreatureSavingThrows savingThrows;
   final List<CreatureAction> actions;
   final List<CreatureTrait> traits;
@@ -314,6 +444,8 @@ class Creature {
     required this.speed,
     required this.abilityScores,
     required this.skills,
+    required this.senses,
+    required this.languages,
     required this.savingThrows,
     required this.actions,
     required this.traits,
@@ -375,24 +507,42 @@ class CreatureAbilityScores {
   });
 }
 
+class CreatureSavingThrows {
+  final int? strength;
+  final int? dexterity;
+  final int? constitution;
+  final int? intelligence;
+  final int? wisdom;
+  final int? charisma;
+
+  const CreatureSavingThrows({
+    required this.strength,
+    required this.dexterity,
+    required this.constitution,
+    required this.intelligence,
+    required this.wisdom,
+    required this.charisma,
+  });
+}
+
 class CreatureSkills {
-  final String athletics;
-  final String acrobatics;
-  final String sleightOfHand;
-  final String stealth;
-  final String arcana;
-  final String history;
-  final String investigation;
-  final String nature;
-  final String religion;
-  final String animalHandling;
-  final String insight;
-  final String medicine;
-  final String perception;
-  final String survival;
-  final String deception;
-  final String intimidation;
-  final String performance;
+  final String? athletics;
+  final String? acrobatics;
+  final String? sleightOfHand;
+  final String? stealth;
+  final String? arcana;
+  final String? history;
+  final String? investigation;
+  final String? nature;
+  final String? religion;
+  final String? animalHandling;
+  final String? insight;
+  final String? medicine;
+  final String? perception;
+  final String? survival;
+  final String? deception;
+  final String? intimidation;
+  final String? performance;
 
   const CreatureSkills({
     required this.athletics,
@@ -412,24 +562,6 @@ class CreatureSkills {
     required this.deception,
     required this.intimidation,
     required this.performance,
-  });
-}
-
-class CreatureSavingThrows {
-  final int? strength;
-  final int? dexterity;
-  final int? constitution;
-  final int? intelligence;
-  final int? wisdom;
-  final int? charisma;
-
-  const CreatureSavingThrows({
-    required this.strength,
-    required this.dexterity,
-    required this.constitution,
-    required this.intelligence,
-    required this.wisdom,
-    required this.charisma,
   });
 }
 

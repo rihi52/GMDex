@@ -68,6 +68,11 @@ class AppTheme {
           fontWeight: FontWeight.bold,
           color: AppColors.primary,
         ),
+        headlineSmall: GoogleFonts.cinzelDecorative(
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+          color: AppColors.primary,
+        ),
         bodyMedium: GoogleFonts.metamorphous(
           fontSize: 24,
           fontWeight: FontWeight.bold,
@@ -83,7 +88,31 @@ class AppTheme {
           fontWeight: FontWeight.bold,
           color: AppColors.appBlack,
         ),
-
+        titleMedium: GoogleFonts.metamorphous(
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+          color: AppColors.appBlack,
+          shadows: [
+            Shadow(
+              color: Colors.black.withValues(alpha: 0.4),
+              offset: Offset(4, 4),
+              blurRadius: 2,
+            ),
+          ],
+        ),
+        titleSmall: GoogleFonts.metamorphous(
+          fontSize: 14,
+          fontWeight: FontWeight.bold,
+          color: AppColors.appBlack,
+          fontStyle: FontStyle.italic,
+          shadows: [
+            Shadow(
+              color: Colors.black.withValues(alpha: 0.3),
+              offset: Offset(1, 1),
+              blurRadius: 2,
+            ),
+          ],
+        ),
       ),
     );
   }
