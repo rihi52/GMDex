@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/services.dart';
-import 'package:flutter/material.dart';
+// import 'package:flutter/material.dart';
 import '../components/statblock.dart';
 
 Future<dynamic> loadMonsters() async {
@@ -8,6 +8,17 @@ Future<dynamic> loadMonsters() async {
   final data = jsonDecode(jsonString);
 
   return data;
+}
+
+Future<Map<String, dynamic>> loadLegendaryGroups() async {
+  final jsonString = await rootBundle.loadString('assets/legendarygroups.json');
+  final data = jsonDecode(jsonString);
+  final map = <String, dynamic>{};
+  for (final group in data['legendaryGroup'] as List) {
+    final key = '${group['name']}_${group['source']}';
+    map[key] = group;
+  }
+  return map;
 }
 
 const sizeNames = {
@@ -31,8 +42,14 @@ const alignmentNames = {
 
 Future<Creature> test() async {
   final data = await loadMonsters();
+  final legendaryGroups = await loadLegendaryGroups();
   final skills = data['skill'] ?? {};
   final save = data['save'] ?? {};
+  final lgRef = data['legendaryGroup'];
+  final group = lgRef != null
+      ? legendaryGroups['${lgRef['name']}_${lgRef['source']}']
+      : null;
+
   final creature = Creature(
     name: data['name'],
     size: sizeNames[data['size'][0]] ?? data['size'][0],
@@ -105,7 +122,6 @@ Future<Creature> test() async {
         ('legendary', ActionType.legendary),
         ('bonus', ActionType.bonusAction),
         ('reaction', ActionType.reaction),
-        ('lair', ActionType.lair),
         ('special', ActionType.special),
         ('villain', ActionType.villainAction),
       ])
@@ -114,11 +130,26 @@ Future<Creature> test() async {
             (data[key] as List).map(
               (action) => CreatureAction(
                 name: action['name'],
-                description: (action['entries'] as List).join('\n'),
+                description: parseEntries(action['entries'] as List),
                 type: type,
               ),
             ),
           ),
+      // lair actions from legendarygroups.json
+      if (data['legendaryGroup'] != null)
+        ...() {
+          final lgRef = data['legendaryGroup'];
+          final key = '${lgRef['name']}_${lgRef['source']}';
+          final group = legendaryGroups[key];
+          if (group?['lairActions'] == null) return <CreatureAction>[];
+          return [
+            CreatureAction(
+              name: '',
+              description: parseEntries(group!['lairActions'] as List),
+              type: ActionType.lair,
+            ),
+          ];
+        }(),
     ],
     traits: List<CreatureTrait>.from(
       (data['trait'] as List? ?? []).map(
@@ -128,14 +159,46 @@ Future<Creature> test() async {
         ),
       ),
     ),
-    regionalEffect: null,
+    regionalEffect: group?['regionalEffects'] == null
+        ? null
+        : () {
+            final entries = group!['regionalEffects'] as List;
+            final blurb = parseEntries([entries.whereType<String>().first]);
+final blurbEnd = entries.whereType<String>().length > 1
+    ? parseEntries([entries.whereType<String>().last])
+    : null;
+            final bullets =
+                (entries.firstWhere(
+                          (e) => e is Map && e['type'] == 'list',
+                          orElse: () => {'items': []},
+                        )['items']
+                        as List)
+                    .cast<String>()
+                    .map((item) => parseEntries([item]))
+                    .toList();
+            return CreatureRegionalEffect(
+              blurb: blurb,
+              bulletPoints: bullets,
+              blurbEnd: blurbEnd,
+            );
+          }(),
     id: 1,
   );
   return creature;
 }
 
 String parseEntries(List entries) {
-  String text = entries.join('\n');
+  final parts = <String>[];
+  for (final entry in entries) {
+    if (entry is String) {
+      parts.add(entry);
+    } else if (entry is Map && entry['type'] == 'list') {
+      for (final item in entry['items'] as List) {
+        parts.add('• $item\n');
+      }
+    }
+  }
+  String text = parts.join('\n');
 
   // Attack types
   text = text.replaceAll('{@atk mw}', 'Melee Weapon Attack:');
@@ -195,6 +258,11 @@ String parseEntries(List entries) {
   );
   text = text.replaceAllMapped(
     RegExp(r'\{@action ([^}]+)\}'),
+    (match) => match.group(1)!,
+  );
+
+  text = text.replaceAllMapped(
+    RegExp(r'\{@quickref ([^|]+)\|\|[^}]*\}'),
     (match) => match.group(1)!,
   );
 

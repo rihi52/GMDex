@@ -43,7 +43,7 @@ class CreatureStatBlock extends StatelessWidget {
                     ? const Text("Loading...")
                     : Text(
                         creature!.name,
-                        style: Theme.of(context).textTheme.titleMedium,
+                        style: Theme.of(context).textTheme.titleLarge,
                       ),
               ),
               Container(
@@ -395,31 +395,85 @@ class CreatureStatBlock extends StatelessWidget {
                   ],
                 ),
               ),
-              ...creature!.actions.map(
-                (action) => Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      action.name,
-                      style: Theme.of(context).textTheme.titleSmall,
-                    ),
-                    Text(
-                      action.description,
-                      style: Theme.of(context).textTheme.labelSmall,
-                      softWrap: true,
-                      overflow: TextOverflow.visible, // let it wrap, not clip
-                    ),
-                    const SizedBox(height: 8),
-                  ],
+              ...buildActionSections(context, creature!.actions),
+              if (creature!.regionalEffect != null)
+                Container(
+                  padding: const EdgeInsets.only(
+                  bottom: AppSpacing.spacingSmall,
+                  top: AppSpacing.spacingSmall,
                 ),
-              ),
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(color: AppColors.primary, width: 1),
+                  ),
+                ),
+                  child: Text(
+                    'Regional Effects',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                ),
+              if (creature!.regionalEffect != null) ...[
+                Text(creature!.regionalEffect!.blurb,
+                style: Theme.of(context).textTheme.labelSmall),
+                SizedBox(height: 4),
+                ...creature!.regionalEffect!.bulletPoints.map(
+                  (point) => Text('• $point\n',
+                style: Theme.of(context).textTheme.labelSmall),
+                ),
+                if (creature!.regionalEffect!.blurbEnd != null)
+                  Text(creature!.regionalEffect!.blurbEnd!,
+                style: Theme.of(context).textTheme.labelSmall),
+              ],
               /* NEXT CHILD GOES HERE */
+              SizedBox(height: 16),
             ],
           ),
         ),
       ),
     );
   }
+}
+
+/* Helper Functions */
+
+List<Widget> buildActionSections(BuildContext context, List<CreatureAction> actions) {
+  final grouped = <ActionType, List<CreatureAction>>{};
+  for (final action in actions) {
+    grouped.putIfAbsent(action.type, () => []).add(action);
+  }
+  return [
+    for (final entry in grouped.entries) ...[
+      Container(
+        margin: const EdgeInsets.only(top: AppSpacing.spacingSmall),
+        padding: const EdgeInsets.only(bottom: AppSpacing.spacingSmall),
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: BorderSide(color: AppColors.primary, width: 1),
+          ),
+        ),
+        child: Text(
+          entry.key.displayName,
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+      ),
+      ...entry.value.map(
+        (action) => Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (action.name.isNotEmpty)
+              Text(action.name, style: Theme.of(context).textTheme.titleSmall),
+            Text(
+              action.description,
+              style: Theme.of(context).textTheme.labelSmall,
+              softWrap: true,
+              overflow: TextOverflow.visible,
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    ],
+  ];
 }
 
 const crToXp = {
@@ -636,6 +690,19 @@ class CreatureAction {
   });
 }
 
+extension ActionTypeDisplay on ActionType {
+  String get displayName => switch (this) {
+    ActionType.action => 'Actions',
+    ActionType.blurb => 'Blurb',
+    ActionType.legendary => 'Legendary Actions',
+    ActionType.bonusAction => 'Bonus Actions',
+    ActionType.reaction => 'Reactions',
+    ActionType.lair => 'Lair Actions',
+    ActionType.special => 'Special Abilities',
+    ActionType.villainAction => 'Villain Actions',
+  };
+}
+
 class CreatureTrait {
   final String name;
   final String description;
@@ -646,11 +713,11 @@ class CreatureTrait {
 class CreatureRegionalEffect {
   final String blurb;
   final List<String> bulletPoints;
-  final String blurbEnd;
+  final String? blurbEnd;
 
   const CreatureRegionalEffect({
     required this.blurb,
     required this.bulletPoints,
-    required this.blurbEnd,
+    this.blurbEnd,
   });
 }
