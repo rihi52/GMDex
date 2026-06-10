@@ -4,21 +4,17 @@ import 'package:flutter/services.dart';
 import '../components/statblock.dart';
 
 Future<dynamic> loadMonsters() async {
-  final jsonString = await rootBundle.loadString('assets/mm.json');
-  final data = jsonDecode(jsonString);
-
-  return data;
+  final jsonString = await rootBundle.loadString('assets/bestiary-mm.json');
+  return jsonDecode(jsonString);
 }
 
 Future<Map<String, dynamic>> loadLegendaryGroups() async {
   final jsonString = await rootBundle.loadString('assets/legendarygroups.json');
   final data = jsonDecode(jsonString);
-  final map = <String, dynamic>{};
-  for (final group in data['legendaryGroup'] as List) {
-    final key = '${group['name']}_${group['source']}';
-    map[key] = group;
-  }
-  return map;
+  return {
+    for (final group in data['legendaryGroup'] as List)
+      '${group['name']}_${group['source']}': group,
+  };
 }
 
 const sizeNames = {
@@ -40,9 +36,10 @@ const alignmentNames = {
   'A': 'Any',
 };
 
-Future<Creature> test() async {
-  final data = await loadMonsters();
-  final legendaryGroups = await loadLegendaryGroups();
+Creature parseCreature(
+  Map<String, dynamic> data,
+  Map<String, dynamic> legendaryGroups,
+) {
   final skills = data['skill'] ?? {};
   final save = data['save'] ?? {};
   final lgRef = data['legendaryGroup'];
@@ -50,28 +47,48 @@ Future<Creature> test() async {
       ? legendaryGroups['${lgRef['name']}_${lgRef['source']}']
       : null;
 
-  final creature = Creature(
+  return Creature(
     name: data['name'],
     size: sizeNames[data['size'][0]] ?? data['size'][0],
-    type: data['type'],
+    type: data['type'] is String
+        ? data['type']
+        : (data['type']?['type'] ?? 'Unknown'),
     alignment:
         (data['alignment'] as List?)
             ?.map((a) => alignmentNames[a] ?? a)
             .join(' ') ??
         'Unaligned',
     armorClass: CreatureArmorClass(
-      ac: data['ac'][0]['ac'],
-      type: (data['ac'][0]['from'] as List?)?.first ?? 'Unknown',
+      ac: data['ac'][0] is int ? data['ac'][0] : data['ac'][0]['ac'] ?? 0,
+      type: data['ac'][0] is int
+          ? 'Natural'
+          : (data['ac'][0]['from'] as List?)?.first ?? 'Unknown',
     ),
     hitPoints: data['hp']['average'],
     hitPointFormula: data['hp']['formula'] ?? '',
-    challengeRating: data['cr'],
+    challengeRating: data['cr'] is Map
+        ? CreatureCR(
+            cr: data['cr']['cr'],
+            lair: data['cr']['lair'],
+            coven: data['cr']['coven'],
+            xpOverride: data['cr']['xp'],
+          )
+        : CreatureCR(cr: data['cr']?.toString() ?? '0'),
     speed: CreatureSpeed(
-      walk: data['speed']['walk'] ?? 0,
-      fly: data['speed']['fly'] ?? 0,
+      //walk: data['speed']['walk'] ?? 0,
+      walk: data['speed']['walk'] == null
+          ? 0
+          : data['speed']['walk'] is int
+          ? data['speed']['walk']
+          : data['speed']['walk']['number'] ?? 0,
+      burrow: data['speed']['burrow'] ?? 0,
+      fly: data['speed']['fly'] == null
+          ? 0
+          : data['speed']['fly'] is int
+          ? data['speed']['fly']
+          : data['speed']['fly']['number'] ?? 0,
       climb: data['speed']['climb'] ?? 0,
       swim: data['speed']['swim'] ?? 0,
-      burrow: data['speed']['burrow'] ?? 0,
     ),
     abilityScores: CreatureAbilityScores(
       strength: data['str'],
@@ -135,21 +152,14 @@ Future<Creature> test() async {
               ),
             ),
           ),
-      // lair actions from legendarygroups.json
-      if (data['legendaryGroup'] != null)
-        ...() {
-          final lgRef = data['legendaryGroup'];
-          final key = '${lgRef['name']}_${lgRef['source']}';
-          final group = legendaryGroups[key];
-          if (group?['lairActions'] == null) return <CreatureAction>[];
-          return [
-            CreatureAction(
-              name: '',
-              description: parseEntries(group!['lairActions'] as List),
-              type: ActionType.lair,
-            ),
-          ];
-        }(),
+      if (group?['lairActions'] != null)
+        CreatureAction(
+          name: '',
+          description: parseEntries(
+            (group!['lairActions'] as List).where((e) => e is! String).toList(),
+          ),
+          type: ActionType.lair,
+        ),
     ],
     traits: List<CreatureTrait>.from(
       (data['trait'] as List? ?? []).map(
@@ -161,30 +171,30 @@ Future<Creature> test() async {
     ),
     regionalEffect: group?['regionalEffects'] == null
         ? null
-        : () {
-            final entries = group!['regionalEffects'] as List;
-            final blurb = parseEntries([entries.whereType<String>().first]);
-final blurbEnd = entries.whereType<String>().length > 1
-    ? parseEntries([entries.whereType<String>().last])
-    : null;
-            final bullets =
-                (entries.firstWhere(
-                          (e) => e is Map && e['type'] == 'list',
-                          orElse: () => {'items': []},
-                        )['items']
-                        as List)
-                    .cast<String>()
-                    .map((item) => parseEntries([item]))
-                    .toList();
-            return CreatureRegionalEffect(
-              blurb: blurb,
-              bulletPoints: bullets,
-              blurbEnd: blurbEnd,
-            );
-          }(),
+        : _parseRegionalEffect(group!['regionalEffects'] as List),
     id: 1,
   );
-  return creature;
+}
+
+CreatureRegionalEffect _parseRegionalEffect(List entries) {
+  return CreatureRegionalEffect(
+    blurb: parseEntries([entries.whereType<String>().first]),
+    bulletPoints:
+        (entries.firstWhere(
+                  (e) => e is Map && e['type'] == 'list',
+                  orElse: () => {'items': []},
+                )['items']
+                as List)
+            .map(
+              (item) => item is String
+                  ? parseEntries([item])
+                  : parseEntries([item.toString()]),
+            )
+            .toList(),
+    blurbEnd: entries.whereType<String>().length > 1
+        ? parseEntries([entries.whereType<String>().last])
+        : null,
+  );
 }
 
 String parseEntries(List entries) {

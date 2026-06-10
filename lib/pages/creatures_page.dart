@@ -94,7 +94,7 @@ class BrowseCreatureWidget extends StatefulWidget {
 class _BrowseCreatureWidgetState extends State<BrowseCreatureWidget> {
   final creatures = [
     (
-      name: 'Goblin',
+      name: 'Aboleth',
       type: 'Humanoid',
       size: 'Small',
       cr: '1/4',
@@ -160,23 +160,43 @@ class _BrowseCreatureWidgetState extends State<BrowseCreatureWidget> {
 
   Creature? monster;
 
+  List<dynamic> _allMonsters = [];
+  Map<String, dynamic> _legendaryGroups = {};
+  Creature? _selectedCreature;
+  int? _selectedIndex;
+
   @override
   void initState() {
     super.initState();
-    loadMonster();
+    _loadData();
   }
 
-  Future<void> loadMonster() async {
-    try {
-      final result = await test();
-      setState(() => monster = result);
-    } catch (e) {
-      debugPrint('Failed to load monster: $e');
-      // Optionally set an error state here
-    }
+  Future<void> _loadData() async {
+    final monstersJson = await loadMonsters();
+    final legendaryGroups = await loadLegendaryGroups();
+    setState(() {
+      _allMonsters = monstersJson['monster'] as List;
+      _legendaryGroups = legendaryGroups;
+    });
   }
 
-  int _selectedIndex = -1;
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   loadMonster();
+  // }
+
+  // Future<void> loadMonster() async {
+  //   try {
+  //     final result = await test();
+  //     setState(() => monster = result);
+  //   } catch (e) {
+  //     debugPrint('Failed to load monster: $e');
+  //     // Optionally set an error state here
+  //   }
+  // }
+
+  // int _selectedIndex = -1;
 
   @override
   Widget build(BuildContext context) {
@@ -210,43 +230,55 @@ class _BrowseCreatureWidgetState extends State<BrowseCreatureWidget> {
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            Expanded(
-              flex: 3,
-              child: SizedBox(
-                width: 350,
-                child: ListView.builder(
-                  padding: const EdgeInsets.only(right: 8),
-                  itemCount: creatures.length,
-                  itemBuilder: (context, index) {
-                    final creature = creatures[index];
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: [
+          Expanded(
+            flex: 3,
+            child: SizedBox(
+              width: 350,
+              child: ListView.builder(
+                padding: const EdgeInsets.only(right: 8),
+                itemCount: _allMonsters.length,
+                itemBuilder: (context, index) {
+                  final data = _allMonsters[index];
 
-                    return SizedBox(
-                      height: 100,
-                      child: CreatureCard(
-                        name: creature.name,
-                        type: creature.type,
-                        size: creature.size,
-                        cr: creature.cr,
-                        source: creature.source,
-                        selected: _selectedIndex == index,
-                        onTap: () => setState(() => _selectedIndex = index),
-                      ),
-                    );
-                  },
-                ),
+                  return SizedBox(
+                    height: 100,
+                    child: CreatureCard(
+                      name: data['name'] ?? '',
+                      type: data['type'] is String ? data['type'] : (data['type']?['type'] ?? ''),
+                      size: sizeNames[data['size']?[0]] ?? '',
+                      cr: data['cr'] is Map
+                        ? data['cr']['cr']?.toString() ?? '0'
+                        : data['cr']?.toString() ?? '0',
+                      source: data['source'] ?? '',
+                      selected: _selectedIndex == index,
+                      onTap: () {
+                        setState(() {
+                          _selectedIndex = index;
+                          _selectedCreature = parseCreature(data, _legendaryGroups);
+                        });
+                      },
+                    ),
+                  );
+                },
               ),
             ),
-            Container(width: 8),
-            Expanded(
-              flex: 7,
-              child: monster != null ? CreatureStatBlock(creature: monster) : SizedBox.shrink(),
-            ),
-          ],
-        ),
+          ),
+          Container(width: 8),
+          Expanded(
+            flex: 7,
+            child: Container(
+              alignment: Alignment.topCenter,
+              child: _selectedCreature != null
+                ? CreatureStatBlock(creature: _selectedCreature!)
+                : SizedBox.shrink(),
+            )
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
+}
 }
