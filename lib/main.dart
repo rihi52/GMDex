@@ -10,8 +10,10 @@ import 'pages/home_page.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Comment this out to run on web or mobile
   await windowManager.ensureInitialized();
 
+  // Comment this out to run on web or mobile
   await windowManager.setMinimumSize(
     const Size(1360, 800),
   );
