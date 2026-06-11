@@ -113,11 +113,16 @@ class CreatureStatBlock extends StatelessWidget {
                       Expanded(
                         child: Text(
                           [
-                            if ((creature!.speed.walk ?? 0) > 0) '${creature!.speed.walk} ft.',
-                            if ((creature!.speed.fly ?? 0) > 0) 'fly ${creature!.speed.fly} ft.',
-                            if ((creature!.speed.climb ?? 0) > 0) 'climb ${creature!.speed.climb} ft.',
-                            if ((creature!.speed.swim ?? 0) > 0) 'swim ${creature!.speed.swim} ft.',
-                            if ((creature!.speed.burrow ?? 0) > 0) 'burrow ${creature!.speed.burrow} ft.',
+                            if ((creature!.speed.walk ?? 0) > 0)
+                              '${creature!.speed.walk} ft.',
+                            if ((creature!.speed.fly ?? 0) > 0)
+                              'fly ${creature!.speed.fly} ft.',
+                            if ((creature!.speed.climb ?? 0) > 0)
+                              'climb ${creature!.speed.climb} ft.',
+                            if ((creature!.speed.swim ?? 0) > 0)
+                              'swim ${creature!.speed.swim} ft.',
+                            if ((creature!.speed.burrow ?? 0) > 0)
+                              'burrow ${creature!.speed.burrow} ft.',
                           ].join(', '),
                           style: Theme.of(context).textTheme.labelSmall,
                         ),
@@ -515,7 +520,7 @@ class Creature {
   final String? senses;
   final String? languages;
   final CreatureSavingThrows savingThrows;
-  final CreatureSpellCasting? spellCasting;
+  final CreatureSpellcasting? spellCasting;
   final List<CreatureAction> actions;
   final List<CreatureTrait> traits;
   final CreatureRegionalEffect? regionalEffect;
@@ -545,31 +550,21 @@ class Creature {
   });
 }
 
-class SpellLevel {
-  final int? slots;
-  final List<String> spells;
+// class SpellLevel {
+//   final int? slots;
+//   final List<String> spells;
 
-  const SpellLevel({
-    this.slots,
-    required this.spells,
-  });
-}
-
-class SpellFrequency {
-  final int? count;
-  final List<String> spells;
-
-  const SpellFrequency({
-    this.count,
-    required this.spells,
-  });
-}
+//   const SpellLevel({this.slots, required this.spells});
+// }
 
 class CreatureSpellcasting {
   final String name;
   final String headerEntries;
   final String ability;
-  final Map<int, SpellLevel> spells; // keyed by level 0-9
+  // final Map<int, SpellLevel> spells; // keyed by level 0-9
+  final Map<int, String>? spells; // keyed by level 0-9, value is spell
+  final Map<int, int>? slots; // keyed by spell level, value is slots
+  final Map<int, String>? innateSpell; // keyed by times per day, value is spell
 
   const CreatureSpellcasting({
     required this.name,
@@ -592,12 +587,7 @@ class CreatureCR {
   final String? coven;
   final int? _xpOverride;
 
-  const CreatureCR({
-    required this.cr,
-    this.lair,
-    this.coven,
-    this._xpOverride,
-  });
+  const CreatureCR({required this.cr, this.lair, this.coven, this._xpOverride});
 
   String get xp => _xpOverride?.toString() ?? crToXp[cr] ?? '0';
   String? get lairXp => lair != null ? crToXp[lair] : null;
@@ -627,7 +617,7 @@ class CreatureSpeed {
     required this.climb,
     required this.swim,
     required this.burrow,
-    this.condition
+    this.condition,
   });
 }
 
