@@ -7,11 +7,13 @@ class PlayerCard extends StatelessWidget {
 
   final String name;
   final String pClass;
+  final int level;
 
   const PlayerCard({
     super.key,
     required this.name,
     required this.pClass,
+    required this.level,
     this.selected = false,
     this.onTap,
   });
@@ -38,6 +40,7 @@ class PlayerCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(pClass, style: Theme.of(context).textTheme.bodySmall),
+                Text('Level $level', style: Theme.of(context).textTheme.bodySmall),
               ],
             ),
             

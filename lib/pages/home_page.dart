@@ -13,7 +13,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   static const List<String> buttons = [
-    'Start Combat',
+    'Combat',
     'Encounters',
     'Players',
     'Creatures',
