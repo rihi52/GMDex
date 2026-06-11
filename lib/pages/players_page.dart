@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:moonscribe/components/player_details.dart';
 import '../components/player_card.dart';
 import '../theme/apptheme.dart';
 
@@ -91,37 +92,21 @@ class BrowsePlayerWidget extends StatefulWidget {
 
 class _BrowsePlayerWidget extends State<BrowsePlayerWidget> {
   final players = [
-    (
-      name: 'Ravi',
-      pClass: 'Rogue',
-      level: 1,
-    ),
-    (
-      name: 'Finn',
-      pClass: 'Bard',
-      level: 2,
-    ),
-    (
-      name: 'Pax',
-      pClass: 'Fighter',
-      level: 3,
-    ),
-    (
-      name: 'Theon',
-      pClass: 'Fighter',
-      level: 1,
-    ),
-    (
-      name: 'Amalagh',
-      pClass: 'Barbarian',
-      level: 2,
-    ),
-    (
-      name: 'Folkini',
-      pClass: 'Soceror',
-      level: 3,
-    ),
+    (name: 'Ravi', pClass: 'Rogue', level: 1),
+    (name: 'Finn', pClass: 'Bard', level: 2),
+    (name: 'Pax', pClass: 'Fighter', level: 3),
+    (name: 'Theon', pClass: 'Fighter', level: 1),
+    (name: 'Amalagh', pClass: 'Barbarian', level: 2),
+    (name: 'Folkini', pClass: 'Soceror', level: 3),
   ];
+
+  final ravi = Player(
+    name: 'Ravi',
+    pClass: 'Rogue',
+    level: 5,
+    originalCampaign: 'Finndalin',
+    id: 1,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -155,44 +140,44 @@ class _BrowsePlayerWidget extends State<BrowsePlayerWidget> {
         ),
       ),
       body: Padding(
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        children: [
-          Expanded(
-            flex: 3,
-            child: SizedBox(
-              width: 350,
-              child: ListView.builder(
-                padding: const EdgeInsets.only(right: 8),
-                itemCount: players.length,
-                itemBuilder: (context, index) {
-                  final player = players[index];
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Expanded(
+              flex: 3,
+              child: SizedBox(
+                width: 350,
+                child: ListView.builder(
+                  padding: const EdgeInsets.only(right: 8),
+                  itemCount: players.length,
+                  itemBuilder: (context, index) {
+                    final player = players[index];
 
-                  return SizedBox(
-                    height: 100,
-                    child: PlayerCard(
-                      name: player.name,
-                      pClass: player.pClass,
-                      level: player.level,
-                      selected: false,
-                      onTap: () {}
+                    return SizedBox(
+                      height: 100,
+                      child: PlayerCard(
+                        name: player.name,
+                        pClass: player.pClass,
+                        level: player.level,
+                        selected: false,
+                        onTap: () {},
                       ),
-                      
                     );
-                },
+                  },
+                ),
               ),
             ),
-          ),
-          Container(width: 8),
-          Expanded(
-            flex: 7,
-            child: Container(
-              alignment: Alignment.topCenter,
-            )
-          ),
-        ],
+            Container(width: 8),
+            Expanded(
+              flex: 7,
+              child: Container(
+                alignment: Alignment.topCenter,
+                child: PlayerDetails(player: ravi),
+              ),
+            ),
+          ],
+        ),
       ),
-    ),
-  );
+    );
   }
 }

@@ -180,24 +180,6 @@ class _BrowseCreatureWidgetState extends State<BrowseCreatureWidget> {
     });
   }
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   loadMonster();
-  // }
-
-  // Future<void> loadMonster() async {
-  //   try {
-  //     final result = await test();
-  //     setState(() => monster = result);
-  //   } catch (e) {
-  //     debugPrint('Failed to load monster: $e');
-  //     // Optionally set an error state here
-  //   }
-  // }
-
-  // int _selectedIndex = -1;
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -204,7 +204,11 @@ String parseEntries(List entries) {
       parts.add(entry);
     } else if (entry is Map && entry['type'] == 'list') {
       for (final item in entry['items'] as List) {
-        parts.add('• $item\n');
+        if (item is String) {
+          parts.add('• $item\n');
+        } else if (item is Map && item['type'] == 'item') {
+          parts.add('• ${item['name']} ${item['entry']}\n');
+        }
       }
     }
   }

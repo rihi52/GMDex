@@ -546,7 +546,11 @@ class Creature {
 }
 
 class CreatureSpellCasting {
+  final String blurb;
 
+    const CreatureSpellCasting({
+      required this.blurb,
+    });
 }
 
 class CreatureArmorClass {
