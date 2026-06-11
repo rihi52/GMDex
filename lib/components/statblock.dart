@@ -545,12 +545,38 @@ class Creature {
   });
 }
 
-class CreatureSpellCasting {
-  final String blurb;
+class SpellLevel {
+  final int? slots;
+  final List<String> spells;
 
-    const CreatureSpellCasting({
-      required this.blurb,
-    });
+  const SpellLevel({
+    this.slots,
+    required this.spells,
+  });
+}
+
+class SpellFrequency {
+  final int? count;
+  final List<String> spells;
+
+  const SpellFrequency({
+    this.count,
+    required this.spells,
+  });
+}
+
+class CreatureSpellcasting {
+  final String name;
+  final String headerEntries;
+  final String ability;
+  final Map<int, SpellLevel> spells; // keyed by level 0-9
+
+  const CreatureSpellcasting({
+    required this.name,
+    required this.headerEntries,
+    required this.ability,
+    required this.spells,
+  });
 }
 
 class CreatureArmorClass {
