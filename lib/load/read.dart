@@ -42,6 +42,7 @@ Creature parseCreature(
 ) {
   final skills = data['skill'] ?? {};
   final save = data['save'] ?? {};
+  final spells = data['spellcasting'] ?? {};
   final lgRef = data['legendaryGroup'];
   final group = lgRef != null
       ? legendaryGroups['${lgRef['name']}_${lgRef['source']}']
@@ -132,6 +133,39 @@ Creature parseCreature(
       intelligence: int.tryParse(save['int']?.toString() ?? ''),
       wisdom: int.tryParse(save['wis']?.toString() ?? ''),
       charisma: int.tryParse(save['cha']?.toString() ?? ''),
+    ),
+    spellCasting: spells == null || spells.isEmpty
+      ? null
+      : CreatureSpellcasting(
+      name: spells[0]['name'],
+      headerEntries: parseEntries(spells[0]['headerEntries'] as List),
+      ability: spells[0]['ability'],
+      spells: spells[0]['spells'] == null
+        ? null
+        : (spells[0]['spells'] as Map<String, dynamic>).map(
+            (key, value) => MapEntry(
+              int.parse(key),
+              SpellLevel(
+                slots: value['slots'] ?? 0,
+                spells: (value['spells'] as List)
+                    .map((s) => parseEntries([s]))
+                    .toList(),
+              ),
+            ),
+          ),
+      innateSpell: {
+        if (spells[0]['will'] != null) // if at will spells exist
+          'will': (spells[0]['will'] as List) // hardcode the key for final Map<String, List<String>>? innateSpell;
+              .map((s) => parseEntries([s])) // iterate over and parse each at will spell to get just the name
+              .toList(), // make it all a list
+        if (spells[0]['daily'] != null) // if the daily key exists in the json
+          ...(spells[0]['daily'] as Map<String, dynamic>).map( // we will map the data inside daily, "2e" : ["spell", "spell"] from the json
+            (key, value) => MapEntry( // map the values
+              key, // use the key directly from the json, "1e", "2e"
+              (value as List).map((s) => parseEntries([s])).toList(), // take each value for the key, "spell1", "spell2" etc, parse it, and stick it in a list
+            ),
+          ),
+      },
     ),
     actions: [
       for (final (key, type) in [

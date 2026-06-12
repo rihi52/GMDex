@@ -550,27 +550,26 @@ class Creature {
   });
 }
 
-// class SpellLevel {
-//   final int? slots;
-//   final List<String> spells;
+class SpellLevel {
+  final int? slots;
+  final List<String> spells;
 
-//   const SpellLevel({this.slots, required this.spells});
-// }
+  const SpellLevel({this.slots, required this.spells});
+}
 
 class CreatureSpellcasting {
   final String name;
   final String headerEntries;
   final String ability;
-  // final Map<int, SpellLevel> spells; // keyed by level 0-9
-  final Map<int, String>? spells; // keyed by level 0-9, value is spell
-  final Map<int, int>? slots; // keyed by spell level, value is slots
-  final Map<int, String>? innateSpell; // keyed by times per day, value is spell
+  final Map<int, SpellLevel>? spells; // keyed by level 0-9
+  final Map<String, List<String>>? innateSpell; // keyed by times per day, value is spell
 
   const CreatureSpellcasting({
     required this.name,
     required this.headerEntries,
     required this.ability,
-    required this.spells,
+    this.spells,
+    this.innateSpell,
   });
 }
 
