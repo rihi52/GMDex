@@ -379,6 +379,23 @@ class CreatureStatBlock extends StatelessWidget {
                 ],
               ),
             ),
+            /* Add spellcasting */
+            if (creature!.spellCasting != null)
+              Container(
+                padding: const EdgeInsets.only(
+                  bottom: AppSpacing.spacingSmall,
+                  top: AppSpacing.spacingSmall,
+                ),
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(color: AppColors.primary, width: 1),
+                  ),
+                ),
+                child: Text(
+                  'Spellcasting',
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+              ),
             ...buildActionSections(context, creature!.actions),
             if (creature!.regionalEffect != null)
               Container(
@@ -562,7 +579,8 @@ class CreatureSpellcasting {
   final String headerEntries;
   final String ability;
   final Map<int, SpellLevel>? spells; // keyed by level 0-9
-  final Map<String, List<String>>? innateSpell; // keyed by times per day, value is spell
+  final Map<String, List<String>>?
+  innateSpell; // keyed by times per day, value is spell
 
   const CreatureSpellcasting({
     required this.name,

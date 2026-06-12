@@ -4,7 +4,9 @@ import 'package:flutter/services.dart';
 import '../components/statblock.dart';
 
 Future<dynamic> loadMonsters() async {
-  final jsonString = await rootBundle.loadString('assets/bestiary-srd.json');
+  final jsonString = await rootBundle.loadString(
+    'assets/bestiary-srd-filtered.json',
+  );
   return jsonDecode(jsonString);
 }
 
@@ -135,38 +137,47 @@ Creature parseCreature(
       charisma: int.tryParse(save['cha']?.toString() ?? ''),
     ),
     spellCasting: spells == null || spells.isEmpty
-      ? null
-      : CreatureSpellcasting(
-      name: spells[0]['name'],
-      headerEntries: parseEntries(spells[0]['headerEntries'] as List),
-      ability: spells[0]['ability'],
-      spells: spells[0]['spells'] == null
         ? null
-        : (spells[0]['spells'] as Map<String, dynamic>).map(
-            (key, value) => MapEntry(
-              int.parse(key),
-              SpellLevel(
-                slots: value['slots'] ?? 0,
-                spells: (value['spells'] as List)
-                    .map((s) => parseEntries([s]))
-                    .toList(),
-              ),
-            ),
+        : CreatureSpellcasting(
+            name: spells[0]['name'],
+            headerEntries: parseEntries(spells[0]['headerEntries'] as List),
+            ability: spells[0]['ability'],
+            spells: spells[0]['spells'] == null
+                ? null
+                : (spells[0]['spells'] as Map<String, dynamic>).map(
+                    (key, value) => MapEntry(
+                      int.parse(key),
+                      SpellLevel(
+                        slots: value['slots'] ?? 0,
+                        spells: (value['spells'] as List)
+                            .map((s) => parseEntries([s]))
+                            .toList(),
+                      ),
+                    ),
+                  ),
+            innateSpell: {
+              if (spells[0]['will'] != null) // if at will spells exist
+                'will':
+                    (spells[0]['will']
+                            as List) // hardcode the key for final Map<String, List<String>>? innateSpell;
+                        .map(
+                          (s) => parseEntries([s]),
+                        ) // iterate over and parse each at will spell to get just the name
+                        .toList(), // make it all a list
+              if (spells[0]['daily'] !=
+                  null) // if the daily key exists in the json
+                ...(spells[0]['daily'] as Map<String, dynamic>).map(
+                  // we will map the data inside daily, "2e" : ["spell", "spell"] from the json
+                  (key, value) => MapEntry(
+                    // map the values
+                    key, // use the key directly from the json, "1e", "2e"
+                    (value as List)
+                        .map((s) => parseEntries([s]))
+                        .toList(), // take each value for the key, "spell1", "spell2" etc, parse it, and stick it in a list
+                  ),
+                ),
+            },
           ),
-      innateSpell: {
-        if (spells[0]['will'] != null) // if at will spells exist
-          'will': (spells[0]['will'] as List) // hardcode the key for final Map<String, List<String>>? innateSpell;
-              .map((s) => parseEntries([s])) // iterate over and parse each at will spell to get just the name
-              .toList(), // make it all a list
-        if (spells[0]['daily'] != null) // if the daily key exists in the json
-          ...(spells[0]['daily'] as Map<String, dynamic>).map( // we will map the data inside daily, "2e" : ["spell", "spell"] from the json
-            (key, value) => MapEntry( // map the values
-              key, // use the key directly from the json, "1e", "2e"
-              (value as List).map((s) => parseEntries([s])).toList(), // take each value for the key, "spell1", "spell2" etc, parse it, and stick it in a list
-            ),
-          ),
-      },
-    ),
     actions: [
       for (final (key, type) in [
         ('action', ActionType.action),
@@ -180,7 +191,7 @@ Creature parseCreature(
           ...List<CreatureAction>.from(
             (data[key] as List).map(
               (action) => CreatureAction(
-                name: action['name'],
+                name: parseEntries([action['name']]),
                 description: parseEntries(action['entries'] as List),
                 type: type,
               ),
@@ -313,6 +324,16 @@ String parseEntries(List entries) {
     RegExp(r'\{@quickref ([^|]+)\|\|[^}]*\}'),
     (match) => match.group(1)!,
   );
+
+  text = text.replaceAllMapped(
+    RegExp(r'\{@recharge (\d+)-(\d+)\}'),
+    (match) => 'Recharge ${match.group(1)}-${match.group(2)}',
+  );
+
+  text = text.replaceAllMapped(RegExp(r'\{@recharge (\d+)\}'), (match) {
+    final min = int.parse(match.group(1)!);
+    return 'Recharge $min-${min + 1}';
+  });
 
   // Catch-all for any remaining {@tag content} patterns
   text = text.replaceAllMapped(
