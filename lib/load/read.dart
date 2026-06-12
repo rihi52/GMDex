@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import '../components/statblock.dart';
 
 Future<dynamic> loadMonsters() async {
-  final jsonString = await rootBundle.loadString('assets/bestiary-mm.json');
+  final jsonString = await rootBundle.loadString('assets/bestiary-srd.json');
   return jsonDecode(jsonString);
 }
 

@@ -64,6 +64,7 @@ flutter:
     - assets/mm.json
     - assets/legendarygroups.json
     - assets/bestiary-mm.json
+    - assets/bestiary-srd.json
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
