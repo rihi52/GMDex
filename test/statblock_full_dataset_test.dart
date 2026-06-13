@@ -3,45 +3,56 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:moonscribe/components/statblock.dart';
 import 'package:moonscribe/load/read.dart';
 
-void main() {
-  testWidgets('CreatureStatBlock builds for every creature in dataset',
-      (WidgetTester tester) async {
-    // Load monster data from assets on disk so tests don't depend on asset bundle.
-    final jsonString = await File('assets/bestiary-mm.json').readAsString();
-    final data = jsonDecode(jsonString) as Map<String, dynamic>;
-    final monsters = data['monster'] as List<dynamic>;
+late final List<dynamic> _monsters;
+late final Map<String, dynamic> _legendaryGroups;
 
-    final lgString = await File('assets/legendarygroups.json').readAsString();
+void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  GoogleFonts.config.allowRuntimeFetching = false;
+
+  setUpAll(() {
+    final jsonString = File('assets/bestiary-mm.json').readAsStringSync();
+    final data = jsonDecode(jsonString) as Map<String, dynamic>;
+    _monsters = data['monster'] as List<dynamic>;
+
+    final lgString = File('assets/legendarygroups.json').readAsStringSync();
     final lgData = jsonDecode(lgString) as Map<String, dynamic>;
-    final legendaryGroups = {
+    _legendaryGroups = {
       for (final group in lgData['legendaryGroup'] as List)
         '${group['name']}_${group['source']}': group,
     };
+  });
 
+  test('parseCreature parses entire dataset without throwing', () {
+    for (final m in _monsters) {
+      parseCreature(m as Map<String, dynamic>, _legendaryGroups);
+    }
+  });
 
-    for (final m in monsters) {
-  try {
-    final creature = parseCreature(m as Map<String, dynamic>, legendaryGroups);
-    print('TEST: building ${creature.name}');
+  testWidgets('CreatureStatBlock builds for entire dataset',
+      (WidgetTester tester) async {
+    await tester.binding.setSurfaceSize(const Size(1600, 1200));
+    addTearDown(() {
+      tester.binding.setSurfaceSize(null);
+    });
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: CreatureStatBlock(creature: creature),
+    for (final m in _monsters) {
+      final creature = parseCreature(m as Map<String, dynamic>, _legendaryGroups);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: CreatureStatBlock(creature: creature),
+          ),
         ),
-      ),
-    );
+      );
 
-    await tester.pump(const Duration(milliseconds: 200));
-    print('TEST: built ${creature.name}');
-    expect(find.text(creature.name), findsWidgets);
-  } catch (e, stack) {
-    print('FAILED: ${m['name']} — $e');
-    print(stack);
-  }
-}
-  }, timeout: Timeout(Duration(minutes: 5)));
+      await tester.pump();
+      expect(find.text(creature.name), findsWidgets, reason: 'Failed on ${creature.name}');
+    }
+  }, timeout: Timeout(Duration(minutes: 10))); 
 }
