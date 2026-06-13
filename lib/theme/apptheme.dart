@@ -139,6 +139,8 @@ class AppTheme {
 
 class AppSpacing {
   static const double spacingSmall = 4;
+  static const double spacingMedium = 8;
+  static const double spacingLarge = 16;
   static const double cornerRadiusSmall = 4;
   static const double cornerRadiusMedium = 8;
   static const double abilityBoxes = 24;

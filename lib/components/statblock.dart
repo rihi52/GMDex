@@ -375,54 +375,22 @@ class CreatureStatBlock extends StatelessWidget {
                     trait.description,
                     style: Theme.of(context).textTheme.labelSmall,
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: AppSpacing.spacingMedium,),
                 ],
               ),
             ),
             /* Add spellcasting */
-            if (creature!.spellCasting != null)
+            if (creature!.spellCasting != null) // if creature has spells
               Container(
                 padding: const EdgeInsets.only(
                   bottom: AppSpacing.spacingSmall,
                   top: AppSpacing.spacingSmall,
                 ),
-                // decoration: BoxDecoration(
-                //   border: Border(
-                //     bottom: BorderSide(color: AppColors.primary, width: 1),
-                //   ),
-                // ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (creature!.spellCasting!.spells != null) ...[
-                      Text(
-                        'Spellcasting',
-                        style: Theme.of(context).textTheme.titleSmall,
-                      ),
-                      Text(
-                        creature!.spellCasting!.headerEntries,
-                        style: Theme.of(context).textTheme.labelSmall,
-                      ),
-                      ...creature!.spellCasting!.spells!.entries.map(
-                        (entry) => Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '${spellLevelNames[entry.key] ?? "${entry.key}th level"}${entry.value.slots != null ? ' (${entry.value.slots} slots): ' : ''}',
-                              style: Theme.of(context).textTheme.titleSmall,
-                            ),
-                            ...entry.value.spells.map(
-                              (spell) => Text(
-                                spell,
-                                style: Theme.of(context).textTheme.labelSmall,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                          ],
-                        ),
-                      ),
-                    ],
-                    if (creature!.spellCasting!.innateSpell != null) ...[
+                    /* innate spell casting */
+            if (creature!.spellCasting!.innateSpell != null) ...[
                       Text(
                         'Innate Spellcasting',
                         style: Theme.of(context).textTheme.titleSmall,
@@ -431,6 +399,61 @@ class CreatureStatBlock extends StatelessWidget {
                         creature!.spellCasting!.headerEntries,
                         style: Theme.of(context).textTheme.labelSmall,
                       ),
+                      ...creature!.spellCasting!.innateSpell!.entries.map(
+                        (entry) => Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '${innateSpellLevelNames[entry.key]}: ',
+                              style: Theme.of(context).textTheme.labelSmall,
+                            ),
+                            Expanded(
+                              child:
+                            Text(
+                              entry.value.join(', '),
+                              style: Theme.of(context).textTheme.labelSmall,
+                              softWrap: true,
+                              overflow: TextOverflow.visible,                              
+                            ),
+                        ),
+                          ],
+                        ),
+                      ),
+                    ],
+                    if (creature!.spellCasting!.spells != null && creature!.spellCasting!.innateSpell != null)
+                      const SizedBox(height: AppSpacing.spacingMedium,),
+                    if (creature!.spellCasting!.spells != null) ...[ // if creature is regular spellcaster
+                      Text(
+                        'Spellcasting',
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                      Text(
+                        creature!.spellCasting!.headerEntries,
+                        style: Theme.of(context).textTheme.labelSmall,
+                      ),
+                      const SizedBox(height: AppSpacing.spacingSmall,),
+                      ...creature!.spellCasting!.spells!.entries.map( // takes the map<int, SpellLevel> from CreatureSpellcasting and makes it iterable with .entries .map transforms it into the row shown on the next line
+                        (entry) => Row( // each entry goes on its on row, i.e. [0 : "spell1", "spell2"] is a row
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              // key is the spell level, reads from const. entry.key is spell level from map. checks if slots are 0, prints if they aren't and assumes cantrips if they are       
+                              '${spellLevelNames[entry.key] ?? "${entry.key}th level"}${entry.key == 0 ? ' (at will): ' : ' (${entry.value.slots} slots): '}',
+                              style: Theme.of(context).textTheme.labelSmall,
+                            ),
+                              Text(
+                                entry.value.spells.join(', '), // joins each string together with ', ' between them
+                                style: Theme.of(context).textTheme.labelSmall,
+                              ),
+                            //),
+                            const SizedBox(height: AppSpacing.spacingMedium,),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.spacingSmall,),
+                      if (creature!.spellCasting!.footerEntries != null)
+                      Text('${creature!.spellCasting!.footerEntries}',
+                      style: Theme.of(context).textTheme.labelSmall,),
                     ],
                   ],
                 ),
@@ -457,7 +480,7 @@ class CreatureStatBlock extends StatelessWidget {
                 creature!.regionalEffect!.blurb,
                 style: Theme.of(context).textTheme.labelSmall,
               ),
-              SizedBox(height: 4),
+              SizedBox(height: AppSpacing.spacingSmall,),
               ...creature!.regionalEffect!.bulletPoints.map(
                 (point) => Text(
                   '• $point\n',
@@ -471,7 +494,7 @@ class CreatureStatBlock extends StatelessWidget {
                 ),
             ],
             /* NEXT CHILD GOES HERE */
-            SizedBox(height: 16),
+            SizedBox(height: AppSpacing.spacingLarge,),
           ],
         ),
       ),
@@ -516,7 +539,7 @@ List<Widget> buildActionSections(
               softWrap: true,
               overflow: TextOverflow.visible,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.spacingMedium,),
           ],
         ),
       ),
@@ -626,17 +649,32 @@ const spellLevelNames = {
   9: '9th level',
 };
 
+const innateSpellLevelNames = {
+  'will' : 'At will',
+  '1'  : '1/day',
+  '1e' : '1/day',
+  '2e' : '2/day',
+  '3e' : '3/day',
+  '4e' : '4/day',
+  '5e' : '5/day',
+  '6e' : '6/day',
+  '7e' : '7/day',
+  '8e' : '8/day',
+  '9e' : '9/day',
+};
+
 class CreatureSpellcasting {
   final String name;
   final String headerEntries;
+  final String? footerEntries;
   final String ability;
   final Map<int, SpellLevel>? spells; // keyed by level 0-9
-  final Map<String, List<String>>?
-  innateSpell; // keyed by times per day, value is spell
+  final Map<String, List<String>>? innateSpell; // keyed by times per day, value is spell
 
   const CreatureSpellcasting({
     required this.name,
     required this.headerEntries,
+    this.footerEntries,
     required this.ability,
     this.spells,
     this.innateSpell,

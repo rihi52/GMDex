@@ -1,11 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/services.dart';
-// import 'package:flutter/material.dart';
 import '../components/statblock.dart';
 
 Future<dynamic> loadMonsters() async {
   final jsonString = await rootBundle.loadString(
-    'assets/bestiary-srd-filtered.json',
+    'assets/bestiary-mm.json',
   );
   return jsonDecode(jsonString);
 }
@@ -137,42 +136,59 @@ Creature parseCreature(
       charisma: int.tryParse(save['cha']?.toString() ?? ''),
     ),
     spellCasting: spells == null || spells.isEmpty
-        ? null
-        : CreatureSpellcasting(
-            name: spells[0]['name'],
-            headerEntries: parseEntries(spells[0]['headerEntries'] as List),
-            ability: spells[0]['ability'],
-            spells: spells[0]['spells'] == null
-                ? null
-                : (spells[0]['spells'] as Map<String, dynamic>).map(
-                    (key, value) => MapEntry(
-                      int.parse(key),
-                      SpellLevel(
-                        slots: value['slots'] ?? 0,
-                        spells: (value['spells'] as List)
+    ? null
+    : () {
+        final innateBlock = (spells as List).cast<Map<String, dynamic>>()
+            .where((s) => s['name'] == 'Innate Spellcasting')
+            .firstOrNull;
+
+        final preparedBlock = (spells).cast<Map<String, dynamic>>()
+            .where((s) => s['name'] != 'Innate Spellcasting')
+            .firstOrNull;
+
+        return CreatureSpellcasting(
+          name: preparedBlock?['name'] ?? innateBlock?['name'] ?? '',
+          headerEntries: parseEntries(
+            (preparedBlock ?? innateBlock)!['headerEntries'] as List,
+          ),
+          footerEntries: (preparedBlock ?? innateBlock)?['footerEntries'] == null
+              ? null
+              : parseEntries(
+                  (preparedBlock ?? innateBlock)!['footerEntries'] as List,
+                ),
+          ability: (preparedBlock ?? innateBlock)?['ability'] ?? '',
+          spells: preparedBlock?['spells'] == null
+              ? null
+              : (preparedBlock!['spells'] as Map<String, dynamic>).map(
+                  (key, value) => MapEntry(
+                    int.parse(key),
+                    SpellLevel(
+                      slots: value['slots'] ?? 0,
+                      spells: (value['spells'] as List)
+                          .map((s) => parseEntries([s]))
+                          .toList(),
+                    ),
+                  ),
+                ),
+          innateSpell: innateBlock == null
+              ? null
+              : {
+                  if (innateBlock['will'] != null)
+                    'will': (innateBlock['will'] as List)
+                        .map((s) => parseEntries([s]))
+                        .toList(),
+                  if (innateBlock['daily'] != null)
+                    ...(innateBlock['daily'] as Map<String, dynamic>).map(
+                      (key, value) => MapEntry(
+                        key,
+                        (value as List)
                             .map((s) => parseEntries([s]))
                             .toList(),
                       ),
                     ),
-                  ),
-            innateSpell: spells[0]['name'] != 'Innate Spellcasting'
-                ? null
-                : {
-                    if (spells[0]['will'] != null)
-                      'will': (spells[0]['will'] as List)
-                          .map((s) => parseEntries([s]))
-                          .toList(),
-                    if (spells[0]['daily'] != null)
-                      ...(spells[0]['daily'] as Map<String, dynamic>).map(
-                        (key, value) => MapEntry(
-                          key,
-                          (value as List)
-                              .map((s) => parseEntries([s]))
-                              .toList(),
-                        ),
-                      ),
-                  },
-          ),
+                },
+        );
+      }(),
     actions: [
       for (final (key, type) in [
         ('action', ActionType.action),
