@@ -155,28 +155,23 @@ Creature parseCreature(
                       ),
                     ),
                   ),
-            innateSpell: {
-              if (spells[0]['will'] != null) // if at will spells exist
-                'will':
-                    (spells[0]['will']
-                            as List) // hardcode the key for final Map<String, List<String>>? innateSpell;
-                        .map(
-                          (s) => parseEntries([s]),
-                        ) // iterate over and parse each at will spell to get just the name
-                        .toList(), // make it all a list
-              if (spells[0]['daily'] !=
-                  null) // if the daily key exists in the json
-                ...(spells[0]['daily'] as Map<String, dynamic>).map(
-                  // we will map the data inside daily, "2e" : ["spell", "spell"] from the json
-                  (key, value) => MapEntry(
-                    // map the values
-                    key, // use the key directly from the json, "1e", "2e"
-                    (value as List)
-                        .map((s) => parseEntries([s]))
-                        .toList(), // take each value for the key, "spell1", "spell2" etc, parse it, and stick it in a list
-                  ),
-                ),
-            },
+            innateSpell: spells[0]['name'] != 'Innate Spellcasting'
+                ? null
+                : {
+                    if (spells[0]['will'] != null)
+                      'will': (spells[0]['will'] as List)
+                          .map((s) => parseEntries([s]))
+                          .toList(),
+                    if (spells[0]['daily'] != null)
+                      ...(spells[0]['daily'] as Map<String, dynamic>).map(
+                        (key, value) => MapEntry(
+                          key,
+                          (value as List)
+                              .map((s) => parseEntries([s]))
+                              .toList(),
+                        ),
+                      ),
+                  },
           ),
     actions: [
       for (final (key, type) in [

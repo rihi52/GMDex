@@ -386,14 +386,53 @@ class CreatureStatBlock extends StatelessWidget {
                   bottom: AppSpacing.spacingSmall,
                   top: AppSpacing.spacingSmall,
                 ),
-                decoration: BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(color: AppColors.primary, width: 1),
-                  ),
-                ),
-                child: Text(
-                  'Spellcasting',
-                  style: Theme.of(context).textTheme.titleSmall,
+                // decoration: BoxDecoration(
+                //   border: Border(
+                //     bottom: BorderSide(color: AppColors.primary, width: 1),
+                //   ),
+                // ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (creature!.spellCasting!.spells != null) ...[
+                      Text(
+                        'Spellcasting',
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                      Text(
+                        creature!.spellCasting!.headerEntries,
+                        style: Theme.of(context).textTheme.labelSmall,
+                      ),
+                      ...creature!.spellCasting!.spells!.entries.map(
+                        (entry) => Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '${spellLevelNames[entry.key] ?? "${entry.key}th level"}${entry.value.slots != null ? ' (${entry.value.slots} slots): ' : ''}',
+                              style: Theme.of(context).textTheme.titleSmall,
+                            ),
+                            ...entry.value.spells.map(
+                              (spell) => Text(
+                                spell,
+                                style: Theme.of(context).textTheme.labelSmall,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                          ],
+                        ),
+                      ),
+                    ],
+                    if (creature!.spellCasting!.innateSpell != null) ...[
+                      Text(
+                        'Innate Spellcasting',
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                      Text(
+                        creature!.spellCasting!.headerEntries,
+                        style: Theme.of(context).textTheme.labelSmall,
+                      ),
+                    ],
+                  ],
                 ),
               ),
             ...buildActionSections(context, creature!.actions),
@@ -573,6 +612,19 @@ class SpellLevel {
 
   const SpellLevel({this.slots, required this.spells});
 }
+
+const spellLevelNames = {
+  0: 'Cantrip',
+  1: '1st level',
+  2: '2nd level',
+  3: '3rd level',
+  4: '4th level',
+  5: '5th level',
+  6: '6th level',
+  7: '7th level',
+  8: '8th level',
+  9: '9th level',
+};
 
 class CreatureSpellcasting {
   final String name;
