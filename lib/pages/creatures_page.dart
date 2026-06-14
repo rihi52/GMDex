@@ -205,7 +205,9 @@ class _BrowseCreatureWidgetState extends State<BrowseCreatureWidget> {
           height: 40,
           child: SearchBar(
             hintText: 'Search Creatures',
+            leading: const Icon(Icons.search),
             onChanged: (value) {
+              //showSearch(context: context, delegate: delegate);
               // Implement search functionality here
             },
           ),
