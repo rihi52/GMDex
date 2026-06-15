@@ -204,72 +204,71 @@ class _BrowseCreatureWidgetState extends State<BrowseCreatureWidget> {
           width: 400,
           height: 40,
           child: SearchAnchor.bar(
-            suggestionsBuilder: (BuildContext context, SearchController controller) {
-              
-            },
-            searchController: SearchController(),
-            ),
-          // SearchBar(
-          //   hintText: 'Search Creatures',
-          //   leading: const Icon(Icons.search),
-          //   onChanged: (value) {
-              
-          //     //showSearch(context: context, delegate: delegate);
-          //     // Implement search functionality here
-          //   },
-          // ),
+            suggestionsBuilder:
+                (BuildContext context, SearchController controller) {
+                  return _allMonsters
+                      .map<Widget>((monster) => Text(monster['name'] ?? '',
+                      style: Theme.of(context).textTheme.labelSmall,))
+                      .toList();
+                },
+          ),
         ),
       ),
       body: Padding(
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        children: [
-          Expanded(
-            flex: 3,
-            child: SizedBox(
-              width: 350,
-              child: ListView.builder(
-                padding: const EdgeInsets.only(right: 8),
-                itemCount: _allMonsters.length,
-                itemBuilder: (context, index) {
-                  final data = _allMonsters[index];
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Expanded(
+              flex: 3,
+              child: SizedBox(
+                width: 350,
+                child: ListView.builder(
+                  padding: const EdgeInsets.only(right: 8),
+                  itemCount: _allMonsters.length,
+                  itemBuilder: (context, index) {
+                    final data = _allMonsters[index];
 
-                  return SizedBox(
-                    height: 100,
-                    child: CreatureCard(
-                      name: data['name'] ?? '',
-                      type: data['type'] is String ? data['type'] : (data['type']?['type'] ?? ''),
-                      size: sizeNames[data['size']?[0]] ?? '',
-                      cr: data['cr'] is Map
-                        ? data['cr']['cr']?.toString() ?? '0'
-                        : data['cr']?.toString() ?? '0',
-                      source: data['source'] ?? '',
-                      selected: _selectedIndex == index,
-                      onTap: () {
-                        setState(() {
-                          _selectedIndex = index;
-                          _selectedCreature = parseCreature(data, _legendaryGroups);
-                        });
-                      },
-                    ),
-                  );
-                },
+                    return SizedBox(
+                      height: 100,
+                      child: CreatureCard(
+                        name: data['name'] ?? '',
+                        type: data['type'] is String
+                            ? data['type']
+                            : (data['type']?['type'] ?? ''),
+                        size: sizeNames[data['size']?[0]] ?? '',
+                        cr: data['cr'] is Map
+                            ? data['cr']['cr']?.toString() ?? '0'
+                            : data['cr']?.toString() ?? '0',
+                        source: data['source'] ?? '',
+                        selected: _selectedIndex == index,
+                        onTap: () {
+                          setState(() {
+                            _selectedIndex = index;
+                            _selectedCreature = parseCreature(
+                              data,
+                              _legendaryGroups,
+                            );
+                          });
+                        },
+                      ),
+                    );
+                  },
+                ),
               ),
             ),
-          ),
-          Container(width: 8),
-          Expanded(
-            flex: 7,
-            child: Container(
-              alignment: Alignment.topCenter,
-              child: _selectedCreature != null
-                ? CreatureStatBlock(creature: _selectedCreature!)
-                : SizedBox.shrink(),
-            )
-          ),
-        ],
+            Container(width: 8),
+            Expanded(
+              flex: 7,
+              child: Container(
+                alignment: Alignment.topCenter,
+                child: _selectedCreature != null
+                    ? CreatureStatBlock(creature: _selectedCreature!)
+                    : SizedBox.shrink(),
+              ),
+            ),
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 }
