@@ -4,7 +4,6 @@ import '../theme/apptheme.dart';
 class PlayerCard extends StatelessWidget {
   final bool selected;
   final VoidCallback? onTap;
-
   final String name;
   final String pClass;
   final int level;
