@@ -161,9 +161,11 @@ class _BrowseCreatureWidgetState extends State<BrowseCreatureWidget> {
   Creature? monster;
 
   List<dynamic> _allMonsters = [];
+  List<dynamic> _allMonsterFilter = [];
   Map<String, dynamic> _legendaryGroups = {};
   Creature? _selectedCreature;
   int? _selectedIndex;
+  String? searchTerm;
 
   @override
   void initState() {
@@ -177,11 +179,21 @@ class _BrowseCreatureWidgetState extends State<BrowseCreatureWidget> {
     setState(() {
       _allMonsters = monstersJson['monster'] as List;
       _legendaryGroups = legendaryGroups;
+      _allMonsterFilter = _allMonsters;
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final visibleMonsters = (searchTerm == null || searchTerm!.isEmpty)
+        ? _allMonsters
+        : _allMonsters
+              .where( // monster represents a monster being put into the anonymous function to check if it contains searchTerm. its added to the list if it does
+                (monster) => monster['name'].toString().toLowerCase().contains(
+                  searchTerm!.toLowerCase(),
+                ),
+              )
+              .toList();
     return Scaffold(
       appBar: AppBar(
         scrolledUnderElevation: 0,
@@ -203,12 +215,25 @@ class _BrowseCreatureWidgetState extends State<BrowseCreatureWidget> {
         title: SizedBox(
           width: 400,
           height: 40,
-          child: SearchAnchor.bar(
+          child: SearchAnchor(
+            builder: (BuildContext context, SearchController controller) {
+              return SearchBar(
+                onChanged: (value) {
+                  setState(() {
+                    searchTerm = value;
+                  });
+                },
+              );
+            },
             suggestionsBuilder:
                 (BuildContext context, SearchController controller) {
-                  return _allMonsters
-                      .map<Widget>((monster) => Text(monster['name'] ?? '',
-                      style: Theme.of(context).textTheme.labelSmall,))
+                  return _allMonsterFilter
+                      .map<Widget>(
+                        (monster) => Text(
+                          monster['name'] ?? '',
+                          style: Theme.of(context).textTheme.labelSmall,
+                        ),
+                      )
                       .toList();
                 },
           ),
@@ -224,10 +249,9 @@ class _BrowseCreatureWidgetState extends State<BrowseCreatureWidget> {
                 width: 350,
                 child: ListView.builder(
                   padding: const EdgeInsets.only(right: 8),
-                  itemCount: _allMonsters.length,
+                  itemCount: visibleMonsters.length,
                   itemBuilder: (context, index) {
-                    final data = _allMonsters[index];
-
+                    final data = visibleMonsters[index];
                     return SizedBox(
                       height: 100,
                       child: CreatureCard(
