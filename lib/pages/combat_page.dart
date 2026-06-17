@@ -66,66 +66,93 @@ class _StartCombatPageState extends State<StartCombatPage> {
       appBar: AppBar(
         scrolledUnderElevation: 0,
         automaticallyImplyLeading: false,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.filter_list),
-            onPressed: () {
-              // Implement filter functionality here
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.sort),
-            onPressed: () {
-              // Implement sort functionality here
-            },
-          ),
-        ],
-        title: SizedBox(
-          width: 400,
-          height: 40,
-          child: SearchAnchor(
-            builder: (BuildContext context, SearchController controller) {
-              return SearchBar(
-                onChanged: (value) {
-                  setState(() {
-                    searchTerm = value;
-                  });
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            SizedBox(
+              height: 40,
+              width: 400,
+              child: SearchAnchor(
+                builder: (BuildContext context, SearchController controller) {
+                  return SearchBar(
+                    hintText: 'Search Players',
+                    onChanged: (value) {
+                      setState(() {
+                        searchTerm = value;
+                      });
+                    },
+                  );
                 },
-              );
-            },
-            suggestionsBuilder:
-                (BuildContext context, SearchController controller) {
-                  return _allMonsterFilter
-                      .map<Widget>(
-                        (monster) => Text(
-                          monster['name'] ?? '',
-                          style: Theme.of(context).textTheme.labelSmall,
-                        ),
-                      )
-                      .toList();
+                suggestionsBuilder:
+                    (BuildContext context, SearchController controller) {
+                      return _allMonsterFilter
+                          .map<Widget>(
+                            (monster) => Text(
+                              monster['name'] ?? '',
+                              style: Theme.of(context).textTheme.labelSmall,
+                            ),
+                          )
+                          .toList();
+                    },
+              ),
+            ),
+            SizedBox(
+              height: 40,
+              width: 400,
+              child: SearchAnchor(
+                builder: (BuildContext context, SearchController controller) {
+                  return SearchBar(
+                    hintText: 'Search Creatures',
+                    onChanged: (value) {
+                      setState(() {
+                        searchTerm = value;
+                      });
+                    },
+                  );
                 },
-          ),
+                suggestionsBuilder:
+                    (BuildContext context, SearchController controller) {
+                      return _allMonsterFilter
+                          .map<Widget>(
+                            (monster) => Text(
+                              monster['name'] ?? '',
+                              style: Theme.of(context).textTheme.labelSmall,
+                            ),
+                          )
+                          .toList();
+                    },
+              ),
+            ),
+          ],
         ),
       ),
       body: Row(
         children: [
           Expanded(
             flex: 3,
-            child: Column(
-              children: [
-                /* Cards for Combatants */
-                Container(
-                  padding: const EdgeInsets.only(
-                    bottom: AppSpacing.spacingSmall,
-                    top: AppSpacing.spacingSmall,
-                  ),
-                  decoration: BoxDecoration(
-                    border: Border(
-                      bottom: BorderSide(color: AppColors.primary, width: 1),
+            child: SizedBox(
+              width: 350,
+              child: ListView.builder(
+                padding: const EdgeInsets.only(right: 8),
+                itemCount: players.length,
+                itemBuilder: (context, index) {
+                  final data = players[index];
+                  return SizedBox(
+                    height: 100,
+                    child: PlayerCard(
+                      name: data.name,
+                      pClass: data.pClass,
+                      level: data.level,
+                      selected: _selectedIndex == index,
+                      onTap: () {
+                        setState(() {
+                          _selectedIndex = index;
+                        });
+                      },
                     ),
-                  ),
-                ),
-              ],
+                  );
+                },
+              ),
             ),
           ),
           Expanded(
