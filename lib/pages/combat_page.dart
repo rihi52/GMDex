@@ -15,7 +15,9 @@ class _StartCombatPageState extends State<StartCombatPage> {
   List<dynamic> _allMonsters = [];
   List<dynamic> _allMonsterFilter = [];
   int? _selectedIndex;
-  String? searchTerm;
+  int? _selectedPlayerIndex;
+  String? playerSearchTerm;
+  String? creatureSearchTerm;
 
   final players = [
     (name: 'Ravi', pClass: 'Rogue', level: 1, originalCampaign: 'Finndalin'),
@@ -52,43 +54,54 @@ class _StartCombatPageState extends State<StartCombatPage> {
 
   @override
   Widget build(BuildContext context) {
-    final visibleMonsters = (searchTerm == null || searchTerm!.isEmpty)
+    final visibleMonsters = (creatureSearchTerm == null || creatureSearchTerm!.isEmpty)
         ? _allMonsters
         : _allMonsters
               .where(
-                // monster represents a monster being put into the anonymous function to check if it contains searchTerm. its added to the list if it does
+                // monster represents a monster being put into the anonymous function to check if it contains creatureSearchTerm. its added to the list if it does
                 (monster) => monster['name'].toString().toLowerCase().contains(
-                  searchTerm!.toLowerCase(),
+                  creatureSearchTerm!.toLowerCase(),
+                ),
+              )
+              .toList();
+    
+    final visiblePlayers = (playerSearchTerm == null || playerSearchTerm!.isEmpty)
+        ? players
+        : players
+              .where(
+                // monster represents a monster being put into the anonymous function to check if it contains playerSearchTerm. its added to the list if it does
+                (player) => player.name.toString().toLowerCase().contains(
+                  playerSearchTerm!.toLowerCase(),
                 ),
               )
               .toList();
     return Scaffold(
       appBar: AppBar(
         scrolledUnderElevation: 0,
-        automaticallyImplyLeading: false,
+        //automaticallyImplyLeading: false,
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             SizedBox(
               height: 40,
-              width: 400,
+              width: 350,
               child: SearchAnchor(
                 builder: (BuildContext context, SearchController controller) {
                   return SearchBar(
                     hintText: 'Search Players',
                     onChanged: (value) {
                       setState(() {
-                        searchTerm = value;
+                        playerSearchTerm = value;
                       });
                     },
                   );
                 },
                 suggestionsBuilder:
                     (BuildContext context, SearchController controller) {
-                      return _allMonsterFilter
+                      return visiblePlayers
                           .map<Widget>(
-                            (monster) => Text(
-                              monster['name'] ?? '',
+                            (player) => Text(
+                              player.name,
                               style: Theme.of(context).textTheme.labelSmall,
                             ),
                           )
@@ -98,14 +111,14 @@ class _StartCombatPageState extends State<StartCombatPage> {
             ),
             SizedBox(
               height: 40,
-              width: 400,
+              width: 350,
               child: SearchAnchor(
                 builder: (BuildContext context, SearchController controller) {
                   return SearchBar(
                     hintText: 'Search Creatures',
                     onChanged: (value) {
                       setState(() {
-                        searchTerm = value;
+                        creatureSearchTerm = value;
                       });
                     },
                   );
@@ -129,24 +142,27 @@ class _StartCombatPageState extends State<StartCombatPage> {
       body: Row(
         children: [
           Expanded(
-            flex: 3,
-            child: SizedBox(
+            flex: 2,
+            child: Container(
+              padding: const EdgeInsets.only(
+                left: AppSpacing.spacingMedium,
+              ),
               width: 350,
               child: ListView.builder(
                 padding: const EdgeInsets.only(right: 8),
-                itemCount: players.length,
+                itemCount: visiblePlayers.length,
                 itemBuilder: (context, index) {
-                  final data = players[index];
+                  final data = visiblePlayers[index];
                   return SizedBox(
                     height: 100,
                     child: PlayerCard(
                       name: data.name,
                       pClass: data.pClass,
                       level: data.level,
-                      selected: _selectedIndex == index,
+                      selected: _selectedPlayerIndex == index,
                       onTap: () {
                         setState(() {
-                          _selectedIndex = index;
+                          _selectedPlayerIndex = index;
                         });
                       },
                     ),
@@ -157,7 +173,7 @@ class _StartCombatPageState extends State<StartCombatPage> {
           ),
           Expanded(
             /* Statblock */
-            flex: 4,
+            flex: 5,
             child: Column(
               children: [
                 Container(
@@ -175,7 +191,7 @@ class _StartCombatPageState extends State<StartCombatPage> {
             ),
           ),
           Expanded(
-            flex: 3,
+            flex: 2,
             child: SizedBox(
               width: 350,
               child: ListView.builder(
