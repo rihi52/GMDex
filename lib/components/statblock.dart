@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../theme/apptheme.dart';
+import 'package:moonscribe/theme/apptheme.dart';
 
 class CreatureStatBlock extends StatelessWidget {
   final Creature? creature;

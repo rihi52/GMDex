@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
-import 'theme/apptheme.dart';
-import 'pages/home_page.dart';
+import 'package:moonscribe/theme/apptheme.dart';
+import 'package:moonscribe/pages/home_page.dart';
 
 // void main() {
 //   runApp(const MyApp());

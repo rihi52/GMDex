@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../theme/apptheme.dart';
-import '../components/creature_card.dart';
-import '../components/statblock.dart';
-import '../load/read.dart';
+import 'package:moonscribe/theme/apptheme.dart';
+import 'package:moonscribe/components/creature_card.dart';
+import 'package:moonscribe/components/statblock.dart';
+import 'package:moonscribe/load/read.dart';
 
 class CreaturesPage extends StatefulWidget {
   const CreaturesPage({super.key});

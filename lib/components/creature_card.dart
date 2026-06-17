@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../theme/apptheme.dart';
+import 'package:moonscribe/theme/apptheme.dart';
 class CreatureCard extends StatelessWidget {
   final bool selected;
   final VoidCallback? onTap;

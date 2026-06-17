@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:moonscribe/components/player_details.dart';
-import '../components/player_card.dart';
-import '../theme/apptheme.dart';
+import 'package:moonscribe/components/player_card.dart';
+import 'package:moonscribe/theme/apptheme.dart';
 
 class PlayersPage extends StatefulWidget {
   const PlayersPage({super.key});

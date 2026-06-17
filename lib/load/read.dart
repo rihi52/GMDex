@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/services.dart';
-import '../components/statblock.dart';
+import 'package:moonscribe/components/statblock.dart';
 
 Future<dynamic> loadMonsters() async {
   final jsonString = await rootBundle.loadString(

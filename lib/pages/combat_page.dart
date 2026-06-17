@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:moonscribe/theme/apptheme.dart';
-import '../components/creature_card.dart';
-import '../components/player_card.dart';
+import 'package:moonscribe/components/creature_card.dart';
+import 'package:moonscribe/components/player_card.dart';
+import 'package:moonscribe/models/combat.dart';
 import 'package:moonscribe/load/read.dart';
+import 'package:moonscribe/components/combatant_card.dart';
 
 class StartCombatPage extends StatefulWidget {
   const StartCombatPage({super.key});
@@ -15,32 +17,39 @@ class _StartCombatPageState extends State<StartCombatPage> {
   List<dynamic> _allMonsters = [];
   List<dynamic> _allMonsterFilter = [];
   int? _selectedIndex;
-  int? _selectedPlayerIndex;
   String? playerSearchTerm;
   String? creatureSearchTerm;
+  late Encounter currentEncounter;
 
   final players = [
-    (name: 'Ravi', pClass: 'Rogue', level: 1, originalCampaign: 'Finndalin'),
-    (name: 'Finn', pClass: 'Bard', level: 2, originalCampaign: 'Finndalin'),
-    (name: 'Pax', pClass: 'Fighter', level: 3, originalCampaign: 'Finndalin'),
-    (name: 'Theon', pClass: 'Fighter', level: 1, originalCampaign: 'Finndalin'),
+    (name: 'Ravi', pClass: 'Rogue', level: 1, originalCampaign: 'Finndalin', hitPoints: 20),
+    (name: 'Finn', pClass: 'Bard', level: 2, originalCampaign: 'Finndalin', hitPoints: 21),
+    (name: 'Pax', pClass: 'Fighter', level: 3, originalCampaign: 'Finndalin', hitPoints: 22),
+    (name: 'Theon', pClass: 'Fighter', level: 1, originalCampaign: 'Finndalin', hitPoints: 23),
     (
       name: 'Amalagh',
       pClass: 'Barbarian',
       level: 2,
       originalCampaign: 'Finndalin',
+      hitPoints: 24
     ),
     (
       name: 'Folkini',
       pClass: 'Soceror',
       level: 3,
       originalCampaign: 'Finndalin',
+      hitPoints: 25
     ),
   ];
 
   @override
   void initState() {
     super.initState();
+    currentEncounter = Encounter(
+      name: 'Encounter 1',
+      currentTurnIndex: 0,
+      combatants: [],
+    );
     _loadData();
   }
 
@@ -159,10 +168,21 @@ class _StartCombatPageState extends State<StartCombatPage> {
                       name: data.name,
                       pClass: data.pClass,
                       level: data.level,
-                      selected: _selectedPlayerIndex == index,
                       onTap: () {
                         setState(() {
-                          _selectedPlayerIndex = index;
+                          if (!currentEncounter.combatants.any(
+                            (combatant) => combatant.name == data.name,
+                          )) {
+                            Combatant selected = Combatant(
+                              name: data.name,
+                              isPlayer: true,
+                              currentHitPoints: data.hitPoints,
+                              maxHitPoints: data.hitPoints,
+                              initiative: 0,
+                              quantity: 1,
+                            );
+                            currentEncounter.combatants.add(selected);
+                          }
                         });
                       },
                     ),
@@ -172,30 +192,26 @@ class _StartCombatPageState extends State<StartCombatPage> {
             ),
           ),
           Expanded(
-            /* Statblock */
+            /* Encounter participants */
             flex: 5,
-            child: Column(
-              children: [
-                Container(
-                  padding: const EdgeInsets.only(
-                    bottom: AppSpacing.spacingSmall,
-                    top: AppSpacing.spacingSmall,
-                  ),
-                  decoration: BoxDecoration(
-                    border: Border(
-                      bottom: BorderSide(color: AppColors.primary, width: 1),
-                    ),
-                  ),
+            child: ListView.builder(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.spacingMedium,
                 ),
-              ],
-            ),
+                itemCount: currentEncounter.combatants.length,
+                itemBuilder: (context, index) {
+                  return CombatantCard(
+                    combatant: currentEncounter.combatants[index],
+                  );
+                },
+              ),
           ),
           Expanded(
             flex: 2,
             child: SizedBox(
               width: 350,
               child: ListView.builder(
-                padding: const EdgeInsets.only(right: 8),
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.spacingMedium),
                 itemCount: visibleMonsters.length,
                 itemBuilder: (context, index) {
                   final data = visibleMonsters[index];

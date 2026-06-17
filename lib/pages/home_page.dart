@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'combat_page.dart';
-import 'encounters_page.dart';
-import 'players_page.dart';
-import 'creatures_page.dart';
+import 'package:moonscribe/pages/combat_page.dart';
+import 'package:moonscribe/pages/encounters_page.dart';
+import 'package:moonscribe/pages/players_page.dart';
+import 'package:moonscribe/pages/creatures_page.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
