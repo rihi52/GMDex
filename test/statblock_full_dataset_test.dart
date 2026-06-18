@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:moonscribe/components/statblock.dart';
-import 'package:moonscribe/load/read.dart';
+import 'package:moonscribe/database/read.dart';
 
 late final List<dynamic> _monsters;
 late final Map<String, dynamic> _legendaryGroups;
@@ -33,26 +33,34 @@ void main() {
     }
   });
 
-  testWidgets('CreatureStatBlock builds for entire dataset',
-      (WidgetTester tester) async {
-    await tester.binding.setSurfaceSize(const Size(1600, 1200));
-    addTearDown(() {
-      tester.binding.setSurfaceSize(null);
-    });
+  testWidgets(
+    'CreatureStatBlock builds for entire dataset',
+    (WidgetTester tester) async {
+      await tester.binding.setSurfaceSize(const Size(1600, 1200));
+      addTearDown(() {
+        tester.binding.setSurfaceSize(null);
+      });
 
-    for (final m in _monsters) {
-      final creature = parseCreature(m as Map<String, dynamic>, _legendaryGroups);
+      for (final m in _monsters) {
+        final creature = parseCreature(
+          m as Map<String, dynamic>,
+          _legendaryGroups,
+        );
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: CreatureStatBlock(creature: creature),
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(body: CreatureStatBlock(creature: creature)),
           ),
-        ),
-      );
+        );
 
-      await tester.pump();
-      expect(find.text(creature.name), findsWidgets, reason: 'Failed on ${creature.name}');
-    }
-  }, timeout: Timeout(Duration(minutes: 10))); 
+        await tester.pump();
+        expect(
+          find.text(creature.name),
+          findsWidgets,
+          reason: 'Failed on ${creature.name}',
+        );
+      }
+    },
+    timeout: Timeout(Duration(minutes: 10)),
+  );
 }

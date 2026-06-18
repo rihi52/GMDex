@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:moonscribe/theme/apptheme.dart';
 import 'package:moonscribe/components/creature_card.dart';
 import 'package:moonscribe/components/statblock.dart';
-import 'package:moonscribe/load/read.dart';
+import 'package:moonscribe/database/read.dart';
 
 class CreaturesPage extends StatefulWidget {
   const CreaturesPage({super.key});
@@ -122,7 +122,8 @@ class _BrowseCreatureWidgetState extends State<BrowseCreatureWidget> {
     final visibleMonsters = (searchTerm == null || searchTerm!.isEmpty)
         ? _allMonsters
         : _allMonsters
-              .where( // monster represents a monster being put into the anonymous function to check if it contains searchTerm. its added to the list if it does
+              .where(
+                // monster represents a monster being put into the anonymous function to check if it contains searchTerm. its added to the list if it does
                 (monster) => monster['name'].toString().toLowerCase().contains(
                   searchTerm!.toLowerCase(),
                 ),
