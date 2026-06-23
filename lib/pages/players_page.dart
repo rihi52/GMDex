@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:moonscribe/components/player_details.dart';
 import 'package:moonscribe/components/player_card.dart';
+import 'package:moonscribe/database/database.dart';
 import 'package:moonscribe/theme/apptheme.dart';
+import 'package:moonscribe/main.dart';
 
 class PlayersPage extends StatefulWidget {
   const PlayersPage({super.key});
@@ -100,7 +102,7 @@ class _BrowsePlayerWidget extends State<BrowsePlayerWidget> {
     (name: 'Folkini', pClass: 'Soceror', level: 3),
   ];
 
-  final ravi = Player(
+  final ravi = PlayerDisplay(
     name: 'Ravi',
     pClass: 'Rogue',
     level: 5,
@@ -174,6 +176,25 @@ class _BrowsePlayerWidget extends State<BrowsePlayerWidget> {
                 alignment: Alignment.topCenter,
                 child: PlayerDetails(player: ravi),
               ),
+            ),
+            FutureBuilder<List<Player>>(
+              future: database.select(database.players).get(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Text('Loading...');
+                }
+                if (snapshot.hasError) {
+                  return Text('Error: ${snapshot.error}');
+                }
+
+                final players = snapshot.data ?? [];
+                return Column(
+                  children: [
+                    for (final player in players)
+                      Text('Player: ${player.pName}'), // Display player name
+                  ],
+                );
+              },
             ),
           ],
         ),

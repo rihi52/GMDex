@@ -1,20 +1,17 @@
 import 'package:flutter/material.dart';
-import '../theme/apptheme.dart';
 
 class PlayerDetails extends StatelessWidget {
-  final Player? player;
+  final PlayerDisplay? player;
 
   const PlayerDetails({super.key, required this.player});
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-
-    );
+    return SingleChildScrollView();
   }
 }
 
-class Player {
+class PlayerDisplay {
   final String name;
   final String pClass;
   final int level;
@@ -22,7 +19,7 @@ class Player {
 
   final int id;
 
-  const Player({
+  const PlayerDisplay({
     required this.name,
     required this.pClass,
     required this.level,
