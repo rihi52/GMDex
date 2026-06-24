@@ -145,29 +145,50 @@ class _BrowsePlayerWidget extends State<BrowsePlayerWidget> {
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            Expanded(
-              flex: 3,
-              child: SizedBox(
-                width: 350,
-                child: ListView.builder(
-                  padding: const EdgeInsets.only(right: 8),
-                  itemCount: players.length,
-                  itemBuilder: (context, index) {
-                    final player = players[index];
+            StreamBuilder<List<Player>>(
+              stream: database.select(database.players).watch(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Expanded(
+                    flex: 3,
+                    child: Center(child: CircularProgressIndicator()),
+                  );
+                }
+                if (snapshot.hasError) {
+                  return Expanded(
+                    flex: 3,
+                    child: Center(child: Text('Error: ${snapshot.error}')),
+                  );
+                }
 
-                    return SizedBox(
-                      height: 100,
-                      child: PlayerCard(
-                        name: player.name,
-                        pClass: player.pClass,
-                        level: player.level,
-                        selected: false,
-                        onTap: () {},
-                      ),
-                    );
-                  },
-                ),
-              ),
+                final players = snapshot.data ?? [];
+
+                return Expanded(
+                  flex: 3,
+                  child: SizedBox(
+                    width: 350,
+                    child: ListView.builder(
+                      padding: const EdgeInsets.only(right: 8),
+                      itemCount: players.length,
+                      itemBuilder: (context, index) {
+                        final player = players[index];
+
+                        return SizedBox(
+                          height: 100,
+                          child: PlayerCard(
+                            name: player.pName,
+                            pClass: player.pClass,
+                            level: player.pLevel ?? 1,
+                            originalCampaign: player.pOriginalCampaign,
+                            selected: false,
+                            onTap: () {},
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                );
+              },
             ),
             Container(width: 8),
             Expanded(
@@ -176,25 +197,6 @@ class _BrowsePlayerWidget extends State<BrowsePlayerWidget> {
                 alignment: Alignment.topCenter,
                 child: PlayerDetails(player: ravi),
               ),
-            ),
-            FutureBuilder<List<Player>>(
-              future: database.select(database.players).get(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Text('Loading...');
-                }
-                if (snapshot.hasError) {
-                  return Text('Error: ${snapshot.error}');
-                }
-
-                final players = snapshot.data ?? [];
-                return Column(
-                  children: [
-                    for (final player in players)
-                      Text('Player: ${player.pName}'), // Display player name
-                  ],
-                );
-              },
             ),
           ],
         ),

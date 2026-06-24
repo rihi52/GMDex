@@ -7,12 +7,14 @@ class PlayerCard extends StatelessWidget {
   final String name;
   final String pClass;
   final int level;
+  final String? originalCampaign;
 
   const PlayerCard({
     super.key,
     required this.name,
     required this.pClass,
     required this.level,
+    this.originalCampaign,
     this.selected = false,
     this.onTap,
   });
@@ -42,7 +44,12 @@ class PlayerCard extends StatelessWidget {
                 Text('Level $level', style: Theme.of(context).textTheme.bodySmall),
               ],
             ),
-            
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Origin: $originalCampaign', style: Theme.of(context).textTheme.bodySmall),
+              ],
+            ),
           ],
         ),
       ),
