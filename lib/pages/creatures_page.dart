@@ -77,7 +77,7 @@ class _CreaturesPageState extends State<CreaturesPage> {
       case 0:
         return const BrowseCreatureWidget();
       case 1:
-        return const Center(child: Text('Create Creature'));
+        return const CreateCreatureWidget();//Center(child: Text('Create Creature'));
       default:
         return const BrowseCreatureWidget();
     }
@@ -227,6 +227,52 @@ class _BrowseCreatureWidgetState extends State<BrowseCreatureWidget> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class CreateCreatureWidget extends StatefulWidget {
+  const CreateCreatureWidget({super.key});
+
+  @override
+  State<CreateCreatureWidget> createState() => _CreateCreatureWidgetState();
+}
+
+class _CreateCreatureWidgetState extends State<CreateCreatureWidget> {
+  Creature? monster;
+
+  List<dynamic> _allMonsters = [];
+  List<dynamic> _allMonsterFilter = [];
+  Map<String, dynamic> _legendaryGroups = {};
+  Creature? _selectedCreature;
+  int? _selectedIndex;
+  String? searchTerm;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    final monstersJson = await loadMonsters();
+    final legendaryGroups = await loadLegendaryGroups();
+    setState(() {
+      _allMonsters = monstersJson['monster'] as List;
+      _legendaryGroups = legendaryGroups;
+      _allMonsterFilter = _allMonsters;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+
+    return Scaffold(
+      appBar: AppBar(
+      ),
+      body: Container(
+        StatblockEditorWidget();
       ),
     );
   }

@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:window_manager/window_manager.dart';
+// import 'package:window_manager/window_manager.dart';
 import 'package:moonscribe/theme/apptheme.dart';
 import 'package:moonscribe/pages/home_page.dart';
 import 'package:drift/drift.dart';
@@ -17,33 +17,33 @@ late AppDatabase _database;
 AppDatabase get database => _database;
 
 // Future<AppDatabase> _openDatabase() async {
-  // late final Directory dbDir;
+// late final Directory dbDir;
 
-  // if (Platform.isLinux) {
-  //   // Works for both native Linux desktop and Codespaces (also Linux).
-  //   // Storing inside the workspace folder survives Codespace rebuilds.
-  //   // On a real desktop this falls back to a sensible home-relative path.
-  //   final workspacePath = '/workspaces/moonscribe/dev_data';
-  //   final workspaceDir = Directory(workspacePath);
+// if (Platform.isLinux) {
+//   // Works for both native Linux desktop and Codespaces (also Linux).
+//   // Storing inside the workspace folder survives Codespace rebuilds.
+//   // On a real desktop this falls back to a sensible home-relative path.
+//   final workspacePath = '/workspaces/moonscribe/dev_data';
+//   final workspaceDir = Directory(workspacePath);
 
-  //   if (workspaceDir.existsSync()) {
-  //     // Running in Codespaces
-  //     dbDir = workspaceDir;
-  //   } else {
-  //     // Running on a real Linux desktop
-  //     dbDir = await getApplicationDocumentsDirectory();
-  //   }
-  // } else {
-  //   // macOS / Windows
-  //   dbDir = await getApplicationDocumentsDirectory();
-  // }
+//   if (workspaceDir.existsSync()) {
+//     // Running in Codespaces
+//     dbDir = workspaceDir;
+//   } else {
+//     // Running on a real Linux desktop
+//     dbDir = await getApplicationDocumentsDirectory();
+//   }
+// } else {
+//   // macOS / Windows
+//   dbDir = await getApplicationDocumentsDirectory();
+// }
 
-  // if (!dbDir.existsSync()) {
-  //   dbDir.createSync(recursive: true);
-  // }
+// if (!dbDir.existsSync()) {
+//   dbDir.createSync(recursive: true);
+// }
 
-  // final file = File(p.join(dbDir.path, 'moonscribe.db'));
-  // return AppDatabase(NativeDatabase(file));
+// final file = File(p.join(dbDir.path, 'moonscribe.db'));
+// return AppDatabase(NativeDatabase(file));
 // }
 
 Future<void> _initializeDatabase() async {
