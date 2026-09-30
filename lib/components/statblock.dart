@@ -545,6 +545,23 @@ class _StatblockEditorWidget extends State<StatblockEditorWidget> {
                   bottom: BorderSide(color: AppColors.primary, width: 1),
                 ),
               ),
+              child: Container(
+                  padding: const EdgeInsets.only(
+                  bottom: AppSpacing.spacingSmall,
+                  top: AppSpacing.spacingSmall,
+                ),
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(color: AppColors.primary, width: 1),
+                  ),
+                ),
+                child: Row(
+                children: [
+                  Text("Name: ", style: Theme.of(context).textTheme.labelSmall),
+                  TextField(style: Theme.of(context).textTheme.titleLarge),
+                ],
+              ),
+              ),
             ),
           ],
         ),

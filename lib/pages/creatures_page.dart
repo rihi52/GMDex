@@ -269,11 +269,8 @@ class _CreateCreatureWidgetState extends State<CreateCreatureWidget> {
   Widget build(BuildContext context) {
 
     return Scaffold(
-      appBar: AppBar(
-      ),
-      body: Container(
-        StatblockEditorWidget();
-      ),
+      appBar: AppBar(),
+      body: Column(children: [StatblockEditorWidget()]),
     );
   }
 }
