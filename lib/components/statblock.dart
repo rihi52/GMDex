@@ -37,16 +37,7 @@ class CreatureStatBlock extends StatelessWidget {
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
             ),
-            Container(
-              padding: const EdgeInsets.only(
-                bottom: AppSpacing.spacingSmall,
-                top: AppSpacing.spacingSmall,
-              ),
-              decoration: BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(color: AppColors.primary, width: 1),
-                ),
-              ),
+            StatblockSection(
               child: Row(
                 children: [
                   Text(
@@ -64,16 +55,7 @@ class CreatureStatBlock extends StatelessWidget {
                 ],
               ),
             ),
-            Container(
-              padding: const EdgeInsets.only(
-                bottom: AppSpacing.spacingSmall,
-                top: AppSpacing.spacingSmall,
-              ),
-              decoration: BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(color: AppColors.primary, width: 1),
-                ),
-              ),
+            StatblockSection(
               child: Column(
                 children: [
                   Row(
@@ -132,16 +114,7 @@ class CreatureStatBlock extends StatelessWidget {
                 ],
               ),
             ),
-            Container(
-              padding: const EdgeInsets.only(
-                bottom: AppSpacing.spacingSmall,
-                top: AppSpacing.spacingSmall,
-              ),
-              decoration: BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(color: AppColors.primary, width: 1),
-                ),
-              ),
+            StatblockSection(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
@@ -225,16 +198,7 @@ class CreatureStatBlock extends StatelessWidget {
                 ],
               ),
             ),
-            Container(
-              padding: const EdgeInsets.only(
-                bottom: AppSpacing.spacingSmall,
-                top: AppSpacing.spacingSmall,
-              ),
-              decoration: BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(color: AppColors.primary, width: 1),
-                ),
-              ),
+            StatblockSection(
               child: Column(
                 children: [
                   Row(
@@ -467,16 +431,7 @@ class CreatureStatBlock extends StatelessWidget {
               ),
             ...buildActionSections(context, creature!.actions),
             if (creature!.regionalEffect != null)
-              Container(
-                padding: const EdgeInsets.only(
-                  bottom: AppSpacing.spacingSmall,
-                  top: AppSpacing.spacingSmall,
-                ),
-                decoration: BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(color: AppColors.primary, width: 1),
-                  ),
-                ),
+              StatblockSection(
                 child: Text(
                   'Regional Effects',
                   style: Theme.of(context).textTheme.titleMedium,
@@ -535,32 +490,18 @@ class _StatblockEditorWidget extends State<StatblockEditorWidget> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Container(
-              padding: const EdgeInsets.only(
-                bottom: AppSpacing.spacingSmall,
-                top: AppSpacing.spacingSmall,
-              ),
-              decoration: BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(color: AppColors.primary, width: 1),
-                ),
-              ),
-              child: Container(
-                  padding: const EdgeInsets.only(
-                  bottom: AppSpacing.spacingSmall,
-                  top: AppSpacing.spacingSmall,
-                ),
-                decoration: BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(color: AppColors.primary, width: 1),
+            StatblockSection(
+              child: StatblockSection(
+                child: Expanded(
+                  child: TextField(
+                    style: Theme.of(context).textTheme.titleLarge,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: "Name",
+                      labelStyle: Theme.of(context).textTheme.titleMedium,
+                    ),
                   ),
                 ),
-                child: Row(
-                children: [
-                  Text("Name: ", style: Theme.of(context).textTheme.labelSmall),
-                  TextField(style: Theme.of(context).textTheme.titleLarge),
-                ],
-              ),
               ),
             ),
           ],
@@ -938,4 +879,24 @@ class CreatureRegionalEffect {
     required this.bulletPoints,
     this.blurbEnd,
   });
+}
+
+class StatblockSection extends StatelessWidget {
+  const StatblockSection({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.only(
+        bottom: AppSpacing.spacingSmall,
+        top: AppSpacing.spacingSmall,
+      ),
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: AppColors.primary, width: 1)),
+      ),
+      child: child,
+    );
+  }
 }
