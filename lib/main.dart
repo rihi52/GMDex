@@ -4,7 +4,6 @@ import 'package:moonscribe/theme/apptheme.dart';
 import 'package:moonscribe/pages/home_page.dart';
 import 'package:moonscribe/database/database.dart';
 
-
 late AppDatabase _database;
 
 AppDatabase get database => _database;
@@ -106,8 +105,8 @@ void main() async {
 
   await _initializeDatabase();
 
-  await windowManager.ensureInitialized();
-  await windowManager.setMinimumSize(const Size(1360, 800));
+  // await windowManager.ensureInitialized();
+  // await windowManager.setMinimumSize(const Size(1360, 800));
 
   runApp(const MyApp());
 }
