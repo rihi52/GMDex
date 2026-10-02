@@ -14,7 +14,7 @@ class Players extends Table {
 
 @DriftDatabase(tables: [Players])
 class AppDatabase extends _$AppDatabase {
-  AppDatabase(QueryExecutor e) : super(e);
+  AppDatabase(super.e);
 
   @override
   int get schemaVersion => 1;

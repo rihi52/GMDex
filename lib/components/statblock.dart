@@ -40,17 +40,14 @@ class CreatureStatBlock extends StatelessWidget {
             StatblockSection(
               child: Row(
                 children: [
-                  Text(
-                    '${creature!.size} ',
-                    style: Theme.of(context).textTheme.labelSmall,
+                  StatblockSmallText(
+                    data: '${creature!.size} ',
                   ),
-                  Text(
-                    '${creature!.type}, ',
-                    style: Theme.of(context).textTheme.labelSmall,
+                  StatblockSmallText(
+                    data: '${creature!.type}, ',
                   ),
-                  Text(
-                    creature!.alignment,
-                    style: Theme.of(context).textTheme.labelSmall,
+                  StatblockSmallText(
+                    data: creature!.alignment,
                   ),
                 ],
               ),
@@ -64,9 +61,8 @@ class CreatureStatBlock extends StatelessWidget {
                         'Armor Class:  ',
                         style: Theme.of(context).textTheme.titleSmall,
                       ),
-                      Text(
-                        '${creature!.armorClass.ac.toString()}, ${creature!.armorClass.type}',
-                        style: Theme.of(context).textTheme.labelSmall,
+                      StatblockSmallText(
+                        data: '${creature!.armorClass.ac.toString()}, ${creature!.armorClass.type}',
                       ),
                     ],
                   ),
@@ -76,13 +72,11 @@ class CreatureStatBlock extends StatelessWidget {
                         'Hit Points:  ',
                         style: Theme.of(context).textTheme.titleSmall,
                       ),
-                      Text(
-                        '${creature!.hitPoints}',
-                        style: Theme.of(context).textTheme.labelSmall,
+                      StatblockSmallText(
+                        data: '${creature!.hitPoints}',
                       ),
-                      Text(
-                        '(${creature!.hitPointFormula})',
-                        style: Theme.of(context).textTheme.labelSmall,
+                      StatblockSmallText(
+                        data: '(${creature!.hitPointFormula})',
                       ),
                     ],
                   ),
@@ -93,8 +87,8 @@ class CreatureStatBlock extends StatelessWidget {
                         style: Theme.of(context).textTheme.titleSmall,
                       ),
                       Expanded(
-                        child: Text(
-                          [
+                        child: StatblockSmallText(
+                          data: [
                             if ((creature!.speed.walk ?? 0) > 0)
                               '${creature!.speed.walk} ft.',
                             if ((creature!.speed.fly ?? 0) > 0)
@@ -106,7 +100,6 @@ class CreatureStatBlock extends StatelessWidget {
                             if ((creature!.speed.burrow ?? 0) > 0)
                               'burrow ${creature!.speed.burrow} ft.',
                           ].join(', '),
-                          style: Theme.of(context).textTheme.labelSmall,
                         ),
                       ),
                     ],
@@ -124,9 +117,8 @@ class CreatureStatBlock extends StatelessWidget {
                         'STR',
                         style: Theme.of(context).textTheme.titleSmall,
                       ),
-                      Text(
-                        '${creature!.abilityScores.strength} (${creature!.abilityScores.strengthModifier >= 0 ? '+' : ''}${creature!.abilityScores.strengthModifier})',
-                        style: Theme.of(context).textTheme.labelSmall,
+                      StatblockSmallText(
+                        data: '${creature!.abilityScores.strength} (${creature!.abilityScores.strengthModifier >= 0 ? '+' : ''}${creature!.abilityScores.strengthModifier})',
                       ),
                     ],
                   ),
@@ -137,9 +129,8 @@ class CreatureStatBlock extends StatelessWidget {
                         'DEX',
                         style: Theme.of(context).textTheme.titleSmall,
                       ),
-                      Text(
-                        '${creature!.abilityScores.dexterity} (${creature!.abilityScores.dexterityModifier >= 0 ? '+' : ''}${creature!.abilityScores.dexterityModifier})',
-                        style: Theme.of(context).textTheme.labelSmall,
+                      StatblockSmallText(
+                        data: '${creature!.abilityScores.dexterity} (${creature!.abilityScores.dexterityModifier >= 0 ? '+' : ''}${creature!.abilityScores.dexterityModifier})',
                       ),
                     ],
                   ),
@@ -150,9 +141,8 @@ class CreatureStatBlock extends StatelessWidget {
                         'CON',
                         style: Theme.of(context).textTheme.titleSmall,
                       ),
-                      Text(
-                        '${creature!.abilityScores.constitution} (${creature!.abilityScores.constitutionModifier >= 0 ? '+' : ''}${creature!.abilityScores.constitutionModifier})',
-                        style: Theme.of(context).textTheme.labelSmall,
+                      StatblockSmallText(
+                        data: '${creature!.abilityScores.constitution} (${creature!.abilityScores.constitutionModifier >= 0 ? '+' : ''}${creature!.abilityScores.constitutionModifier})',
                       ),
                     ],
                   ),
@@ -163,9 +153,8 @@ class CreatureStatBlock extends StatelessWidget {
                         'INT',
                         style: Theme.of(context).textTheme.titleSmall,
                       ),
-                      Text(
-                        '${creature!.abilityScores.intelligence} (${creature!.abilityScores.intelligenceModifier >= 0 ? '+' : ''}${creature!.abilityScores.intelligenceModifier})',
-                        style: Theme.of(context).textTheme.labelSmall,
+                      StatblockSmallText(
+                        data: '${creature!.abilityScores.intelligence} (${creature!.abilityScores.intelligenceModifier >= 0 ? '+' : ''}${creature!.abilityScores.intelligenceModifier})',
                       ),
                     ],
                   ),
@@ -176,9 +165,8 @@ class CreatureStatBlock extends StatelessWidget {
                         'WIS',
                         style: Theme.of(context).textTheme.titleSmall,
                       ),
-                      Text(
-                        '${creature!.abilityScores.wisdom} (${creature!.abilityScores.wisdomModifier >= 0 ? '+' : ''}${creature!.abilityScores.wisdomModifier})',
-                        style: Theme.of(context).textTheme.labelSmall,
+                      StatblockSmallText(
+                        data: '${creature!.abilityScores.wisdom} (${creature!.abilityScores.wisdomModifier >= 0 ? '+' : ''}${creature!.abilityScores.wisdomModifier})',
                       ),
                     ],
                   ),
@@ -189,9 +177,8 @@ class CreatureStatBlock extends StatelessWidget {
                         'CHA',
                         style: Theme.of(context).textTheme.titleSmall,
                       ),
-                      Text(
-                        '${creature!.abilityScores.charisma} (${creature!.abilityScores.charismaModifier >= 0 ? '+' : ''}${creature!.abilityScores.charismaModifier})',
-                        style: Theme.of(context).textTheme.labelSmall,
+                      StatblockSmallText(
+                        data: '${creature!.abilityScores.charisma} (${creature!.abilityScores.charismaModifier >= 0 ? '+' : ''}${creature!.abilityScores.charismaModifier})',
                       ),
                     ],
                   ),
@@ -208,34 +195,28 @@ class CreatureStatBlock extends StatelessWidget {
                         style: Theme.of(context).textTheme.titleSmall,
                       ),
                       if (creature!.savingThrows.strength != null)
-                        Text(
-                          'Str ${creature!.savingThrows.strength! >= 0 ? '+' : ''}${creature!.savingThrows.strength}',
-                          style: Theme.of(context).textTheme.labelSmall,
+                        StatblockSmallText(
+                          data: 'Str ${creature!.savingThrows.strength! >= 0 ? '+' : ''}${creature!.savingThrows.strength}',
                         ),
                       if (creature!.savingThrows.dexterity != null)
-                        Text(
-                          'Dex ${creature!.savingThrows.dexterity! >= 0 ? '+' : ''}${creature!.savingThrows.dexterity}, ',
-                          style: Theme.of(context).textTheme.labelSmall,
+                        StatblockSmallText(
+                          data: 'Dex ${creature!.savingThrows.dexterity! >= 0 ? '+' : ''}${creature!.savingThrows.dexterity}, ',
                         ),
                       if (creature!.savingThrows.constitution != null)
-                        Text(
-                          'Con ${creature!.savingThrows.constitution! >= 0 ? '+' : ''}${creature!.savingThrows.constitution}, ',
-                          style: Theme.of(context).textTheme.labelSmall,
+                        StatblockSmallText(
+                          data: 'Con ${creature!.savingThrows.constitution! >= 0 ? '+' : ''}${creature!.savingThrows.constitution}, ',
                         ),
                       if (creature!.savingThrows.intelligence != null)
-                        Text(
-                          'Int ${creature!.savingThrows.intelligence! >= 0 ? '+' : ''}${creature!.savingThrows.intelligence}, ',
-                          style: Theme.of(context).textTheme.labelSmall,
+                        StatblockSmallText(
+                          data: 'Int ${creature!.savingThrows.intelligence! >= 0 ? '+' : ''}${creature!.savingThrows.intelligence}, ',
                         ),
                       if (creature!.savingThrows.wisdom != null)
-                        Text(
-                          'Wis ${creature!.savingThrows.wisdom! >= 0 ? '+' : ''}${creature!.savingThrows.wisdom}, ',
-                          style: Theme.of(context).textTheme.labelSmall,
+                        StatblockSmallText(
+                          data: 'Wis ${creature!.savingThrows.wisdom! >= 0 ? '+' : ''}${creature!.savingThrows.wisdom}, ',
                         ),
                       if (creature!.savingThrows.charisma != null)
-                        Text(
-                          'Cha ${creature!.savingThrows.charisma! >= 0 ? '+' : ''}${creature!.savingThrows.charisma}, ',
-                          style: Theme.of(context).textTheme.labelSmall,
+                        StatblockSmallText(
+                          data: 'Cha ${creature!.savingThrows.charisma! >= 0 ? '+' : ''}${creature!.savingThrows.charisma}, ',
                         ),
                     ],
                   ),
@@ -245,8 +226,8 @@ class CreatureStatBlock extends StatelessWidget {
                         'Skills: ',
                         style: Theme.of(context).textTheme.titleSmall,
                       ),
-                      Text(
-                        [
+                      StatblockSmallText(
+                        data: [
                           if (creature!.skills.acrobatics != null)
                             'Acrobatics ${creature!.skills.acrobatics!}',
                           if (creature!.skills.animalHandling != null)
@@ -282,7 +263,6 @@ class CreatureStatBlock extends StatelessWidget {
                           if (creature!.skills.survival != null)
                             'Survival ${creature!.skills.survival!}',
                         ].join(', '),
-                        style: Theme.of(context).textTheme.labelSmall,
                       ),
                     ],
                   ),
@@ -293,9 +273,8 @@ class CreatureStatBlock extends StatelessWidget {
                         style: Theme.of(context).textTheme.titleSmall,
                       ),
                       if (creature!.senses != null)
-                        Text(
-                          creature!.senses!,
-                          style: Theme.of(context).textTheme.labelSmall,
+                        StatblockSmallText(
+                          data: creature!.senses!,
                         ),
                     ],
                   ),
@@ -306,9 +285,8 @@ class CreatureStatBlock extends StatelessWidget {
                         style: Theme.of(context).textTheme.titleSmall,
                       ),
                       if (creature!.languages != null)
-                        Text(
-                          creature!.languages!,
-                          style: Theme.of(context).textTheme.labelSmall,
+                        StatblockSmallText(
+                          data: creature!.languages!,
                         ),
                     ],
                   ),
@@ -318,9 +296,8 @@ class CreatureStatBlock extends StatelessWidget {
                         'Challenge: ',
                         style: Theme.of(context).textTheme.titleSmall,
                       ),
-                      Text(
-                        '${creature!.challengeRating}',
-                        style: Theme.of(context).textTheme.labelSmall,
+                      StatblockSmallText(
+                        data: '${creature!.challengeRating}',
                       ),
                     ],
                   ),
@@ -335,9 +312,8 @@ class CreatureStatBlock extends StatelessWidget {
                     trait.name,
                     style: Theme.of(context).textTheme.titleSmall,
                   ),
-                  Text(
-                    trait.description,
-                    style: Theme.of(context).textTheme.labelSmall,
+                  StatblockSmallText(
+                    data: trait.description,
                   ),
                   const SizedBox(height: AppSpacing.spacingMedium),
                 ],
@@ -359,17 +335,16 @@ class CreatureStatBlock extends StatelessWidget {
                         'Innate Spellcasting',
                         style: Theme.of(context).textTheme.titleSmall,
                       ),
-                      Text(
-                        creature!.spellCasting!.headerEntries,
-                        style: Theme.of(context).textTheme.labelSmall,
+                      StatblockSmallText(
+                        data: creature!.spellCasting!.headerEntries,
                       ),
                       ...creature!.spellCasting!.innateSpell!.entries.map(
                         (entry) => Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              '${innateSpellLevelNames[entry.key]}: ',
-                              style: Theme.of(context).textTheme.labelSmall,
+                            StatblockSmallText(
+                              data: '${innateSpellLevelNames[entry.key]}: ',
+    
                             ),
                             Expanded(
                               child: Text(
@@ -392,9 +367,8 @@ class CreatureStatBlock extends StatelessWidget {
                         'Spellcasting',
                         style: Theme.of(context).textTheme.titleSmall,
                       ),
-                      Text(
-                        creature!.spellCasting!.headerEntries,
-                        style: Theme.of(context).textTheme.labelSmall,
+                      StatblockSmallText(
+                        data: creature!.spellCasting!.headerEntries,
                       ),
                       const SizedBox(height: AppSpacing.spacingSmall),
                       ...creature!.spellCasting!.spells!.entries.map(
@@ -403,16 +377,14 @@ class CreatureStatBlock extends StatelessWidget {
                           // each entry goes on its on row, i.e. [0 : "spell1", "spell2"] is a row
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              // key is the spell level, reads from const. entry.key is spell level from map. checks if slots are 0, prints if they aren't and assumes cantrips if they are
+                            StatblockSmallText(
+                              data: // key is the spell level, reads from const. entry.key is spell level from map. checks if slots are 0, prints if they aren't and assumes cantrips if they are
                               '${spellLevelNames[entry.key] ?? "${entry.key}th level"}${entry.key == 0 ? ' (at will): ' : ' (${entry.value.slots} slots): '}',
-                              style: Theme.of(context).textTheme.labelSmall,
                             ),
-                            Text(
-                              entry.value.spells.join(
+                            StatblockSmallText(
+                              data: entry.value.spells.join(
                                 ', ',
                               ), // joins each string together with ', ' between them
-                              style: Theme.of(context).textTheme.labelSmall,
                             ),
                             //),
                             const SizedBox(height: AppSpacing.spacingMedium),
@@ -421,9 +393,8 @@ class CreatureStatBlock extends StatelessWidget {
                       ),
                       const SizedBox(height: AppSpacing.spacingSmall),
                       if (creature!.spellCasting!.footerEntries != null)
-                        Text(
-                          '${creature!.spellCasting!.footerEntries}',
-                          style: Theme.of(context).textTheme.labelSmall,
+                        StatblockSmallText(
+                          data: '${creature!.spellCasting!.footerEntries}',
                         ),
                     ],
                   ],
@@ -438,21 +409,18 @@ class CreatureStatBlock extends StatelessWidget {
                 ),
               ),
             if (creature!.regionalEffect != null) ...[
-              Text(
-                creature!.regionalEffect!.blurb,
-                style: Theme.of(context).textTheme.labelSmall,
+              StatblockSmallText(
+                data: creature!.regionalEffect!.blurb,
               ),
               SizedBox(height: AppSpacing.spacingSmall),
               ...creature!.regionalEffect!.bulletPoints.map(
-                (point) => Text(
-                  '• $point\n',
-                  style: Theme.of(context).textTheme.labelSmall,
+                (point) => StatblockSmallText(
+                  data: '• $point\n',
                 ),
               ),
               if (creature!.regionalEffect!.blurbEnd != null)
-                Text(
-                  creature!.regionalEffect!.blurbEnd!,
-                  style: Theme.of(context).textTheme.labelSmall,
+                StatblockSmallText(
+                  data: creature!.regionalEffect!.blurbEnd!,
                 ),
             ],
             /* NEXT CHILD GOES HERE */
@@ -491,7 +459,6 @@ class _StatblockEditorWidget extends State<StatblockEditorWidget> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             StatblockSection(
-              child: StatblockSection(
                 child: Expanded(
                   child: TextField(
                     style: Theme.of(context).textTheme.titleLarge,
@@ -502,7 +469,40 @@ class _StatblockEditorWidget extends State<StatblockEditorWidget> {
                     ),
                   ),
                 ),
-              ),
+            ),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    style: Theme.of(context).textTheme.titleSmall,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: "Size",
+                      labelStyle: Theme.of(context).textTheme.titleSmall,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: TextField(
+                    style: Theme.of(context).textTheme.titleSmall,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: "Type",
+                      labelStyle: Theme.of(context).textTheme.titleSmall,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: TextField(
+                    style: Theme.of(context).textTheme.titleSmall,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: "Alignment",
+                      labelStyle: Theme.of(context).textTheme.titleSmall,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -898,5 +898,16 @@ class StatblockSection extends StatelessWidget {
       ),
       child: child,
     );
+  }
+}
+
+class StatblockSmallText extends StatelessWidget {
+  const StatblockSmallText({super.key, required this.data});
+
+  final String data;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(data, style: Theme.of(context).textTheme.labelSmall);
   }
 }

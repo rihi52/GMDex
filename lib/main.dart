@@ -1,16 +1,9 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
-// import 'package:window_manager/window_manager.dart';
+import 'package:window_manager/window_manager.dart';
 import 'package:moonscribe/theme/apptheme.dart';
 import 'package:moonscribe/pages/home_page.dart';
-import 'package:drift/drift.dart';
 import 'package:moonscribe/database/database.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart' as p;
 
-import 'package:drift/native.dart'
-    if (dart.library.html) 'package:moonscribe/stubs/native_stub.dart';
 
 late AppDatabase _database;
 
@@ -113,8 +106,8 @@ void main() async {
 
   await _initializeDatabase();
 
-  // await windowManager.ensureInitialized();
-  // await windowManager.setMinimumSize(const Size(1360, 800));
+  await windowManager.ensureInitialized();
+  await windowManager.setMinimumSize(const Size(1360, 800));
 
   runApp(const MyApp());
 }
