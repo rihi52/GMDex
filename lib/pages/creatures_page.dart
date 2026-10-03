@@ -270,7 +270,7 @@ class _CreateCreatureWidgetState extends State<CreateCreatureWidget> {
 
     return Scaffold(
       appBar: AppBar(),
-      body: Column(children: [StatblockEditorWidget()]),
+      body: Column(children: [StatblockEditorForm()]),
     );
   }
 }

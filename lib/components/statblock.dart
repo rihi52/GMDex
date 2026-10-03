@@ -424,67 +424,190 @@ class CreatureStatBlock extends StatelessWidget {
 }
 
 /* Editable Statblock */
-class StatblockEditorWidget extends StatefulWidget {
-  const StatblockEditorWidget({super.key});
+class StatblockEditorForm extends StatefulWidget {
+  const StatblockEditorForm({super.key, this.creature, required this.onSubmit});
+
+  final Creature? creature;
+  final void Function(Creature) onSubmit;
 
   @override
-  State<StatblockEditorWidget> createState() => _StatblockEditorWidget();
+  State<StatblockEditorForm> createState() => _StatblockEditorForm();
 }
 
-class _StatblockEditorWidget extends State<StatblockEditorWidget> {
+class _StatblockEditorForm extends State<StatblockEditorForm> {
+  final _formKey = GlobalKey<FormState>();
+  late final Creature _draft;
+
   @override
   void initState() {
     super.initState();
+    _draft = widget.creature?.copy() ?? Creature();
+  }
+
+  void _submit() {
+    final form = _formKey.currentState!;
+    if (!form.validate()) return;
+    form.save();
+
+    // final creature = Creature();
+
+    // widget.onSubmit(creature);
   }
 
   @override
   Widget build(BuildContext context) {
+    final c = widget.creature;
+
     return SingleChildScrollView(
-      child: Container(
-        decoration: BoxDecoration(
-          color: AppColors.cardSelected,
-          borderRadius: BorderRadius.circular(AppSpacing.cornerRadiusMedium),
-        ),
-        padding: EdgeInsets.all(AppSpacing.spacingSmall),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            StatblockEditSection(
-              child: Expanded(
-                child: TextField(
-                  style: Theme.of(context).textTheme.titleLarge,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: "Name",
-                    labelStyle: Theme.of(context).textTheme.titleMedium,
+      child: Form(
+        child: Container(
+          decoration: BoxDecoration(
+            color: AppColors.cardSelected,
+            borderRadius: BorderRadius.circular(AppSpacing.cornerRadiusMedium),
+          ),
+          padding: EdgeInsets.all(AppSpacing.spacingSmall),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              StatblockSection(
+                child: Expanded(
+                  child: TextField(
+                    style: Theme.of(context).textTheme.titleLarge,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: "Name",
+                      labelStyle: Theme.of(context).textTheme.titleMedium,
+                    ),
                   ),
                 ),
               ),
-            ),
-            StatblockEditSection(
-              child: Row(
-                children: [
-                  Expanded(child: StatblockEditSmallText(labelText: "Size")),
-                  Expanded(child: StatblockEditSmallText(labelText: "Type")),
-                  Expanded(
-                    child: StatblockEditSmallText(labelText: "Alignment"),
-                  ),
-                ],
+              StatblockSection(
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: StatblockEditSmallText(
+                        labelText: "Size",
+                        startingValue: c?.size,
+                        onSaved: (v) => _draft.size = v,
+                      ),
+                    ),
+                    Expanded(
+                      child: StatblockEditSmallText(
+                        labelText: "Type",
+                        startingValue: c?.type,
+                      ),
+                    ),
+                    Expanded(
+                      child: StatblockEditSmallText(
+                        labelText: "Alignment",
+                        startingValue: c?.alignment,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            StatblockEditSection(
-              child: Row(
-                children: [
-                  Expanded(
-                    child: StatblockEditSmallNumber(labelText: "Armor Class"),
-                  ),
-                  Expanded(
-                    child: StatblockEditSmallText(labelText: "Armor Type"),
-                  ),
-                ],
+              StatblockSection(
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: StatblockEditSmallText(
+                            labelText: "Armor Class",
+                            startingValue: c?.armorClass.ac.toString(),
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
+                          ),
+                        ),
+                        Expanded(
+                          child: StatblockEditSmallText(
+                            labelText: "Armor Type",
+                            startingValue: c?.armorClass.type,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: StatblockEditSmallText(
+                            labelText: "Hit Points",
+                            startingValue: c?.hitPoints.toString(),
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
+                          ),
+                        ),
+                        Expanded(
+                          child: StatblockEditSmallText(
+                            labelText: "Formula (eg: 8d6 + 5)",
+                            startingValue: c?.hitPointFormula,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: StatblockEditSmallText(
+                            labelText: "Walk Speed (ft)",
+                            startingValue: c?.speed.walk.toString(),
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
+                          ),
+                        ),
+                        Expanded(
+                          child: StatblockEditSmallText(
+                            labelText: "Fly Speed (ft)",
+                            startingValue: c?.speed.fly.toString(),
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
+                          ),
+                        ),
+                        Expanded(
+                          child: StatblockEditSmallText(
+                            labelText: "Climb Speed (ft)",
+                            startingValue: c?.speed.climb.toString(),
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
+                          ),
+                        ),
+                        Expanded(
+                          child: StatblockEditSmallText(
+                            labelText: "Swim Speed (ft)",
+                            startingValue: c?.speed.swim.toString(),
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
+                          ),
+                        ),
+                        Expanded(
+                          child: StatblockEditSmallText(
+                            labelText: "Burrow Speed (ft)",
+                            startingValue: c?.speed.burrow.toString(),
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -594,6 +717,27 @@ class Creature {
   final CreatureRegionalEffect? regionalEffect;
 
   final int id;
+
+  Creature copy() => Creature(
+    name: name,
+    size: size,
+    type: type,
+    alignment: alignment,
+    armorClass: armorClass,
+    hitPoints: hitPoints,
+    hitPointFormula: hitPointFormula,
+    challengeRating: challengeRating,
+    speed: speed,
+    abilityScores: abilityScores,
+    skills: skills,
+    senses: senses,
+    languages: languages,
+    savingThrows: savingThrows,
+    actions: actions,
+    traits: traits,
+    regionalEffect: regionalEffect,
+    id: id,
+  );
 
   const Creature({
     required this.name,
@@ -881,26 +1025,6 @@ class StatblockSection extends StatelessWidget {
   }
 }
 
-class StatblockEditSection extends StatelessWidget {
-  const StatblockEditSection({super.key, required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.only(
-        bottom: AppSpacing.spacingMedium,
-        top: AppSpacing.spacingMedium,
-      ),
-      decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: AppColors.primary, width: 1)),
-      ),
-      child: child,
-    );
-  }
-}
-
 class StatblockSmallText extends StatelessWidget {
   const StatblockSmallText({super.key, required this.data});
 
@@ -913,40 +1037,44 @@ class StatblockSmallText extends StatelessWidget {
 }
 
 class StatblockEditSmallText extends StatelessWidget {
-  const StatblockEditSmallText({super.key, required this.labelText});
+  const StatblockEditSmallText({
+    super.key,
+    required this.labelText,
+    required this.onSaved,
+    required this.startingValue,
+    this.required = false,
+    this.keyboardType,
+    this.inputFormatters,
+  });
 
   final String labelText;
+  final void Function(String) onSaved;
+  final String? startingValue;
+  final bool required;
+  final TextInputType? keyboardType;
+  final List<TextInputFormatter>? inputFormatters;
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
-      style: Theme.of(context).textTheme.labelSmall,
-      decoration: InputDecoration(
-        border: OutlineInputBorder(),
-        labelText: labelText,
-        labelStyle: Theme.of(context).textTheme.titleSmall,
+    return Padding(
+      padding: const EdgeInsets.only(
+        bottom: AppSpacing.spacingSmall,
+        top: AppSpacing.spacingSmall,
       ),
-    );
-  }
-}
-
-class StatblockEditSmallNumber extends StatelessWidget {
-  const StatblockEditSmallNumber({super.key, required this.labelText});
-
-  final String labelText;
-
-  @override
-  Widget build(BuildContext context) {
-    return TextField(
-      keyboardType: TextInputType.number,
-      inputFormatters: <TextInputFormatter>[
-        FilteringTextInputFormatter.digitsOnly,
-      ],
-      style: Theme.of(context).textTheme.labelSmall,
-      decoration: InputDecoration(
-        border: OutlineInputBorder(),
-        labelText: labelText,
-        labelStyle: Theme.of(context).textTheme.titleSmall,
+      child: TextFormField(
+        initialValue: startingValue,
+        keyboardType: keyboardType,
+        inputFormatters: inputFormatters,
+        style: Theme.of(context).textTheme.labelSmall,
+        decoration: InputDecoration(
+          border: OutlineInputBorder(),
+          labelText: labelText,
+          labelStyle: Theme.of(context).textTheme.titleSmall,
+        ),
+        validator: (v) => required && (v == null || v.trim().isEmpty)
+            ? '$labelText is required'
+            : null,
+        onSaved: (v) => onSaved((v ?? '').trim()),
       ),
     );
   }
