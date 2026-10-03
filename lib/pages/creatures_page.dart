@@ -267,10 +267,12 @@ class _CreateCreatureWidgetState extends State<CreateCreatureWidget> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(),
-      body: Column(children: [StatblockEditorWidget()]),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(children: [Expanded(child: StatblockEditorForm())]),
+      ),
     );
   }
 }

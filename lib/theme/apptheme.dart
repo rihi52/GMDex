@@ -76,8 +76,9 @@ class AppTheme {
           color: AppColors.primary,
         ),
         headlineSmall: GoogleFonts.modernAntiqua(
-          fontSize: 24,
+          fontSize: 16,
           fontWeight: FontWeight.bold,
+          fontStyle: FontStyle.italic,
           color: AppColors.primary,
         ),
         bodyMedium: GoogleFonts.metamorphous(
