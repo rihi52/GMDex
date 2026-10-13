@@ -520,12 +520,15 @@ class _StatblockEditorForm extends State<StatblockEditorForm> {
                             inputFormatters: [
                               FilteringTextInputFormatter.digitsOnly,
                             ],
+                            onSaved: (v) =>
+                                _draft.armorClass!.ac = int.tryParse(v) ?? 0,
                           ),
                         ),
                         Expanded(
                           child: StatblockEditSmallText(
                             labelText: "Armor Type",
                             startingValue: c?.armorClass.type,
+                            onSaved: (v) => _draft.armorClass!.type = v,
                           ),
                         ),
                       ],
@@ -540,12 +543,15 @@ class _StatblockEditorForm extends State<StatblockEditorForm> {
                             inputFormatters: [
                               FilteringTextInputFormatter.digitsOnly,
                             ],
+                            onSaved: (v) =>
+                                _draft.hitPoints = int.tryParse(v) ?? 0,
                           ),
                         ),
                         Expanded(
                           child: StatblockEditSmallText(
                             labelText: "Formula (eg: 8d6 + 5)",
                             startingValue: c?.hitPointFormula,
+                            onSaved: (v) => _draft.hitPointFormula = v,
                           ),
                         ),
                       ],
@@ -560,6 +566,8 @@ class _StatblockEditorForm extends State<StatblockEditorForm> {
                             inputFormatters: [
                               FilteringTextInputFormatter.digitsOnly,
                             ],
+                            onSaved: (v) =>
+                                _draft.speed!.walk = int.tryParse(v) ?? 0,
                           ),
                         ),
                         Expanded(
@@ -570,6 +578,8 @@ class _StatblockEditorForm extends State<StatblockEditorForm> {
                             inputFormatters: [
                               FilteringTextInputFormatter.digitsOnly,
                             ],
+                            onSaved: (v) =>
+                                _draft.speed!.fly = int.tryParse(v) ?? 0,
                           ),
                         ),
                         Expanded(
@@ -580,6 +590,8 @@ class _StatblockEditorForm extends State<StatblockEditorForm> {
                             inputFormatters: [
                               FilteringTextInputFormatter.digitsOnly,
                             ],
+                            onSaved: (v) =>
+                                _draft.speed!.climb = int.tryParse(v) ?? 0,
                           ),
                         ),
                         Expanded(
@@ -590,6 +602,8 @@ class _StatblockEditorForm extends State<StatblockEditorForm> {
                             inputFormatters: [
                               FilteringTextInputFormatter.digitsOnly,
                             ],
+                            onSaved: (v) =>
+                                _draft.speed!.swim = int.tryParse(v) ?? 0,
                           ),
                         ),
                         Expanded(
@@ -600,6 +614,8 @@ class _StatblockEditorForm extends State<StatblockEditorForm> {
                             inputFormatters: [
                               FilteringTextInputFormatter.digitsOnly,
                             ],
+                            onSaved: (v) =>
+                                _draft.speed!.burrow = int.tryParse(v) ?? 0,
                           ),
                         ),
                       ],
@@ -1063,7 +1079,7 @@ class StatblockEditSmallText extends StatelessWidget {
 }
 
 /// ****************
-/// Draft Classes 
+/// Draft Classes
 /// ***************
 
 class CreatureDraft {
@@ -1280,18 +1296,18 @@ class CreatureActionDraft {
   CreatureActionDraft({this.name = '', this.description = '', this.type});
 }
 
-extension ActionTypeDisplayDraft on ActionType {
-  String get displayName => switch (this) {
-    ActionType.action => 'Actions',
-    ActionType.blurb => 'Blurb',
-    ActionType.legendary => 'Legendary Actions',
-    ActionType.bonusAction => 'Bonus Actions',
-    ActionType.reaction => 'Reactions',
-    ActionType.lair => 'Lair Actions',
-    ActionType.special => 'Special Abilities',
-    ActionType.villainAction => 'Villain Actions',
-  };
-}
+// extension ActionTypeDisplayDraft on ActionType {
+//   String get displayName => switch (this) {
+//     ActionType.action => 'Actions',
+//     ActionType.blurb => 'Blurb',
+//     ActionType.legendary => 'Legendary Actions',
+//     ActionType.bonusAction => 'Bonus Actions',
+//     ActionType.reaction => 'Reactions',
+//     ActionType.lair => 'Lair Actions',
+//     ActionType.special => 'Special Abilities',
+//     ActionType.villainAction => 'Villain Actions',
+//   };
+// }
 
 class CreatureTraitDraft {
   String name;
