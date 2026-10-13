@@ -436,12 +436,11 @@ class StatblockEditorForm extends StatefulWidget {
 
 class _StatblockEditorForm extends State<StatblockEditorForm> {
   final _formKey = GlobalKey<FormState>();
-  late final Creature _draft;
+  late final CreatureDraft _draft;
 
   @override
   void initState() {
     super.initState();
-    _draft = widget.creature?.copy() ?? Creature();
   }
 
   void _submit() {
@@ -495,12 +494,14 @@ class _StatblockEditorForm extends State<StatblockEditorForm> {
                       child: StatblockEditSmallText(
                         labelText: "Type",
                         startingValue: c?.type,
+                        onSaved: (v) => _draft.type = v,
                       ),
                     ),
                     Expanded(
                       child: StatblockEditSmallText(
                         labelText: "Alignment",
                         startingValue: c?.alignment,
+                        onSaved: (v) => _draft.alignment = v,
                       ),
                     ),
                   ],
@@ -1061,7 +1062,9 @@ class StatblockEditSmallText extends StatelessWidget {
   }
 }
 
-/* Draft Classes */
+/// ****************
+/// Draft Classes 
+/// ***************
 
 class CreatureDraft {
   String name;
@@ -1069,7 +1072,7 @@ class CreatureDraft {
   String type;
   String alignment;
   CreatureArmorClassDraft? armorClass;
-  int? hitPoints;
+  int hitPoints;
   String hitPointFormula;
   CreatureCRDraft? challengeRating;
   CreatureSpeedDraft? speed;
@@ -1091,7 +1094,7 @@ class CreatureDraft {
     this.type = '',
     this.alignment = '',
     this.armorClass,
-    this.hitPoints,
+    this.hitPoints = 1,
     this.hitPointFormula = '',
     this.challengeRating,
     this.speed,
@@ -1110,9 +1113,9 @@ class CreatureDraft {
 
 class SpellLevelDraft {
   int? slots;
-  List<String> spells;
+  List<String>? spells;
 
-  SpellLevelDraft({this.slots, required this.spells});
+  SpellLevelDraft({this.slots, this.spells});
 }
 
 class CreatureSpellcastingDraft {
@@ -1125,10 +1128,10 @@ class CreatureSpellcastingDraft {
   innateSpell; // keyed by times per day, value is spell
 
   CreatureSpellcastingDraft({
-    required this.name,
-    required this.headerEntries,
+    this.name = '',
+    this.headerEntries = '',
     this.footerEntries,
-    required this.ability,
+    this.ability = '',
     this.spells,
     this.innateSpell,
   });
@@ -1138,7 +1141,7 @@ class CreatureArmorClassDraft {
   int ac;
   String type;
 
-  CreatureArmorClassDraft({required this.ac, required this.type});
+  CreatureArmorClassDraft({this.ac = 10, this.type = ''});
 }
 
 class CreatureCRDraft {
@@ -1147,7 +1150,7 @@ class CreatureCRDraft {
   String? coven;
   int? _xpOverride;
 
-  CreatureCRDraft({required this.cr, this.lair, this.coven, this._xpOverride});
+  CreatureCRDraft({this.cr = '', this.lair, this.coven, this._xpOverride});
 
   String get xp => _xpOverride?.toString() ?? crToXp[cr] ?? '0';
   String? get lairXp => lair != null ? crToXp[lair] : null;
@@ -1172,11 +1175,11 @@ class CreatureSpeedDraft {
   String? condition;
 
   CreatureSpeedDraft({
-    required this.walk,
-    required this.fly,
-    required this.climb,
-    required this.swim,
-    required this.burrow,
+    this.walk,
+    this.fly,
+    this.climb,
+    this.swim,
+    this.burrow,
     this.condition,
   });
 }
@@ -1196,18 +1199,18 @@ class CreatureAbilityScoresDraft {
   int charismaModifier;
 
   CreatureAbilityScoresDraft({
-    required this.strength,
-    required this.strengthModifier,
-    required this.dexterity,
-    required this.dexterityModifier,
-    required this.constitution,
-    required this.constitutionModifier,
-    required this.intelligence,
-    required this.intelligenceModifier,
-    required this.wisdom,
-    required this.wisdomModifier,
-    required this.charisma,
-    required this.charismaModifier,
+    this.strength = 10,
+    this.strengthModifier = 0,
+    this.dexterity = 10,
+    this.dexterityModifier = 0,
+    this.constitution = 10,
+    this.constitutionModifier = 0,
+    this.intelligence = 10,
+    this.intelligenceModifier = 0,
+    this.wisdom = 10,
+    this.wisdomModifier = 0,
+    this.charisma = 10,
+    this.charismaModifier = 0,
   });
 }
 
@@ -1220,12 +1223,12 @@ class CreatureSavingThrowsDraft {
   int? charisma;
 
   CreatureSavingThrowsDraft({
-    required this.strength,
-    required this.dexterity,
-    required this.constitution,
-    required this.intelligence,
-    required this.wisdom,
-    required this.charisma,
+    this.strength,
+    this.dexterity,
+    this.constitution,
+    this.intelligence,
+    this.wisdom,
+    this.charisma,
   });
 }
 
@@ -1249,36 +1252,32 @@ class CreatureSkillsDraft {
   String? performance;
 
   CreatureSkillsDraft({
-    required this.athletics,
-    required this.acrobatics,
-    required this.sleightOfHand,
-    required this.stealth,
-    required this.arcana,
-    required this.history,
-    required this.investigation,
-    required this.nature,
-    required this.religion,
-    required this.animalHandling,
-    required this.insight,
-    required this.medicine,
-    required this.perception,
-    required this.survival,
-    required this.deception,
-    required this.intimidation,
-    required this.performance,
+    this.athletics,
+    this.acrobatics,
+    this.sleightOfHand,
+    this.stealth,
+    this.arcana,
+    this.history,
+    this.investigation,
+    this.nature,
+    this.religion,
+    this.animalHandling,
+    this.insight,
+    this.medicine,
+    this.perception,
+    this.survival,
+    this.deception,
+    this.intimidation,
+    this.performance,
   });
 }
 
 class CreatureActionDraft {
   String name;
   String description;
-  ActionType type;
+  ActionType? type;
 
-  CreatureActionDraft({
-    required this.name,
-    required this.description,
-    required this.type,
-  });
+  CreatureActionDraft({this.name = '', this.description = '', this.type});
 }
 
 extension ActionTypeDisplayDraft on ActionType {
@@ -1298,17 +1297,17 @@ class CreatureTraitDraft {
   String name;
   String description;
 
-  CreatureTraitDraft({required this.name, required this.description});
+  CreatureTraitDraft({this.name = '', this.description = ''});
 }
 
 class CreatureRegionalEffectDraft {
   String blurb;
-  List<String> bulletPoints;
+  List<String>? bulletPoints;
   String? blurbEnd;
 
   CreatureRegionalEffectDraft({
-    required this.blurb,
-    required this.bulletPoints,
+    this.blurb = '',
+    this.bulletPoints,
     this.blurbEnd,
   });
 }
