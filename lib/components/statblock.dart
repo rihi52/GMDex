@@ -623,6 +623,26 @@ class _StatblockEditorForm extends State<StatblockEditorForm> {
                   ],
                 ),
               ),
+              StatblockSection(
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: StatblockEditSmallText(
+                        labelText: "Str Score",
+                        startingValue: c?.abilityScores.strength.toString(),
+                        onSaved: (v) => _draft.abilityScores!.strength =
+                            int.tryParse(v) ?? 0,
+                      ),
+                    ),
+                    Expanded(
+                      child: Checkbox(
+                        value: false,
+                        onChanged: (v) => _draft.savingThrows.strength,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
         ),
@@ -1232,11 +1252,17 @@ class CreatureAbilityScoresDraft {
 
 class CreatureSavingThrowsDraft {
   int? strength;
+  bool isStrPorf = false;
   int? dexterity;
+  bool isDexPorf = false;
   int? constitution;
+  bool isConPorf = false;
   int? intelligence;
+  bool isStrPorf = false;
   int? wisdom;
+  bool isStrPorf = false;
   int? charisma;
+  bool isStrPorf = false;
 
   CreatureSavingThrowsDraft({
     this.strength,
