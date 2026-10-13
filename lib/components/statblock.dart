@@ -425,10 +425,10 @@ class CreatureStatBlock extends StatelessWidget {
 
 /* Editable Statblock */
 class StatblockEditorForm extends StatefulWidget {
-  const StatblockEditorForm({super.key, this.creature, required this.onSubmit});
+  const StatblockEditorForm({super.key, this.creature, this.onSubmit});
 
   final Creature? creature;
-  final void Function(Creature) onSubmit;
+  final void Function(Creature)? onSubmit;
 
   @override
   State<StatblockEditorForm> createState() => _StatblockEditorForm();
@@ -437,6 +437,12 @@ class StatblockEditorForm extends StatefulWidget {
 class _StatblockEditorForm extends State<StatblockEditorForm> {
   final _formKey = GlobalKey<FormState>();
   late final CreatureDraft _draft;
+  bool isStrChecked = false;
+  bool isDexChecked = false;
+  bool isConChecked = false;
+  bool isIntChecked = false;
+  bool isWisChecked = false;
+  bool isChaChecked = false;
 
   @override
   void initState() {
@@ -636,8 +642,36 @@ class _StatblockEditorForm extends State<StatblockEditorForm> {
                     ),
                     Expanded(
                       child: Checkbox(
-                        value: false,
-                        onChanged: (v) => _draft.savingThrows.strength,
+                        value: isStrChecked,
+                        onChanged: (bool? value) {
+                          setState(() {
+                            isStrChecked = value!;
+                          });
+                          _draft.savingThrows!.isStrProf = value!;
+                          // print(_draft.savingThrows!.isStrProf);
+                          // TODO: the above doesn't seem correct
+                        }, // _draft.savingThrows!.isStrProf = v!,
+                      ),
+                    ),
+                    Expanded(
+                      child: StatblockEditSmallText(
+                        labelText: "Dex Score",
+                        startingValue: c?.abilityScores.dexterity.toString(),
+                        onSaved: (v) => _draft.abilityScores!.dexterity =
+                            int.tryParse(v) ?? 0,
+                      ),
+                    ),
+                    Expanded(
+                      child: Checkbox(
+                        value: isDexChecked,
+                        onChanged: (bool? value) {
+                          setState(() {
+                            isDexChecked = value!;
+                          });
+                          _draft.savingThrows!.isDexProf = value!;
+                          // print(_draft.savingThrows!.isStrProf);
+                          // TODO: the above doesn't seem correct
+                        }, // _draft.savingThrows!.isStrProf = v!,
                       ),
                     ),
                   ],
@@ -1252,17 +1286,17 @@ class CreatureAbilityScoresDraft {
 
 class CreatureSavingThrowsDraft {
   int? strength;
-  bool isStrPorf = false;
+  bool isStrProf = false;
   int? dexterity;
-  bool isDexPorf = false;
+  bool isDexProf = false;
   int? constitution;
-  bool isConPorf = false;
+  bool isConProf = false;
   int? intelligence;
-  bool isStrPorf = false;
+  bool isIntProf = false;
   int? wisdom;
-  bool isStrPorf = false;
+  bool isWisProf = false;
   int? charisma;
-  bool isStrPorf = false;
+  bool isChaProf = false;
 
   CreatureSavingThrowsDraft({
     this.strength,
@@ -1271,6 +1305,13 @@ class CreatureSavingThrowsDraft {
     this.intelligence,
     this.wisdom,
     this.charisma,
+
+    required this.isStrProf,
+    required this.isDexProf,
+    required this.isConProf,
+    required this.isIntProf,
+    required this.isWisProf,
+    required this.isChaProf,
   });
 }
 
