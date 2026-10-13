@@ -718,27 +718,6 @@ class Creature {
 
   final int id;
 
-  Creature copy() => Creature(
-    name: name,
-    size: size,
-    type: type,
-    alignment: alignment,
-    armorClass: armorClass,
-    hitPoints: hitPoints,
-    hitPointFormula: hitPointFormula,
-    challengeRating: challengeRating,
-    speed: speed,
-    abilityScores: abilityScores,
-    skills: skills,
-    senses: senses,
-    languages: languages,
-    savingThrows: savingThrows,
-    actions: actions,
-    traits: traits,
-    regionalEffect: regionalEffect,
-    id: id,
-  );
-
   const Creature({
     required this.name,
     required this.size,
@@ -818,6 +797,8 @@ class CreatureSpellcasting {
 class CreatureArmorClass {
   final int ac;
   final String type;
+
+  CreatureArmorClass copy() => CreatureArmorClass(ac: ac, type: type);
 
   const CreatureArmorClass({required this.ac, required this.type});
 }
@@ -1078,4 +1059,256 @@ class StatblockEditSmallText extends StatelessWidget {
       ),
     );
   }
+}
+
+/* Draft Classes */
+
+class CreatureDraft {
+  String name;
+  String size;
+  String type;
+  String alignment;
+  CreatureArmorClassDraft? armorClass;
+  int? hitPoints;
+  String hitPointFormula;
+  CreatureCRDraft? challengeRating;
+  CreatureSpeedDraft? speed;
+  CreatureAbilityScoresDraft? abilityScores;
+  CreatureSkillsDraft? skills;
+  String senses;
+  String languages;
+  CreatureSavingThrowsDraft? savingThrows;
+  CreatureSpellcastingDraft? spellCasting;
+  List<CreatureActionDraft>? actions;
+  List<CreatureTraitDraft>? traits;
+  CreatureRegionalEffectDraft? regionalEffect;
+
+  int? id;
+
+  CreatureDraft({
+    this.name = '',
+    this.size = '',
+    this.type = '',
+    this.alignment = '',
+    this.armorClass,
+    this.hitPoints,
+    this.hitPointFormula = '',
+    this.challengeRating,
+    this.speed,
+    this.abilityScores,
+    this.skills,
+    this.senses = '',
+    this.languages = '',
+    this.savingThrows,
+    this.spellCasting,
+    this.actions,
+    this.traits,
+    this.regionalEffect,
+    this.id,
+  });
+}
+
+class SpellLevelDraft {
+  int? slots;
+  List<String> spells;
+
+  SpellLevelDraft({this.slots, required this.spells});
+}
+
+class CreatureSpellcastingDraft {
+  String name;
+  String headerEntries;
+  String? footerEntries;
+  String ability;
+  Map<int, SpellLevelDraft>? spells; // keyed by level 0-9
+  Map<String, List<String>>?
+  innateSpell; // keyed by times per day, value is spell
+
+  CreatureSpellcastingDraft({
+    required this.name,
+    required this.headerEntries,
+    this.footerEntries,
+    required this.ability,
+    this.spells,
+    this.innateSpell,
+  });
+}
+
+class CreatureArmorClassDraft {
+  int ac;
+  String type;
+
+  CreatureArmorClassDraft({required this.ac, required this.type});
+}
+
+class CreatureCRDraft {
+  String cr;
+  String? lair;
+  String? coven;
+  int? _xpOverride;
+
+  CreatureCRDraft({required this.cr, this.lair, this.coven, this._xpOverride});
+
+  String get xp => _xpOverride?.toString() ?? crToXp[cr] ?? '0';
+  String? get lairXp => lair != null ? crToXp[lair] : null;
+  String? get covenXp => coven != null ? crToXp[coven] : null;
+
+  @override
+  String toString() {
+    return [
+      '$cr ($xp XP)',
+      if (lair != null) 'lair: $lair ($lairXp XP)',
+      if (coven != null) 'coven: $coven ($covenXp XP)',
+    ].join(', ');
+  }
+}
+
+class CreatureSpeedDraft {
+  int? walk;
+  int? fly;
+  int? climb;
+  int? swim;
+  int? burrow;
+  String? condition;
+
+  CreatureSpeedDraft({
+    required this.walk,
+    required this.fly,
+    required this.climb,
+    required this.swim,
+    required this.burrow,
+    this.condition,
+  });
+}
+
+class CreatureAbilityScoresDraft {
+  int strength;
+  int strengthModifier;
+  int dexterity;
+  int dexterityModifier;
+  int constitution;
+  int constitutionModifier;
+  int intelligence;
+  int intelligenceModifier;
+  int wisdom;
+  int wisdomModifier;
+  int charisma;
+  int charismaModifier;
+
+  CreatureAbilityScoresDraft({
+    required this.strength,
+    required this.strengthModifier,
+    required this.dexterity,
+    required this.dexterityModifier,
+    required this.constitution,
+    required this.constitutionModifier,
+    required this.intelligence,
+    required this.intelligenceModifier,
+    required this.wisdom,
+    required this.wisdomModifier,
+    required this.charisma,
+    required this.charismaModifier,
+  });
+}
+
+class CreatureSavingThrowsDraft {
+  int? strength;
+  int? dexterity;
+  int? constitution;
+  int? intelligence;
+  int? wisdom;
+  int? charisma;
+
+  CreatureSavingThrowsDraft({
+    required this.strength,
+    required this.dexterity,
+    required this.constitution,
+    required this.intelligence,
+    required this.wisdom,
+    required this.charisma,
+  });
+}
+
+class CreatureSkillsDraft {
+  String? athletics;
+  String? acrobatics;
+  String? sleightOfHand;
+  String? stealth;
+  String? arcana;
+  String? history;
+  String? investigation;
+  String? nature;
+  String? religion;
+  String? animalHandling;
+  String? insight;
+  String? medicine;
+  String? perception;
+  String? survival;
+  String? deception;
+  String? intimidation;
+  String? performance;
+
+  CreatureSkillsDraft({
+    required this.athletics,
+    required this.acrobatics,
+    required this.sleightOfHand,
+    required this.stealth,
+    required this.arcana,
+    required this.history,
+    required this.investigation,
+    required this.nature,
+    required this.religion,
+    required this.animalHandling,
+    required this.insight,
+    required this.medicine,
+    required this.perception,
+    required this.survival,
+    required this.deception,
+    required this.intimidation,
+    required this.performance,
+  });
+}
+
+class CreatureActionDraft {
+  String name;
+  String description;
+  ActionType type;
+
+  CreatureActionDraft({
+    required this.name,
+    required this.description,
+    required this.type,
+  });
+}
+
+extension ActionTypeDisplayDraft on ActionType {
+  String get displayName => switch (this) {
+    ActionType.action => 'Actions',
+    ActionType.blurb => 'Blurb',
+    ActionType.legendary => 'Legendary Actions',
+    ActionType.bonusAction => 'Bonus Actions',
+    ActionType.reaction => 'Reactions',
+    ActionType.lair => 'Lair Actions',
+    ActionType.special => 'Special Abilities',
+    ActionType.villainAction => 'Villain Actions',
+  };
+}
+
+class CreatureTraitDraft {
+  String name;
+  String description;
+
+  CreatureTraitDraft({required this.name, required this.description});
+}
+
+class CreatureRegionalEffectDraft {
+  String blurb;
+  List<String> bulletPoints;
+  String? blurbEnd;
+
+  CreatureRegionalEffectDraft({
+    required this.blurb,
+    required this.bulletPoints,
+    this.blurbEnd,
+  });
 }
