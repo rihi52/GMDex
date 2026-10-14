@@ -455,6 +455,7 @@ class _StatblockEditorForm extends State<StatblockEditorForm> {
     form.save();
 
     // final creature = Creature();
+    _draft.savingThrows!.isDexProf = isDexChecked;
 
     // widget.onSubmit(creature);
   }
@@ -634,44 +635,134 @@ class _StatblockEditorForm extends State<StatblockEditorForm> {
                   children: [
                     Expanded(
                       child: StatblockEditSmallText(
-                        labelText: "Str Score",
+                        labelText: "Str",
                         startingValue: c?.abilityScores.strength.toString(),
+                        keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
                         onSaved: (v) => _draft.abilityScores!.strength =
                             int.tryParse(v) ?? 0,
                       ),
                     ),
                     Expanded(
-                      child: Checkbox(
-                        value: isStrChecked,
-                        onChanged: (bool? value) {
+                      child: StatblockCheckbox(
+                        initialValue: isStrChecked,
+                        onChanged: (value) {
                           setState(() {
-                            isStrChecked = value!;
+                            isStrChecked = value;
                           });
-                          _draft.savingThrows!.isStrProf = value!;
-                          // print(_draft.savingThrows!.isStrProf);
-                          // TODO: the above doesn't seem correct
-                        }, // _draft.savingThrows!.isStrProf = v!,
+                        },
                       ),
                     ),
                     Expanded(
                       child: StatblockEditSmallText(
-                        labelText: "Dex Score",
+                        labelText: "Dex",
                         startingValue: c?.abilityScores.dexterity.toString(),
+                        keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
                         onSaved: (v) => _draft.abilityScores!.dexterity =
                             int.tryParse(v) ?? 0,
                       ),
                     ),
                     Expanded(
-                      child: Checkbox(
-                        value: isDexChecked,
-                        onChanged: (bool? value) {
+                      child: StatblockCheckbox(
+                        initialValue: isDexChecked,
+                        onChanged: (value) {
                           setState(() {
-                            isDexChecked = value!;
+                            isDexChecked = value;
                           });
-                          _draft.savingThrows!.isDexProf = value!;
-                          // print(_draft.savingThrows!.isStrProf);
-                          // TODO: the above doesn't seem correct
-                        }, // _draft.savingThrows!.isStrProf = v!,
+                        },
+                      ),
+                    ),
+                    Expanded(
+                      child: StatblockEditSmallText(
+                        labelText: "Con",
+                        startingValue: c?.abilityScores.constitution.toString(),
+                        keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
+                        onSaved: (v) => _draft.abilityScores!.constitution =
+                            int.tryParse(v) ?? 0,
+                      ),
+                    ),
+                    Expanded(
+                      child: StatblockCheckbox(
+                        initialValue: isConChecked,
+                        onChanged: (value) {
+                          setState(() {
+                            isConChecked = value;
+                          });
+                        },
+                      ),
+                    ),
+                    Expanded(
+                      child: StatblockEditSmallText(
+                        labelText: "Int",
+                        startingValue: c?.abilityScores.intelligence.toString(),
+                        keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
+                        onSaved: (v) => _draft.abilityScores!.intelligence =
+                            int.tryParse(v) ?? 0,
+                      ),
+                    ),
+                    Expanded(
+                      child: StatblockCheckbox(
+                        initialValue: isIntChecked,
+                        onChanged: (value) {
+                          setState(() {
+                            isIntChecked = value;
+                          });
+                        },
+                      ),
+                    ),
+                    Expanded(
+                      child: StatblockEditSmallText(
+                        labelText: "Wis",
+                        startingValue: c?.abilityScores.wisdom.toString(),
+                        keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
+                        onSaved: (v) => _draft.abilityScores!.wisdom =
+                            int.tryParse(v) ?? 0,
+                      ),
+                    ),
+                    Expanded(
+                      child: StatblockCheckbox(
+                        initialValue: isWisChecked,
+                        onChanged: (value) {
+                          setState(() {
+                            isWisChecked = value;
+                          });
+                        },
+                      ),
+                    ),
+                    Expanded(
+                      child: StatblockEditSmallText(
+                        labelText: "Cha",
+                        startingValue: c?.abilityScores.charisma.toString(),
+                        keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
+                        onSaved: (v) => _draft.abilityScores!.charisma =
+                            int.tryParse(v) ?? 0,
+                      ),
+                    ),
+                    Expanded(
+                      child: StatblockCheckbox(
+                        initialValue: isChaChecked,
+                        onChanged: (value) {
+                          setState(() {
+                            isChaChecked = value;
+                          });
+                        },
                       ),
                     ),
                   ],
@@ -1057,6 +1148,10 @@ class CreatureRegionalEffect {
   });
 }
 
+/// ****************
+/// Statblock Components
+/// ***************
+
 class StatblockSection extends StatelessWidget {
   const StatblockSection({super.key, required this.child});
 
@@ -1123,11 +1218,54 @@ class StatblockEditSmallText extends StatelessWidget {
           labelText: labelText,
           labelStyle: Theme.of(context).textTheme.titleSmall,
         ),
+        
         validator: (v) => required && (v == null || v.trim().isEmpty)
             ? '$labelText is required'
             : null,
         onSaved: (v) => onSaved((v ?? '').trim()),
       ),
+    );
+  }
+}
+
+class StatblockCheckbox extends StatefulWidget {
+  const StatblockCheckbox({
+    super.key,
+    required this.initialValue,
+    required this.onChanged,
+  });
+
+  final bool initialValue;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  State<StatblockCheckbox> createState() => _StatblockCheckboxState();
+}
+
+class _StatblockCheckboxState extends State<StatblockCheckbox> {
+  late bool _checked;
+
+  @override
+  void initState() {
+    super.initState();
+    _checked = widget.initialValue;
+  }
+
+  bool get checked => _checked;
+
+  @override
+  Widget build(BuildContext context) {
+    return Checkbox(
+      activeColor: AppColors.primary,
+      checkColor: Colors.white,
+      value: _checked,
+      onChanged: (bool? value) {
+        if (value == null) return;
+        setState(() {
+          _checked = value;
+        });
+        widget.onChanged(_checked);
+      },
     );
   }
 }
