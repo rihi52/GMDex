@@ -876,6 +876,104 @@ class _StatblockEditorForm extends State<StatblockEditorForm> {
                               isAthletics = value;
                             }),
                           ),
+                          StatblockCheckboxRow(
+                            label: 'Deception',
+                            initalValue: isDeception,
+                            onChanged: (value) => setState(() {
+                              isDeception = value;
+                            }),
+                          ),
+                          StatblockCheckboxRow(
+                            label: 'History',
+                            initalValue: isHistory,
+                            onChanged: (value) => setState(() {
+                              isHistory = value;
+                            }),
+                          ),
+                          StatblockCheckboxRow(
+                            label: 'Insight',
+                            initalValue: isInsight,
+                            onChanged: (value) => setState(() {
+                              isInsight = value;
+                            }),
+                          ),
+                          StatblockCheckboxRow(
+                            label: 'Intimidation',
+                            initalValue: isIntimidation,
+                            onChanged: (value) => setState(() {
+                              isIntimidation = value;
+                            }),
+                          ),
+                          StatblockCheckboxRow(
+                            label: 'Investigation',
+                            initalValue: isInvestigation,
+                            onChanged: (value) => setState(() {
+                              isInvestigation = value;
+                            }),
+                          ),
+                          StatblockCheckboxRow(
+                            label: 'Medicine',
+                            initalValue: isMedicine,
+                            onChanged: (value) => setState(() {
+                              isMedicine = value;
+                            }),
+                          ),
+                          StatblockCheckboxRow(
+                            label: 'Nature',
+                            initalValue: isNature,
+                            onChanged: (value) => setState(() {
+                              isNature = value;
+                            }),
+                          ),
+                          StatblockCheckboxRow(
+                            label: 'Perception',
+                            initalValue: isPerception,
+                            onChanged: (value) => setState(() {
+                              isPerception = value;
+                            }),
+                          ),
+                          StatblockCheckboxRow(
+                            label: 'Performance',
+                            initalValue: isPerformance,
+                            onChanged: (value) => setState(() {
+                              isPerformance = value;
+                            }),
+                          ),
+                          StatblockCheckboxRow(
+                            label: 'Persuasion',
+                            initalValue: isPersuasion,
+                            onChanged: (value) => setState(() {
+                              isPersuasion = value;
+                            }),
+                          ),
+                          StatblockCheckboxRow(
+                            label: 'Religion',
+                            initalValue: isReligion,
+                            onChanged: (value) => setState(() {
+                              isReligion = value;
+                            }),
+                          ),
+                          StatblockCheckboxRow(
+                            label: 'Sleight of Hand',
+                            initalValue: isSleightHand,
+                            onChanged: (value) => setState(() {
+                              isSleightHand = value;
+                            }),
+                          ),
+                          StatblockCheckboxRow(
+                            label: 'Stealth',
+                            initalValue: isStealth,
+                            onChanged: (value) => setState(() {
+                              isStealth = value;
+                            }),
+                          ),
+                          StatblockCheckboxRow(
+                            label: 'Survival',
+                            initalValue: isSurvival,
+                            onChanged: (value) => setState(() {
+                              isSurvival = value;
+                            }),
+                          ),
                         ],
                       ),
                     ),
