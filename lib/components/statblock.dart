@@ -444,6 +444,26 @@ class _StatblockEditorForm extends State<StatblockEditorForm> {
   bool isWisChecked = false;
   bool isChaChecked = false;
 
+  bool isAcrobatics = false;
+  bool isAnimalHandling = false;
+  bool isArcana = false;
+  bool isAthletics = false;
+  bool isDeception = false;
+  bool isHistory = false;
+  bool isInsight = false;
+  bool isIntimidation = false;
+  bool isInvestigation = false;
+  bool isMedicine = false;
+  bool isNature = false;
+  bool isPerception = false;
+  bool isPerformance = false;
+  bool isPersuasion = false;
+  bool isReligion = false;
+  bool isSleightHand = false;
+  bool isStealth = false;
+  bool isSurvival = false;
+  
+
   double smallBoxWidth = 100;
   double checkBoxWidth = 50;
 
@@ -468,6 +488,7 @@ class _StatblockEditorForm extends State<StatblockEditorForm> {
     final c = widget.creature;
 
     return SingleChildScrollView(
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       child: Form(
         child: Container(
           decoration: BoxDecoration(
@@ -634,204 +655,231 @@ class _StatblockEditorForm extends State<StatblockEditorForm> {
               StatblockSection(
                 child: Row(
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                SizedBox(
-                                  width: smallBoxWidth,
-                                  child: StatblockSmallText(
-                                    data: 'Score',
-                                    alignment: TextAlign.center,
-                                  ),
+                    Container(
+                      decoration: BoxDecoration(
+                        border: Border(
+                          right: BorderSide(color: AppColors.primary, width: 1),
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          StatblockLabelRow(dataOne: 'Score', dataTwo: 'Proficient', alignment: TextAlign.center, width: smallBoxWidth,),
+                          Row(
+                            children: [
+                              StatblockEditSmallText(
+                                width: smallBoxWidth,
+                                labelText: "Str",
+                                startingValue: c?.abilityScores.strength
+                                    .toString(),
+                                keyboardType: TextInputType.number,
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly,
+                                ],
+                                onSaved: (v) => _draft.abilityScores!.strength =
+                                    int.tryParse(v) ?? 0,
+                              ),
+                              SizedBox(
+                                width: smallBoxWidth,
+                                child: StatblockCheckbox(
+                                  initialValue: isStrChecked,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      isStrChecked = value;
+                                    });
+                                  },
                                 ),
-                              ],
-                            ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                SizedBox(
-                                  width: smallBoxWidth,
-                                  child: StatblockSmallText(
-                                    data: 'Proficient',
-                                    alignment: TextAlign.center,
-                                  ),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              StatblockEditSmallText(
+                                width: smallBoxWidth,
+                                labelText: "Dex",
+                                startingValue: c?.abilityScores.dexterity
+                                    .toString(),
+                                keyboardType: TextInputType.number,
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly,
+                                ],
+                                onSaved: (v) =>
+                                    _draft.abilityScores!.dexterity =
+                                        int.tryParse(v) ?? 0,
+                              ),
+                              SizedBox(
+                                width: smallBoxWidth,
+                                child: StatblockCheckbox(
+                                  initialValue: isDexChecked,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      isDexChecked = value;
+                                    });
+                                  },
                                 ),
-                              ],
-                            ),
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            StatblockEditSmallText(
-                              width: smallBoxWidth,
-                              labelText: "Str",
-                              startingValue: c?.abilityScores.strength
-                                  .toString(),
-                              keyboardType: TextInputType.number,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly,
-                              ],
-                              onSaved: (v) => _draft.abilityScores!.strength =
-                                  int.tryParse(v) ?? 0,
-                            ),
-                            SizedBox(
-                              width: smallBoxWidth,
-                              child: StatblockCheckbox(
-                                initialValue: isStrChecked,
-                                onChanged: (value) {
-                                  setState(() {
-                                    isStrChecked = value;
-                                  });
-                                },
                               ),
-                            ),
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            StatblockEditSmallText(
-                              width: smallBoxWidth,
-                              labelText: "Dex",
-                              startingValue: c?.abilityScores.dexterity
-                                  .toString(),
-                              keyboardType: TextInputType.number,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly,
-                              ],
-                              onSaved: (v) => _draft.abilityScores!.dexterity =
-                                  int.tryParse(v) ?? 0,
-                            ),
-                            SizedBox(
-                              width: smallBoxWidth,
-                              child: StatblockCheckbox(
-                                initialValue: isDexChecked,
-                                onChanged: (value) {
-                                  setState(() {
-                                    isDexChecked = value;
-                                  });
-                                },
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              StatblockEditSmallText(
+                                width: smallBoxWidth,
+                                labelText: "Con",
+                                startingValue: c?.abilityScores.constitution
+                                    .toString(),
+                                keyboardType: TextInputType.number,
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly,
+                                ],
+                                onSaved: (v) =>
+                                    _draft.abilityScores!.constitution =
+                                        int.tryParse(v) ?? 0,
                               ),
-                            ),
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            StatblockEditSmallText(
-                              width: smallBoxWidth,
-                              labelText: "Con",
-                              startingValue: c?.abilityScores.constitution
-                                  .toString(),
-                              keyboardType: TextInputType.number,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly,
-                              ],
-                              onSaved: (v) =>
-                                  _draft.abilityScores!.constitution =
-                                      int.tryParse(v) ?? 0,
-                            ),
-                            SizedBox(
-                              width: smallBoxWidth,
-                              child: StatblockCheckbox(
-                                initialValue: isConChecked,
-                                onChanged: (value) {
-                                  setState(() {
-                                    isConChecked = value;
-                                  });
-                                },
+                              SizedBox(
+                                width: smallBoxWidth,
+                                child: StatblockCheckbox(
+                                  initialValue: isConChecked,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      isConChecked = value;
+                                    });
+                                  },
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            StatblockEditSmallText(
-                              width: smallBoxWidth,
-                              labelText: "Int",
-                              startingValue: c?.abilityScores.intelligence
-                                  .toString(),
-                              keyboardType: TextInputType.number,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly,
-                              ],
-                              onSaved: (v) =>
-                                  _draft.abilityScores!.intelligence =
-                                      int.tryParse(v) ?? 0,
-                            ),
-                            SizedBox(
-                              width: smallBoxWidth,
-                              child: StatblockCheckbox(
-                                initialValue: isIntChecked,
-                                onChanged: (value) {
-                                  setState(() {
-                                    isIntChecked = value;
-                                  });
-                                },
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              StatblockEditSmallText(
+                                width: smallBoxWidth,
+                                labelText: "Int",
+                                startingValue: c?.abilityScores.intelligence
+                                    .toString(),
+                                keyboardType: TextInputType.number,
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly,
+                                ],
+                                onSaved: (v) =>
+                                    _draft.abilityScores!.intelligence =
+                                        int.tryParse(v) ?? 0,
                               ),
-                            ),
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            StatblockEditSmallText(
-                              width: smallBoxWidth,
-                              labelText: "Wis",
-                              startingValue: c?.abilityScores.wisdom.toString(),
-                              keyboardType: TextInputType.number,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly,
-                              ],
-                              onSaved: (v) => _draft.abilityScores!.wisdom =
-                                  int.tryParse(v) ?? 0,
-                            ),
-                            SizedBox(
-                              width: smallBoxWidth,
-                              child: StatblockCheckbox(
-                                initialValue: isWisChecked,
-                                onChanged: (value) {
-                                  setState(() {
-                                    isWisChecked = value;
-                                  });
-                                },
+                              SizedBox(
+                                width: smallBoxWidth,
+                                child: StatblockCheckbox(
+                                  initialValue: isIntChecked,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      isIntChecked = value;
+                                    });
+                                  },
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            StatblockEditSmallText(
-                              width: smallBoxWidth,
-                              labelText: "Cha",
-                              startingValue: c?.abilityScores.charisma
-                                  .toString(),
-                              keyboardType: TextInputType.number,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly,
-                              ],
-                              onSaved: (v) => _draft.abilityScores!.charisma =
-                                  int.tryParse(v) ?? 0,
-                            ),
-                            SizedBox(
-                              width: smallBoxWidth,
-                              child: StatblockCheckbox(
-                                initialValue: isChaChecked,
-                                onChanged: (value) {
-                                  setState(() {
-                                    isChaChecked = value;
-                                  });
-                                },
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              StatblockEditSmallText(
+                                width: smallBoxWidth,
+                                labelText: "Wis",
+                                startingValue: c?.abilityScores.wisdom
+                                    .toString(),
+                                keyboardType: TextInputType.number,
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly,
+                                ],
+                                onSaved: (v) => _draft.abilityScores!.wisdom =
+                                    int.tryParse(v) ?? 0,
                               ),
-                            ),
-                          ],
-                        ),
-                      ],
+                              SizedBox(
+                                width: smallBoxWidth,
+                                child: StatblockCheckbox(
+                                  initialValue: isWisChecked,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      isWisChecked = value;
+                                    });
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              StatblockEditSmallText(
+                                width: smallBoxWidth,
+                                labelText: "Cha",
+                                startingValue: c?.abilityScores.charisma
+                                    .toString(),
+                                keyboardType: TextInputType.number,
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly,
+                                ],
+                                onSaved: (v) => _draft.abilityScores!.charisma =
+                                    int.tryParse(v) ?? 0,
+                              ),
+                              SizedBox(
+                                width: smallBoxWidth,
+                                child: StatblockCheckbox(
+                                  initialValue: isChaChecked,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      isChaChecked = value;
+                                    });
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
-                    Column(children: []),
-                    Column(children: []),
+                    Container(
+                      decoration: BoxDecoration(
+                        border: Border(
+                          right: BorderSide(color: AppColors.primary, width: 1),
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          StatblockLabelRow(
+                            dataOne: 'Skill',
+                            dataTwo: 'Proficient',
+                            alignment: TextAlign.center,
+                            width: smallBoxWidth,
+                          ),
+                          StatblockCheckboxRow(
+                            label: 'Acrobatics',
+                            initalValue: isAcrobatics,
+                            onChanged: (value) => setState(() {
+                              isAcrobatics = value;
+                            }),
+                          ),
+                          StatblockCheckboxRow(
+                            label: 'Animal Handling',
+                            initalValue: isAnimalHandling,
+                            onChanged: (value) => setState(() {
+                              isAnimalHandling = value;
+                            }),
+                          ),
+                          StatblockCheckboxRow(
+                            label: 'Arcana',
+                            initalValue: isArcana,
+                            onChanged: (value) => setState(() {
+                              isArcana = value;
+                            }),
+                          ),
+                          StatblockCheckboxRow(
+                            label: 'Athletics',
+                            initalValue: isAthletics,
+                            onChanged: (value) => setState(() {
+                              isAthletics = value;
+                            }),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Column(children: []),
                   ],
                 ),
               ),
@@ -1247,7 +1295,11 @@ class StatblockSmallText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(data, style: Theme.of(context).textTheme.labelSmall, textAlign: alignment,);
+    return Text(
+      data,
+      style: Theme.of(context).textTheme.labelSmall,
+      textAlign: alignment,
+    );
   }
 }
 
@@ -1338,6 +1390,75 @@ class _StatblockCheckboxState extends State<StatblockCheckbox> {
         });
         widget.onChanged(_checked);
       },
+    );
+  }
+}
+
+class StatblockLabelRow extends StatelessWidget {
+  const StatblockLabelRow({super.key, required this.dataOne, required this.dataTwo, this.alignment, this.width});
+
+  final String dataOne;
+  final String dataTwo;
+  final TextAlign? alignment;
+  final double? width;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: width,
+              child: Text(dataOne, textAlign: alignment, style: Theme.of(context).textTheme.headlineSmall,) // StatblockSmallText(data: dataOne, alignment: alignment),
+            ),
+          ],
+        ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: width,
+              child: Text(dataTwo, textAlign: alignment, style: Theme.of(context).textTheme.headlineSmall,)
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class StatblockCheckboxRow extends StatelessWidget {
+  const StatblockCheckboxRow({
+    super.key,
+    required this.label,
+    required this.initalValue,
+    required this.onChanged,
+    this.width = 100,
+  });
+
+  final String label;
+  final bool initalValue;
+  final ValueChanged<bool> onChanged;
+  final double width;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        SizedBox(
+          width: width,
+          child: StatblockSmallText(data: label, alignment: TextAlign.center),
+        ),
+        SizedBox(
+          width: width,
+          child: StatblockCheckbox(
+            initialValue: initalValue,
+            onChanged: onChanged,
+          ),
+        )
+      ],
     );
   }
 }
@@ -1572,19 +1693,6 @@ class CreatureActionDraft {
 
   CreatureActionDraft({this.name = '', this.description = '', this.type});
 }
-
-// extension ActionTypeDisplayDraft on ActionType {
-//   String get displayName => switch (this) {
-//     ActionType.action => 'Actions',
-//     ActionType.blurb => 'Blurb',
-//     ActionType.legendary => 'Legendary Actions',
-//     ActionType.bonusAction => 'Bonus Actions',
-//     ActionType.reaction => 'Reactions',
-//     ActionType.lair => 'Lair Actions',
-//     ActionType.special => 'Special Abilities',
-//     ActionType.villainAction => 'Villain Actions',
-//   };
-// }
 
 class CreatureTraitDraft {
   String name;
