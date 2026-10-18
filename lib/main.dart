@@ -105,8 +105,8 @@ void main() async {
 
   await _initializeDatabase();
 
-  // await windowManager.ensureInitialized();
-  // await windowManager.setMinimumSize(const Size(1360, 800));
+  await windowManager.ensureInitialized();
+  await windowManager.setMinimumSize(const Size(1346, 682));
 
   runApp(const MyApp());
 }
