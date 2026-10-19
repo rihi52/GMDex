@@ -657,14 +657,6 @@ class _StatblockEditorForm extends State<StatblockEditorForm> {
               ),
               StatblockSection(
                 child: Row(
-                //   spacing: 5,
-                //   runSpacing: 5,
-                //   direction: Axis.horizontal,
-                //   alignment: WrapAlignment.start,
-                //   crossAxisAlignment: WrapCrossAlignment.start,
-                //   runAlignment: WrapAlignment.start,
-                //   verticalDirection: VerticalDirection.down,
-                //   clipBehavior: Clip.antiAlias,
                   children: [
                     SizedBox(
                       height: checkBoxTableHeight,
@@ -1026,48 +1018,52 @@ class _StatblockEditorForm extends State<StatblockEditorForm> {
                       ),
                     ),
                     StatblockVerticalDivider(height: checkBoxTableHeight),
-                    // SizedBox(
-                    //   height: 300,
-                    //   width: 450,
-                    //   child: 
-                      // Padding(
-                      //   padding: const EdgeInsets.only(
-                      //     left: AppSpacing.spacingMedium,
-                      //   ),
-                        // child: 
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            StatblockEditSmallText(
-                              labelText: 'Senses',
-                              startingValue: c?.senses.toString(),
-                              onSaved: (value) => _draft.senses = value,
-                                maxLines: 4,
+                    Expanded(
+                      child: Padding(
+                        padding: EdgeInsetsGeometry.symmetric(horizontal: AppSpacing.spacingMedium),
+                        child: SizedBox(
+                          height: checkBoxTableHeight,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: StatblockEditSmallText(
+                                  labelText: 'Senses',
+                                  startingValue: c?.senses.toString(),
+                                  onSaved: (value) => _draft.senses = value,
+                                  maxLines: 4,
+                                ),
                               ),
-                              StatblockEditSmallText(
-                                labelText: 'Languages',
-                                startingValue: c?.languages.toString(),
-                                onSaved: (value) => _draft.languages = value,
-                                maxLines: 4,
+                              Expanded(
+                                child: StatblockEditSmallText(
+                                  labelText: 'Languages',
+                                  startingValue: c?.languages.toString(),
+                                  onSaved: (value) => _draft.languages = value,
+                                  maxLines: 4,
+                                ),
                               ),
-                              StatblockEditSmallText(
-                                labelText: 'Challenge Rating',
-                                startingValue: c?.languages.toString(),
-                                keyboardType: TextInputType.number,
-                                inputFormatters: [
-                                  FilteringTextInputFormatter.digitsOnly,
-                                ],
-                                onSaved: (value) =>
-                                    _draft.challengeRating!.cr = value,
+                              Expanded(
+                                child: StatblockEditSmallText(
+                                  labelText: 'Challenge Rating',
+                                  startingValue: c?.languages.toString(),
+                                  keyboardType: TextInputType.number,
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.digitsOnly,
+                                  ],
+                                  onSaved: (value) =>
+                                      _draft.challengeRating!.cr = value,
+                                ),
                               ),
                             ],
                           ),
-                        // ),
-                    // ),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
+              StatblockSection(child: child)
             ],
           ),
         ),
