@@ -52,6 +52,21 @@ class _StatblockEditorForm extends State<StatblockEditorForm> {
   @override
   void initState() {
     super.initState();
+
+    final traits = widget.creature?.traits ?? const <CreatureTrait>[];
+
+    _draft = CreatureDraft(
+      traits: traits.isEmpty
+          ? [CreatureTraitDraft()]
+          : traits
+                .map(
+                  (trait) => CreatureTraitDraft(
+                    name: trait.name,
+                    description: trait.description,
+                  ),
+                )
+                .toList(),
+    );
   }
 
   void _submit() {
@@ -645,34 +660,33 @@ class _StatblockEditorForm extends State<StatblockEditorForm> {
                 ),
               ),
               StatblockSection(
-                child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    if (c?.traits != null) ...[
-                      ...c!.traits.map(
-                        (trait) => Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            StatblockEditSmallText(
-                              labelText: 'Name',
-                              startingValue: trait.name,
-                              onSaved: (value) => _draft.alignment = value,
-                            ),
-                            StatblockSmallText(data: trait.description),
-                            const SizedBox(height: AppSpacing.spacingMedium),
-                          ],
-                        ),
-                      ),
-                    ] else ...[
-                      Column(
+                    ..._draft.traits!.asMap().entries.map((entry) {
+                      final index = entry.key;
+                      final trait = entry.value;
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           StatblockEditSmallText(
                             labelText: 'Name',
-                            startingValue: '',
-                            onSaved: (value) => _draft.alignment = value,
+                            startingValue: trait.name,
+                            onSaved: (value) =>
+                                _draft.traits![index].name = value,
                           ),
+                          StatblockEditSmallText(
+                            labelText: 'Description',
+                            startingValue: trait.description,
+                            onSaved: (value) =>
+                                _draft.traits![index].description = value,
+                            maxLines: 4,
+                          ),
+                          const SizedBox(height: AppSpacing.spacingMedium),
                         ],
-                      ),
-                    ],
+                      );
+                    }),
                   ],
                 ),
               ),
