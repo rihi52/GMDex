@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:moonscribe/theme/apptheme.dart';
 import 'package:moonscribe/components/creature_card.dart';
 import 'package:moonscribe/components/statblock.dart';
+import 'package:moonscribe/components/statblock_edit.dart';
 import 'package:moonscribe/database/read.dart';
 
 class CreaturesPage extends StatefulWidget {
@@ -77,7 +78,7 @@ class _CreaturesPageState extends State<CreaturesPage> {
       case 0:
         return const BrowseCreatureWidget();
       case 1:
-        return const CreateCreatureWidget();//Center(child: Text('Create Creature'));
+        return const CreateCreatureWidget(); //Center(child: Text('Create Creature'));
       default:
         return const BrowseCreatureWidget();
     }
