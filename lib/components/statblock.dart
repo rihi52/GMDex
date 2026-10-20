@@ -1,7 +1,5 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:moonscribe/components/creature_calculations.dart';
 import 'package:moonscribe/theme/apptheme.dart';
 
 class CreatureStatBlock extends StatelessWidget {
@@ -45,7 +43,7 @@ class CreatureStatBlock extends StatelessWidget {
                 children: [
                   StatblockSmallText(data: '${creature!.size} '),
                   StatblockSmallText(data: '${creature!.type}, '),
-                  StatblockSmallText(data: creature!.alignment),
+                  StatblockSmallText(data: creature?.alignment ?? ''),
                 ],
               ),
             ),
@@ -236,54 +234,55 @@ class CreatureStatBlock extends StatelessWidget {
                       ),
                       StatblockSmallText(
                         data: [
-                          if (creature!.skills.acrobatics != null)
-                            'Acrobatics ${creature!.skills.acrobatics!}',
-                          if (creature!.skills.animalHandling != null)
-                            'Animal Handling ${creature!.skills.animalHandling!}',
-                          if (creature!.skills.arcana != null)
-                            'Arcana ${creature!.skills.arcana!}',
-                          if (creature!.skills.athletics != null)
-                            'Athletics ${creature!.skills.athletics!}',
-                          if (creature!.skills.deception != null)
-                            'Deception ${creature!.skills.deception!}',
-                          if (creature!.skills.history != null)
-                            'History ${creature!.skills.history!}',
-                          if (creature!.skills.insight != null)
-                            'Insight ${creature!.skills.insight!}',
-                          if (creature!.skills.intimidation != null)
-                            'Intimidation ${creature!.skills.intimidation!}',
-                          if (creature!.skills.investigation != null)
-                            'Investigation ${creature!.skills.investigation!}',
-                          if (creature!.skills.medicine != null)
-                            'Medicine ${creature!.skills.medicine!}',
-                          if (creature!.skills.nature != null)
-                            'Nature ${creature!.skills.nature!}',
-                          if (creature!.skills.perception != null)
-                            'Perception ${creature!.skills.perception!}',
-                          if (creature!.skills.performance != null)
-                            'Performance ${creature!.skills.performance!}',
-                          if (creature!.skills.religion != null)
-                            'Religion ${creature!.skills.religion!}',
-                          if (creature!.skills.sleightOfHand != null)
-                            'Sleight of Hand ${creature!.skills.sleightOfHand!}',
-                          if (creature!.skills.stealth != null)
-                            'Stealth ${creature!.skills.stealth!}',
-                          if (creature!.skills.survival != null)
-                            'Survival ${creature!.skills.survival!}',
+                          if (creature!.skills?.acrobatics != null)
+                            'Acrobatics ${creature!.skills?.acrobatics!}',
+                          if (creature!.skills?.animalHandling != null)
+                            'Animal Handling ${creature!.skills?.animalHandling!}',
+                          if (creature!.skills?.arcana != null)
+                            'Arcana ${creature!.skills?.arcana!}',
+                          if (creature!.skills?.athletics != null)
+                            'Athletics ${creature!.skills?.athletics!}',
+                          if (creature!.skills?.deception != null)
+                            'Deception ${creature!.skills?.deception!}',
+                          if (creature!.skills?.history != null)
+                            'History ${creature!.skills?.history!}',
+                          if (creature!.skills?.insight != null)
+                            'Insight ${creature!.skills?.insight!}',
+                          if (creature!.skills?.intimidation != null)
+                            'Intimidation ${creature!.skills?.intimidation!}',
+                          if (creature!.skills?.investigation != null)
+                            'Investigation ${creature!.skills?.investigation!}',
+                          if (creature!.skills?.medicine != null)
+                            'Medicine ${creature!.skills?.medicine!}',
+                          if (creature!.skills?.nature != null)
+                            'Nature ${creature!.skills?.nature!}',
+                          if (creature!.skills?.perception != null)
+                            'Perception ${creature!.skills?.perception!}',
+                          if (creature!.skills?.performance != null)
+                            'Performance ${creature!.skills?.performance!}',
+                          if (creature!.skills?.religion != null)
+                            'Religion ${creature!.skills?.religion!}',
+                          if (creature!.skills?.sleightOfHand != null)
+                            'Sleight of Hand ${creature!.skills?.sleightOfHand!}',
+                          if (creature!.skills?.stealth != null)
+                            'Stealth ${creature!.skills?.stealth!}',
+                          if (creature!.skills?.survival != null)
+                            'Survival ${creature!.skills?.survival!}',
                         ].join(', '),
                       ),
                     ],
                   ),
-                  Row(
-                    children: [
-                      Text(
-                        'Senses: ',
-                        style: Theme.of(context).textTheme.titleSmall,
-                      ),
-                      if (creature!.senses != null)
-                        StatblockSmallText(data: creature!.senses!),
-                    ],
-                  ),
+                  if (creature?.senses != null && creature?.senses != '')
+                    Row(
+                      children: [
+                        Text(
+                          'Senses: ',
+                          style: Theme.of(context).textTheme.titleSmall,
+                        ),
+                        if (creature?.senses != null && creature?.senses != '')
+                          StatblockSmallText(data: creature!.senses!),
+                      ],
+                    ),
                   Row(
                     children: [
                       Text(
@@ -301,24 +300,29 @@ class CreatureStatBlock extends StatelessWidget {
                         style: Theme.of(context).textTheme.titleSmall,
                       ),
                       StatblockSmallText(data: '${creature!.challengeRating}'),
+                      StatblockSmallText(
+                        data:
+                            '   Proficiency Bonus: +${creature?.proficiencyBonus?.toInt() ?? proficiencyBonusCalc(tryParseFraction(creature!.challengeRating.cr) ?? 2)}',
+                      ),
                     ],
                   ),
                 ],
               ),
             ),
-            ...creature!.traits.map(
-              (trait) => Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    trait.name,
-                    style: Theme.of(context).textTheme.titleSmall,
-                  ),
-                  StatblockSmallText(data: trait.description),
-                  const SizedBox(height: AppSpacing.spacingMedium),
-                ],
+            if (creature!.traits != null)
+              ...creature!.traits!.map(
+                (trait) => Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      trait.name,
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
+                    StatblockSmallText(data: trait.description),
+                    const SizedBox(height: AppSpacing.spacingMedium),
+                  ],
+                ),
               ),
-            ),
             /* Add spellcasting */
             if (creature!.spellCasting != null) // if creature has spells
               Container(
@@ -399,7 +403,8 @@ class CreatureStatBlock extends StatelessWidget {
                   ],
                 ),
               ),
-            ...buildActionSections(context, creature!.actions),
+            if (creature?.actions != null)
+              ...buildActionSections(context, creature!.actions!),
             if (creature!.regionalEffect != null)
               StatblockSection(
                 child: Text(
@@ -509,46 +514,48 @@ const crToXp = {
 
 class Creature {
   final String name;
-  final String size;
-  final String type;
-  final String alignment;
+  final String? size;
+  final String? type;
+  final String? alignment;
   final CreatureArmorClass armorClass;
   final int hitPoints;
-  final String hitPointFormula;
+  final String? hitPointFormula;
   final CreatureCR challengeRating;
+  final double? proficiencyBonus;
   final CreatureSpeed speed;
   final CreatureAbilityScores abilityScores;
-  final CreatureSkills skills;
+  final CreatureSkills? skills;
   final String? senses;
   final String? languages;
   final CreatureSavingThrows savingThrows;
   final CreatureSpellcasting? spellCasting;
-  final List<CreatureAction> actions;
-  final List<CreatureTrait> traits;
+  final List<CreatureAction>? actions;
+  final List<CreatureTrait>? traits;
   final CreatureRegionalEffect? regionalEffect;
 
-  final int id;
+  final int? id;
 
   const Creature({
     required this.name,
-    required this.size,
-    required this.type,
-    required this.alignment,
+    this.size,
+    this.type,
+    this.alignment,
     required this.armorClass,
     required this.hitPoints,
-    required this.hitPointFormula,
+    this.hitPointFormula,
     required this.challengeRating,
+    this.proficiencyBonus,
     required this.speed,
     required this.abilityScores,
-    required this.skills,
-    required this.senses,
-    required this.languages,
+    this.skills,
+    this.senses,
+    this.languages,
     required this.savingThrows,
     this.spellCasting,
-    required this.actions,
-    required this.traits,
-    required this.regionalEffect,
-    required this.id,
+    this.actions,
+    this.traits,
+    this.regionalEffect,
+    this.id,
   });
 }
 
@@ -645,11 +652,11 @@ class CreatureSpeed {
   final String? condition;
 
   const CreatureSpeed({
-    required this.walk,
-    required this.fly,
-    required this.climb,
-    required this.swim,
-    required this.burrow,
+    this.walk,
+    this.fly,
+    this.climb,
+    this.swim,
+    this.burrow,
     this.condition,
   });
 }
@@ -686,11 +693,17 @@ class CreatureAbilityScores {
 
 class CreatureSavingThrows {
   final int? strength;
+  final bool? isStrProf;
   final int? dexterity;
+  final bool? isDexProf;
   final int? constitution;
+  final bool? isConProf;
   final int? intelligence;
+  final bool? isIntProf;
   final int? wisdom;
+  final bool? isWisProf;
   final int? charisma;
+  final bool? isChaProf;
 
   const CreatureSavingThrows({
     required this.strength,
@@ -699,58 +712,105 @@ class CreatureSavingThrows {
     required this.intelligence,
     required this.wisdom,
     required this.charisma,
+    this.isStrProf,
+    this.isDexProf,
+    this.isConProf,
+    this.isIntProf,
+    this.isWisProf,
+    this.isChaProf,
   });
 }
 
 class CreatureSkills {
   final String? athletics;
+  final bool? isAthleticsProf;
   final String? acrobatics;
+  final bool? isAcrobaticsProf;
   final String? sleightOfHand;
+  final bool? isSleightOfHandProf;
   final String? stealth;
+  final bool? isStealthProf;
   final String? arcana;
+  final bool? isArcanaProf;
   final String? history;
+  final bool? isHistoryProf;
   final String? investigation;
+  final bool? isInvestigationProf;
   final String? nature;
+  final bool? isNatureProf;
   final String? religion;
+  final bool? isReligionProf;
   final String? animalHandling;
+  final bool? isAnimalHandlingProf;
   final String? insight;
+  final bool? isInsightProf;
   final String? medicine;
+  final bool? isMedicineProf;
   final String? perception;
+  final bool? isPerceptionProf;
   final String? survival;
+  final bool? isSurvivalProf;
   final String? deception;
+  final bool? isDeceptionProf;
   final String? intimidation;
+  final bool? isIntimidationProf;
+  final String? persuasion;
+  final bool? isPersuasionProf;
   final String? performance;
+  final bool? isPerformanceProf;
 
   const CreatureSkills({
     required this.athletics,
+    this.isAthleticsProf,
     required this.acrobatics,
+    this.isAcrobaticsProf,
     required this.sleightOfHand,
+    this.isSleightOfHandProf,
     required this.stealth,
+    this.isStealthProf,
     required this.arcana,
+    this.isArcanaProf,
     required this.history,
+    this.isHistoryProf,
     required this.investigation,
+    this.isInvestigationProf,
     required this.nature,
+    this.isNatureProf,
     required this.religion,
+    this.isReligionProf,
     required this.animalHandling,
+    this.isAnimalHandlingProf,
     required this.insight,
+    this.isInsightProf,
     required this.medicine,
+    this.isMedicineProf,
     required this.perception,
+    this.isPerceptionProf,
+    required this.persuasion,
+    this.isPersuasionProf,
     required this.survival,
+    this.isSurvivalProf,
     required this.deception,
+    this.isDeceptionProf,
     required this.intimidation,
+    this.isIntimidationProf,
     required this.performance,
+    this.isPerformanceProf,
   });
 }
 
 enum ActionType {
-  action,
-  blurb,
-  bonusAction,
-  reaction,
-  legendary,
-  lair,
-  special,
-  villainAction,
+  action('Action'),
+  blurb('Blurb'),
+  bonusAction('Bonus Action'),
+  reaction('Reaction'),
+  legendary('Legendary'),
+  lair('Lair'),
+  special('Special'),
+  villainAction('Villain Action');
+
+  const ActionType(this.label);
+  final String label;
 }
 
 class CreatureAction {

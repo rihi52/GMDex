@@ -7,8 +7,11 @@ I am writing this version with flutter to learn dart/flutter and potentially com
 ## Homepage
 ![image](https://github.com/rihi52/moonscribe/blob/main/assets/homepage.png)
 
-## Creature database (in progress)
+## Creature database
 ![image](https://github.com/rihi52/moonscribe/blob/main/assets/creaturelookup.png)
+
+## Creature creation (in progress)
+![image](https://github.com/rihi52/moonscribe/blob/main/assets/creaturecreate.png)
 
 ## Encounter builder (in progress)
 ![image](https://github.com/rihi52/moonscribe/blob/main/assets/encounterbuilder.png)

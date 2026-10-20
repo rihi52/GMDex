@@ -1,11 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:moonscribe/components/statblock.dart';
+import 'package:moonscribe/components/creature_calculations.dart';
 
 Future<dynamic> loadMonsters() async {
-  final jsonString = await rootBundle.loadString(
-    'assets/bestiary-mm.json',
-  );
+  final jsonString = await rootBundle.loadString('assets/bestiary-mm.json');
   return jsonDecode(jsonString);
 }
 
@@ -92,6 +91,12 @@ Creature parseCreature(
       climb: data['speed']['climb'] ?? 0,
       swim: data['speed']['swim'] ?? 0,
     ),
+    proficiencyBonus: proficiencyBonusCalc(
+      tryParseFraction(
+            (data['cr'] is Map ? data['cr']['cr'] : data['cr']).toString(),
+          ) ??
+          0,
+    ).toDouble(),
     abilityScores: CreatureAbilityScores(
       strength: data['str'],
       strengthModifier: ((data['str'] - 10) / 2).floor(),
@@ -108,22 +113,45 @@ Creature parseCreature(
     ),
     skills: CreatureSkills(
       athletics: skills['athletics']?.toString(),
+      isAthleticsProf: skills['athletics']?.toString().isNotEmpty ?? false,
       acrobatics: skills['acrobatics']?.toString(),
+      isAcrobaticsProf: skills['acrobatics']?.toString().isNotEmpty ?? false,
       sleightOfHand: skills['sleightOfHand']?.toString(),
+      isSleightOfHandProf:
+          skills['sleightOfHand']?.toString().isNotEmpty ?? false,
       stealth: skills['stealth']?.toString(),
+      isStealthProf: skills['stealth']?.toString().isNotEmpty ?? false,
       arcana: skills['arcana']?.toString(),
+      isArcanaProf: skills['arcana']?.toString().isNotEmpty ?? false,
       history: skills['history']?.toString(),
+      isHistoryProf: skills['history']?.toString().isNotEmpty ?? false,
       investigation: skills['investigation']?.toString(),
+      isInvestigationProf:
+          skills['investigation']?.toString().isNotEmpty ?? false,
       nature: skills['nature']?.toString(),
+      isNatureProf: skills['nature']?.toString().isNotEmpty ?? false,
       religion: skills['religion']?.toString(),
+      isReligionProf: skills['religion']?.toString().isNotEmpty ?? false,
       animalHandling: skills['animalHandling']?.toString(),
+      isAnimalHandlingProf:
+          skills['animalHandling']?.toString().isNotEmpty ?? false,
       insight: skills['insight']?.toString(),
+      isInsightProf: skills['insight']?.toString().isNotEmpty ?? false,
       medicine: skills['medicine']?.toString(),
+      isMedicineProf: skills['medicine']?.toString().isNotEmpty ?? false,
       perception: skills['perception']?.toString(),
+      isPerceptionProf: skills['perception']?.toString().isNotEmpty ?? false,
       survival: skills['survival']?.toString(),
+      isSurvivalProf: skills['survival']?.toString().isNotEmpty ?? false,
       deception: skills['deception']?.toString(),
+      isDeceptionProf: skills['deception']?.toString().isNotEmpty ?? false,
       intimidation: skills['intimidation']?.toString(),
+      isIntimidationProf:
+          skills['intimidation']?.toString().isNotEmpty ?? false,
       performance: skills['performance']?.toString(),
+      isPerformanceProf: skills['persuasion']?.toString().isNotEmpty ?? false,
+      persuasion: skills['persuasion']?.toString(),
+      isPersuasionProf: skills['persuasion']?.toString().isNotEmpty ?? false,
     ),
     senses: (data['senses'] as List?)?.join(', ') ?? '',
     languages: (data['languages'] as List?)?.join(', ') ?? '',
@@ -134,61 +162,70 @@ Creature parseCreature(
       intelligence: int.tryParse(save['int']?.toString() ?? ''),
       wisdom: int.tryParse(save['wis']?.toString() ?? ''),
       charisma: int.tryParse(save['cha']?.toString() ?? ''),
+      isStrProf: false,
+      isDexProf: false,
+      isConProf: false,
+      isIntProf: false,
+      isWisProf: false,
+      isChaProf: false,
     ),
     spellCasting: spells == null || spells.isEmpty
-    ? null
-    : () {
-        final innateBlock = (spells as List).cast<Map<String, dynamic>>()
-            .where((s) => s['name'] == 'Innate Spellcasting')
-            .firstOrNull;
+        ? null
+        : () {
+            final innateBlock = (spells as List)
+                .cast<Map<String, dynamic>>()
+                .where((s) => s['name'] == 'Innate Spellcasting')
+                .firstOrNull;
 
-        final preparedBlock = (spells).cast<Map<String, dynamic>>()
-            .where((s) => s['name'] != 'Innate Spellcasting')
-            .firstOrNull;
+            final preparedBlock = (spells)
+                .cast<Map<String, dynamic>>()
+                .where((s) => s['name'] != 'Innate Spellcasting')
+                .firstOrNull;
 
-        return CreatureSpellcasting(
-          name: preparedBlock?['name'] ?? innateBlock?['name'] ?? '',
-          headerEntries: parseEntries(
-            (preparedBlock ?? innateBlock)!['headerEntries'] as List,
-          ),
-          footerEntries: (preparedBlock ?? innateBlock)?['footerEntries'] == null
-              ? null
-              : parseEntries(
-                  (preparedBlock ?? innateBlock)!['footerEntries'] as List,
-                ),
-          ability: (preparedBlock ?? innateBlock)?['ability'] ?? '',
-          spells: preparedBlock?['spells'] == null
-              ? null
-              : (preparedBlock!['spells'] as Map<String, dynamic>).map(
-                  (key, value) => MapEntry(
-                    int.parse(key),
-                    SpellLevel(
-                      slots: value['slots'] ?? 0,
-                      spells: (value['spells'] as List)
-                          .map((s) => parseEntries([s]))
-                          .toList(),
+            return CreatureSpellcasting(
+              name: preparedBlock?['name'] ?? innateBlock?['name'] ?? '',
+              headerEntries: parseEntries(
+                (preparedBlock ?? innateBlock)!['headerEntries'] as List,
+              ),
+              footerEntries:
+                  (preparedBlock ?? innateBlock)?['footerEntries'] == null
+                  ? null
+                  : parseEntries(
+                      (preparedBlock ?? innateBlock)!['footerEntries'] as List,
                     ),
-                  ),
-                ),
-          innateSpell: innateBlock == null
-              ? null
-              : {
-                  if (innateBlock['will'] != null)
-                    'will': (innateBlock['will'] as List)
-                        .map((s) => parseEntries([s]))
-                        .toList(),
-                  if (innateBlock['daily'] != null)
-                    ...(innateBlock['daily'] as Map<String, dynamic>).map(
+              ability: (preparedBlock ?? innateBlock)?['ability'] ?? '',
+              spells: preparedBlock?['spells'] == null
+                  ? null
+                  : (preparedBlock!['spells'] as Map<String, dynamic>).map(
                       (key, value) => MapEntry(
-                        key,
-                        (value as List)
-                            .map((s) => parseEntries([s]))
-                            .toList(),
+                        int.parse(key),
+                        SpellLevel(
+                          slots: value['slots'] ?? 0,
+                          spells: (value['spells'] as List)
+                              .map((s) => parseEntries([s]))
+                              .toList(),
+                        ),
                       ),
                     ),
-                },
-        );
-      }(),
+              innateSpell: innateBlock == null
+                  ? null
+                  : {
+                      if (innateBlock['will'] != null)
+                        'will': (innateBlock['will'] as List)
+                            .map((s) => parseEntries([s]))
+                            .toList(),
+                      if (innateBlock['daily'] != null)
+                        ...(innateBlock['daily'] as Map<String, dynamic>).map(
+                          (key, value) => MapEntry(
+                            key,
+                            (value as List)
+                                .map((s) => parseEntries([s]))
+                                .toList(),
+                          ),
+                        ),
+                    },
+            );
+          }(),
     actions: [
       for (final (key, type) in [
         ('action', ActionType.action),

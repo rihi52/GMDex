@@ -34,10 +34,8 @@ class AppTheme {
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
           foregroundColor: AppColors.appBlack,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          minimumSize: const Size(250, 55),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          // minimumSize: Size(250, 55),
           textStyle: GoogleFonts.metamorphous(
             fontSize: 20,
             fontWeight: FontWeight.bold,
@@ -95,6 +93,11 @@ class AppTheme {
           fontSize: 14,
           fontWeight: FontWeight.bold,
           color: AppColors.appBlack,
+        ),
+        labelMedium: GoogleFonts.metamorphous(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+          color: AppColors.cardSelected,
         ),
         titleLarge: GoogleFonts.modernAntiqua(
           fontSize: 28,
