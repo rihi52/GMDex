@@ -1,12 +1,12 @@
 
 
 class Encounter {
-  final String? name;
+  final String name;
   final List<Combatant> combatants;
   final int currentTurnIndex;
 
   const Encounter ({
-    this.name,
+    required this.name,
     required this.currentTurnIndex,
     required this.combatants,
   });
@@ -17,11 +17,11 @@ class Combatant {
   final bool isPlayer;
   final int maxHitPoints;
   final int currentHitPoints;
-  final int initiative;
+  int? initiative;
   final int? armorClass;
-  final int quantity;
+  int quantity;
 
-  const Combatant({
+  Combatant({
     required this.name,
     required this.isPlayer,
     required this.maxHitPoints,

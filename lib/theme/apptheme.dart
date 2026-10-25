@@ -34,7 +34,7 @@ class AppTheme {
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
           foregroundColor: AppColors.appBlack,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSpacing.cornerRadiusMedium)),
           // minimumSize: Size(250, 55),
           textStyle: GoogleFonts.metamorphous(
             fontSize: 20,
@@ -45,7 +45,7 @@ class AppTheme {
 
       listTileTheme: ListTileThemeData(
         dense: false,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSpacing.cornerRadiusMedium)),
         selectedColor: AppColors.accent,
         selectedTileColor: AppColors.sideSelectGrey,
         titleTextStyle: GoogleFonts.metamorphous(

@@ -45,12 +45,10 @@ class _MyHomePageState extends State<MyHomePage> {
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(minimumSize: Size(250, 55)),
-                  onPressed: () {
-                    Navigator.push(
+                  onPressed: () => Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => pages[index]),
-                    );
-                  },
+                    ),
                   child: Text(buttons[index]),
                 ),
               ),

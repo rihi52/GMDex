@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:moonscribe/models/creature.dart';
 import 'package:moonscribe/theme/apptheme.dart';
 import 'package:moonscribe/components/creature_card.dart';
 import 'package:moonscribe/components/statblock.dart';
 import 'package:moonscribe/components/statblock_edit.dart';
 import 'package:moonscribe/database/read.dart';
+import 'dart:math' show min;
 
 class CreaturesPage extends StatefulWidget {
   const CreaturesPage({super.key});
@@ -13,63 +15,105 @@ class CreaturesPage extends StatefulWidget {
 }
 
 class _CreaturesPageState extends State<CreaturesPage> {
+  static const double _breakpoint = 700;
   int _selectedIndex = 0;
+
+  static const _titles = ['Browse', 'Create'];
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Row(
-        children: [
-          Container(
-            width: 250,
-            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-            decoration: const BoxDecoration(
-              border: Border(
-                right: BorderSide(color: AppColors.primary, width: 1),
-              ),
-            ),
-            child: Column(
-              spacing: 8,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isWide = constraints.maxWidth >= _breakpoint;
+
+        if (isWide) {
+          return Scaffold(
+            body: Row(
               children: [
-                ListTile(
-                  selected: false,
-                  title: const Text('Return'),
-                  onTap: () => Navigator.pop(context),
-                ),
-                ListTile(
-                  selected: _selectedIndex == 0,
-                  title: const Text('Browse'),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    side: BorderSide(
-                      color: _selectedIndex == 0
-                          ? AppColors.hoverGrey
-                          : Colors.transparent,
-                      width: 1,
+                Container(
+                  width: 175,
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 16,
+                    horizontal: 16,
+                  ),
+                  decoration: const BoxDecoration(
+                    border: Border(
+                      right: BorderSide(color: AppColors.primary, width: 1),
                     ),
                   ),
-                  onTap: () => setState(() => _selectedIndex = 0),
+                  child: _navItems(inDrawer: false),
                 ),
-                ListTile(
-                  selected: _selectedIndex == 1,
-                  title: const Text('Create'),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    side: BorderSide(
-                      color: _selectedIndex == 1
-                          ? AppColors.hoverGrey
-                          : Colors.transparent,
-                      width: 1,
-                    ),
-                  ),
-                  onTap: () => setState(() => _selectedIndex = 1),
-                ),
+                Expanded(child: _buildContent()),
               ],
             ),
+          );
+        }
+
+        return Scaffold(
+          appBar: AppBar(
+            // The hamburger icon is added automatically because a drawer exists
+            title: Text(_titles[_selectedIndex]),
           ),
-          Expanded(child: _buildContent()),
-        ],
+          drawer: Drawer(
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: _navItems(inDrawer: true),
+              ),
+            ),
+          ),
+          body: _buildContent(),
+        );
+      },
+    );
+  }
+
+  Widget _navItems({required bool inDrawer}) {
+    // In the drawer, close it after a selection.
+    void closeDrawerIfNeeded() {
+      if (inDrawer) Navigator.of(context).pop();
+    }
+
+    ShapeBorder shapeFor(int index) => RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(8),
+      side: BorderSide(
+        color: _selectedIndex == index
+            ? AppColors.hoverGrey
+            : Colors.transparent,
+        width: 1,
       ),
+    );
+
+    return Column(
+      spacing: 8,
+      children: [
+        ListTile(
+          selected: false,
+          title: const Text('Return'),
+          onTap: () {
+            closeDrawerIfNeeded(); // closes the drawer
+            Navigator.of(context).pop(); // leaves the page
+          },
+        ),
+        ListTile(
+          selected: _selectedIndex == 0,
+          title: const Text('Browse'),
+          shape: shapeFor(0),
+          onTap: () {
+            setState(() => _selectedIndex = 0);
+            closeDrawerIfNeeded();
+          },
+        ),
+        ListTile(
+          selected: _selectedIndex == 1,
+          title: const Text('Create'),
+          shape: shapeFor(1),
+          onTap: () {
+            setState(() => _selectedIndex = 1);
+            closeDrawerIfNeeded();
+          },
+        ),
+      ],
     );
   }
 
@@ -78,7 +122,7 @@ class _CreaturesPageState extends State<CreaturesPage> {
       case 0:
         return const BrowseCreatureWidget();
       case 1:
-        return const CreateCreatureWidget(); //Center(child: Text('Create Creature'));
+        return const CreateCreatureWidget();
       default:
         return const BrowseCreatureWidget();
     }
@@ -94,6 +138,8 @@ class BrowseCreatureWidget extends StatefulWidget {
 
 class _BrowseCreatureWidgetState extends State<BrowseCreatureWidget> {
   Creature? monster;
+  static const double _breakpoint = 900;
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
 
   List<dynamic> _allMonsters = [];
   List<dynamic> _allMonsterFilter = [];
@@ -130,105 +176,124 @@ class _BrowseCreatureWidgetState extends State<BrowseCreatureWidget> {
                 ),
               )
               .toList();
-    return Scaffold(
-      appBar: AppBar(
-        scrolledUnderElevation: 0,
-        automaticallyImplyLeading: false,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.filter_list),
-            onPressed: () {
-              // Implement filter functionality here
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.sort),
-            onPressed: () {
-              // Implement sort functionality here
-            },
-          ),
-        ],
-        title: SizedBox(
-          width: 400,
-          height: 40,
-          child: SearchAnchor(
-            builder: (BuildContext context, SearchController controller) {
-              return SearchBar(
-                onChanged: (value) {
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isWide = constraints.maxWidth >= _breakpoint;
+
+        final monsterList = ListView.builder(
+          padding: const EdgeInsets.only(right: AppSpacing.spacingMedium),
+          itemCount: visibleMonsters.length,
+          itemBuilder: (context, index) {
+            final data = visibleMonsters[index];
+            return SizedBox(
+              height: 100,
+              child: CreatureCard(
+                name: data['name'] ?? '',
+                type: data['type'] is String
+                    ? data['type']
+                    : (data['type']?['type'] ?? ''),
+                size: sizeNames[data['size']?[0]] ?? '',
+                cr: data['cr'] is Map
+                    ? data['cr']['cr']?.toString() ?? '0'
+                    : data['cr']?.toString() ?? '0',
+                source: data['source'] ?? '',
+                selected: _selectedIndex == index,
+                onTap: () {
                   setState(() {
-                    searchTerm = value;
+                    _selectedIndex = index;
+                    _selectedCreature = parseCreature(data, _legendaryGroups);
                   });
+                  if (!isWide) _scaffoldKey.currentState?.openEndDrawer();
                 },
-              );
-            },
-            suggestionsBuilder:
-                (BuildContext context, SearchController controller) {
-                  return _allMonsterFilter
-                      .map<Widget>(
-                        (monster) => Text(
-                          monster['name'] ?? '',
-                          style: Theme.of(context).textTheme.labelSmall,
-                        ),
-                      )
-                      .toList();
+              ),
+            );
+          },
+        );
+
+        final statBlock = _selectedCreature != null
+            ? SingleChildScrollView(
+                child: CreatureStatBlock(creature: _selectedCreature!),
+              )
+            : const SizedBox.shrink();
+
+        return Scaffold(
+          key: _scaffoldKey,
+          appBar: AppBar(
+            scrolledUnderElevation: 0,
+            automaticallyImplyLeading: false,
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.filter_list),
+                onPressed: () {
+                  // Implement filter functionality here
                 },
+              ),
+              IconButton(
+                icon: const Icon(Icons.sort),
+                onPressed: () {
+                  // Implement sort functionality here
+                },
+              ),
+            ],
+            title: SizedBox(
+              width: 400,
+              height: 40,
+              child: SearchAnchor(
+                builder: (BuildContext context, SearchController controller) {
+                  return SearchBar(
+                    onChanged: (value) {
+                      setState(() {
+                        searchTerm = value;
+                      });
+                    },
+                  );
+                },
+                suggestionsBuilder:
+                    (BuildContext context, SearchController controller) {
+                      return _allMonsterFilter
+                          .map<Widget>(
+                            (monster) => Text(
+                              monster['name'] ?? '',
+                              style: Theme.of(context).textTheme.labelSmall,
+                            ),
+                          )
+                          .toList();
+                    },
+              ),
+            ),
           ),
-        ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            Expanded(
-              flex: 3,
-              child: SizedBox(
-                width: 350,
-                child: ListView.builder(
-                  padding: const EdgeInsets.only(right: 8),
-                  itemCount: visibleMonsters.length,
-                  itemBuilder: (context, index) {
-                    final data = visibleMonsters[index];
-                    return SizedBox(
-                      height: 100,
-                      child: CreatureCard(
-                        name: data['name'] ?? '',
-                        type: data['type'] is String
-                            ? data['type']
-                            : (data['type']?['type'] ?? ''),
-                        size: sizeNames[data['size']?[0]] ?? '',
-                        cr: data['cr'] is Map
-                            ? data['cr']['cr']?.toString() ?? '0'
-                            : data['cr']?.toString() ?? '0',
-                        source: data['source'] ?? '',
-                        selected: _selectedIndex == index,
-                        onTap: () {
-                          setState(() {
-                            _selectedIndex = index;
-                            _selectedCreature = parseCreature(
-                              data,
-                              _legendaryGroups,
-                            );
-                          });
-                        },
-                      ),
-                    );
-                  },
+          endDrawer: isWide
+              ? null
+              : Drawer(
+                  width: min(constraints.maxWidth, 520),
+                  child: SafeArea(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: statBlock,
+                    ), // closes Padding(
+                  ), // closes SafeArea(
                 ),
-              ),
-            ),
-            Container(width: 8),
-            Expanded(
-              flex: 7,
-              child: Container(
-                alignment: Alignment.topCenter,
-                child: _selectedCreature != null
-                    ? CreatureStatBlock(creature: _selectedCreature!)
-                    : SizedBox.shrink(),
-              ),
-            ),
-          ],
-        ),
-      ),
+          body: Padding(
+            padding: const EdgeInsets.all(16),
+            child: isWide
+                ? Row(
+                    children: [
+                      Expanded(flex: 3, child: monsterList),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        flex: 7,
+                        child: Container(
+                          alignment: Alignment.topCenter,
+                          child: statBlock,
+                        ),
+                      ),
+                    ],
+                  )
+                : monsterList,
+          ),
+        );
+      },
     );
   }
 }
@@ -269,7 +334,10 @@ class _CreateCreatureWidgetState extends State<CreateCreatureWidget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        scrolledUnderElevation: 0,
+        automaticallyImplyLeading: false,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(children: [Expanded(child: StatblockEditorForm())]),

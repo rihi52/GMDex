@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/services.dart';
+import 'package:moonscribe/models/creature.dart';
 import 'package:moonscribe/components/statblock.dart';
 import 'package:moonscribe/components/creature_calculations.dart';
 
@@ -149,7 +150,7 @@ Creature parseCreature(
       isIntimidationProf:
           skills['intimidation']?.toString().isNotEmpty ?? false,
       performance: skills['performance']?.toString(),
-      isPerformanceProf: skills['persuasion']?.toString().isNotEmpty ?? false,
+      isPerformanceProf: skills['performance']?.toString().isNotEmpty ?? false,
       persuasion: skills['persuasion']?.toString(),
       isPersuasionProf: skills['persuasion']?.toString().isNotEmpty ?? false,
     ),
