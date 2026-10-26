@@ -1,3 +1,52 @@
+class Creature {
+  final String name;
+  final String? size;
+  final String? type;
+  final String? alignment;
+  final CreatureArmorClass armorClass;
+  final int hitPoints;
+  final String? hitPointFormula;
+  final CreatureCR challengeRating;
+  final double? proficiencyBonus;
+  final CreatureSpeed speed;
+  final CreatureAbilityScores abilityScores;
+  final CreatureSkills? skills;
+  final String? senses;
+  final String? languages;
+  final CreatureSavingThrows savingThrows;
+  final CreatureSpellcasting? spellCasting;
+  final List<CreatureAction>? actions;
+  final List<CreatureTrait>? traits;
+  final CreatureRegionalEffect? regionalEffect;
+  final String? notes;
+
+  final int? id;
+
+  const Creature({
+    required this.name,
+    this.size,
+    this.type,
+    this.alignment,
+    required this.armorClass,
+    required this.hitPoints,
+    this.hitPointFormula,
+    required this.challengeRating,
+    this.proficiencyBonus,
+    required this.speed,
+    required this.abilityScores,
+    this.skills,
+    this.senses,
+    this.languages,
+    required this.savingThrows,
+    this.spellCasting,
+    this.actions,
+    this.traits,
+    this.regionalEffect,
+    this.notes,
+    this.id,
+  });
+}
+
 const crToXp = {
   '0': '10',
   '1/8': '25',
@@ -34,53 +83,6 @@ const crToXp = {
   '29': '135,000',
   '30': '155,000',
 };
-
-class Creature {
-  final String name;
-  final String? size;
-  final String? type;
-  final String? alignment;
-  final CreatureArmorClass armorClass;
-  final int hitPoints;
-  final String? hitPointFormula;
-  final CreatureCR challengeRating;
-  final double? proficiencyBonus;
-  final CreatureSpeed speed;
-  final CreatureAbilityScores abilityScores;
-  final CreatureSkills? skills;
-  final String? senses;
-  final String? languages;
-  final CreatureSavingThrows savingThrows;
-  final CreatureSpellcasting? spellCasting;
-  final List<CreatureAction>? actions;
-  final List<CreatureTrait>? traits;
-  final CreatureRegionalEffect? regionalEffect;
-
-  final int? id;
-
-  const Creature({
-    required this.name,
-    this.size,
-    this.type,
-    this.alignment,
-    required this.armorClass,
-    required this.hitPoints,
-    this.hitPointFormula,
-    required this.challengeRating,
-    this.proficiencyBonus,
-    required this.speed,
-    required this.abilityScores,
-    this.skills,
-    this.senses,
-    this.languages,
-    required this.savingThrows,
-    this.spellCasting,
-    this.actions,
-    this.traits,
-    this.regionalEffect,
-    this.id,
-  });
-}
 
 class SpellLevel {
   final int? slots;
@@ -324,7 +326,6 @@ class CreatureSkills {
 
 enum ActionType {
   action('Action'),
-  blurb('Blurb'),
   bonusAction('Bonus Action'),
   reaction('Reaction'),
   legendary('Legendary'),
@@ -351,7 +352,6 @@ class CreatureAction {
 extension ActionTypeDisplay on ActionType {
   String get displayName => switch (this) {
     ActionType.action => 'Actions',
-    ActionType.blurb => 'Blurb',
     ActionType.legendary => 'Legendary Actions',
     ActionType.bonusAction => 'Bonus Actions',
     ActionType.reaction => 'Reactions',

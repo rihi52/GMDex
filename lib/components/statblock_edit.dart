@@ -1,16 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:moonscribe/models/creature.dart';
-import 'package:moonscribe/models/creature_draft.dart';
-import 'package:moonscribe/theme/apptheme.dart';
-import 'package:moonscribe/components/statblock.dart';
-import 'package:moonscribe/components/creature_calculations.dart';
+import 'package:gmdex/models/creature.dart';
+import 'package:gmdex/models/creature_draft.dart';
+import 'package:gmdex/theme/apptheme.dart';
+import 'package:gmdex/components/statblock.dart';
+import 'package:gmdex/components/creature_calculations.dart';
 
 class StatblockEditorForm extends StatefulWidget {
-  const StatblockEditorForm({super.key, this.creature, this.onSubmit});
+  const StatblockEditorForm({
+    super.key,
+    this.creature,
+    this.onSubmit,
+    this.isEditing = false,
+  });
 
   final Creature? creature;
   final void Function(Creature)? onSubmit;
+  final bool isEditing;
 
   @override
   State<StatblockEditorForm> createState() => _StatblockEditorForm();
@@ -65,6 +71,7 @@ class _StatblockEditorForm extends State<StatblockEditorForm> {
     final challengeRating = widget.creature?.challengeRating;
     final abilityScore = widget.creature?.abilityScores;
     final savingThrows = widget.creature?.savingThrows;
+    final skills = widget.creature?.skills;
 
     isStrChecked = savingThrows?.isStrProf ?? false;
     isDexChecked = savingThrows?.isDexProf ?? false;
@@ -72,6 +79,25 @@ class _StatblockEditorForm extends State<StatblockEditorForm> {
     isIntChecked = savingThrows?.isIntProf ?? false;
     isWisChecked = savingThrows?.isWisProf ?? false;
     isChaChecked = savingThrows?.isChaProf ?? false;
+
+    isAcrobatics = skills?.isAcrobaticsProf ?? false;
+    isAnimalHandling = skills?.isAnimalHandlingProf ?? false;
+    isArcana = skills?.isArcanaProf ?? false;
+    isAthletics = skills?.isAthleticsProf ?? false;
+    isDeception = skills?.isDeceptionProf ?? false;
+    isHistory = skills?.isHistoryProf ?? false;
+    isInsight = skills?.isInsightProf ?? false;
+    isIntimidation = skills?.isIntimidationProf ?? false;
+    isInvestigation = skills?.isInvestigationProf ?? false;
+    isMedicine = skills?.isMedicineProf ?? false;
+    isNature = skills?.isNatureProf ?? false;
+    isPerception = skills?.isPerceptionProf ?? false;
+    isPerformance = skills?.isPerformanceProf ?? false;
+    isPersuasion = skills?.isPersuasionProf ?? false;
+    isReligion = skills?.isReligionProf ?? false;
+    isSleightHand = skills?.isSleightOfHandProf ?? false;
+    isStealth = skills?.isStealthProf ?? false;
+    isSurvival = skills?.isSurvivalProf ?? false;
 
     _draft = CreatureDraft(
       armorClass: CreatureArmorClassDraft(
@@ -106,6 +132,44 @@ class _StatblockEditorForm extends State<StatblockEditorForm> {
         isIntProf: savingThrows?.intelligence != null,
         isWisProf: savingThrows?.wisdom != null,
         isChaProf: savingThrows?.charisma != null,
+      ),
+      skills: CreatureSkillsDraft(
+        athletics: skills?.athletics,
+        isAthleticsProf: isAthletics,
+        acrobatics: skills?.acrobatics,
+        isAcrobaticsProf: isAcrobatics,
+        sleightOfHand: skills?.sleightOfHand,
+        isSleightOfHandProf: isSleightHand,
+        stealth: skills?.stealth,
+        isStealthProf: isStealth,
+        arcana: skills?.arcana,
+        isArcanaProf: isArcana,
+        history: skills?.history,
+        isHistoryProf: isHistory,
+        investigation: skills?.investigation,
+        isInvestigationProf: isInvestigation,
+        nature: skills?.nature,
+        isNatureProf: isNature,
+        religion: skills?.religion,
+        isReligionProf: isReligion,
+        animalHandling: skills?.animalHandling,
+        isAnimalHandlingProf: isAnimalHandling,
+        insight: skills?.insight,
+        isInsightProf: isInsight,
+        medicine: skills?.medicine,
+        isMedicineProf: isMedicine,
+        perception: skills?.perception,
+        isPerceptionProf: isPerception,
+        persuasion: skills?.persuasion,
+        isPersuasionProf: isPersuasion,
+        survival: skills?.survival,
+        isSurvivalProf: isSurvival,
+        deception: skills?.deception,
+        isDeceptionProf: isDeception,
+        intimidation: skills?.intimidation,
+        isIntimidationProf: isIntimidation,
+        performance: skills?.performance,
+        isPerformanceProf: isPerformance,
       ),
       traits: traits
           .map(
@@ -175,6 +239,25 @@ class _StatblockEditorForm extends State<StatblockEditorForm> {
     _draft.savingThrows.isWisProf = isWisChecked;
     _draft.savingThrows.isChaProf = isChaChecked;
 
+    _draft.skills?.isAcrobaticsProf = isAcrobatics;
+    _draft.skills?.isAnimalHandlingProf = isAnimalHandling;
+    _draft.skills?.isArcanaProf = isArcana;
+    _draft.skills?.isAthleticsProf = isAthletics;
+    _draft.skills?.isDeceptionProf = isDeception;
+    _draft.skills?.isHistoryProf = isHistory;
+    _draft.skills?.isInsightProf = isInsight;
+    _draft.skills?.isIntimidationProf = isIntimidation;
+    _draft.skills?.isInvestigationProf = isInvestigation;
+    _draft.skills?.isMedicineProf = isMedicine;
+    _draft.skills?.isNatureProf = isNature;
+    _draft.skills?.isPerceptionProf = isPerception;
+    _draft.skills?.isPerformanceProf = isPerformance;
+    _draft.skills?.isPersuasionProf = isPersuasion;
+    _draft.skills?.isReligionProf = isReligion;
+    _draft.skills?.isSleightOfHandProf = isSleightHand;
+    _draft.skills?.isStealthProf = isStealth;
+    _draft.skills?.isSurvivalProf = isSurvival;
+
     _draft.abilityScores.strengthModifier = abilityModifier(
       _draft.abilityScores.strength,
     );
@@ -230,6 +313,11 @@ class _StatblockEditorForm extends State<StatblockEditorForm> {
               ),
               StatblockSection(
                 child: TextFormField(
+                  initialValue: c == null
+                      ? null
+                      : widget.isEditing
+                      ? c.name
+                      : '${c.name} (Copy)',
                   style: Theme.of(context).textTheme.titleLarge,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(),
@@ -405,7 +493,7 @@ class _StatblockEditorForm extends State<StatblockEditorForm> {
                         ? constraints.maxWidth
                         : columnWidth;
                     final double sensesWidth = remaining >= columnWidth
-                        ? remaining
+                        ? remaining - 100
                         : maxAvailable;
 
                     return Wrap(
@@ -610,7 +698,8 @@ class _StatblockEditorForm extends State<StatblockEditorForm> {
                             ],
                           ),
                         ),
-                        if (remaining >= columnWidth) StatblockVerticalDivider(height: checkBoxTableHeight),
+                        if (remaining >= columnWidth)
+                          StatblockVerticalDivider(height: checkBoxTableHeight),
                         // ----- Column 2: skills (first half) -----
                         SizedBox(
                           height: checkBoxTableHeight,
@@ -979,8 +1068,9 @@ class _StatblockEditorForm extends State<StatblockEditorForm> {
                                 _draft.actions![index].name = value,
                           ),
                           DropdownMenu<ActionType>(
-                            initialSelection: ActionType.action,
+                            initialSelection: action.type ?? ActionType.action,
                             onSelected: (ActionType? value) {
+                              if (value == null) return;
                               setState(
                                 () => _draft.actions![index].type = value,
                               );

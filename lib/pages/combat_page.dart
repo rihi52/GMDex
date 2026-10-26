@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:moonscribe/theme/apptheme.dart';
-import 'package:moonscribe/models/creature.dart';
-import 'package:moonscribe/components/creature_card.dart';
-import 'package:moonscribe/components/player_card.dart';
-import 'package:moonscribe/models/combat.dart';
-import 'package:moonscribe/database/read.dart';
-import 'package:moonscribe/components/combatant_card.dart';
+import 'package:drift/drift.dart' show OrderingTerm;
+import 'package:gmdex/theme/apptheme.dart';
+import 'package:gmdex/components/creature_card.dart';
+import 'package:gmdex/components/player_card.dart';
+import 'package:gmdex/models/combat.dart';
+import 'package:gmdex/components/combatant_card.dart';
+import 'package:gmdex/database/database.dart';
+import 'package:gmdex/main.dart';
 
 class StartCombatPage extends StatefulWidget {
   const StartCombatPage({super.key});
@@ -22,11 +23,8 @@ class _StartCombatPageState extends State<StartCombatPage> {
   final _playerSearchController = SearchController();
   final _creatureSearchController = SearchController();
 
-  List<dynamic> _allMonsters = [];
-  List<dynamic> _allMonsterFilter = [];
-  int? _selectedIndex;
-  Creature? _selectedCreature;
-  Map<String, dynamic> _legendaryGroups = {};
+  List<CreatureRow> _allCreatures = [];
+  int? _selectedId; // creature id, so the highlight survives filtering
   String? playerSearchTerm;
   String? creatureSearchTerm;
   late Encounter currentEncounter;
@@ -100,13 +98,11 @@ class _StartCombatPageState extends State<StartCombatPage> {
   }
 
   Future<void> _loadData() async {
-    final monstersJson = await loadMonsters();
-    final legendaryGroups = await loadLegendaryGroups();
-    setState(() {
-      _allMonsters = monstersJson['monster'] as List;
-      _allMonsterFilter = _allMonsters;
-      _legendaryGroups = legendaryGroups;
-    });
+    final rows = await (database.select(
+      database.creatures,
+    )..orderBy([(c) => OrderingTerm.asc(c.name)])).get();
+    if (!mounted) return;
+    setState(() => _allCreatures = rows);
   }
 
   void _start() {
@@ -121,16 +117,13 @@ class _StartCombatPageState extends State<StartCombatPage> {
 
   // ---------- Shared pieces used by both layouts ----------
 
-  List<dynamic> get _visibleMonsters =>
-      (creatureSearchTerm == null || creatureSearchTerm!.isEmpty)
-      ? _allMonsters
-      : _allMonsters
-            .where(
-              (monster) => monster['name'].toString().toLowerCase().contains(
-                creatureSearchTerm!.toLowerCase(),
-              ),
-            )
-            .toList();
+  List<CreatureRow> get _visibleCreatures {
+    final term = creatureSearchTerm?.toLowerCase() ?? '';
+    if (term.isEmpty) return _allCreatures;
+    return _allCreatures
+        .where((c) => c.name.toLowerCase().contains(term))
+        .toList();
+  }
 
   List<
     ({
@@ -189,38 +182,33 @@ class _StartCombatPageState extends State<StartCombatPage> {
   }
 
   Widget _creatureList(EdgeInsets padding) {
-    final visibleMonsters = _visibleMonsters;
+    final visibleCreatures = _visibleCreatures;
     return ListView.builder(
       padding: padding,
-      itemCount: visibleMonsters.length,
+      itemCount: visibleCreatures.length,
       itemBuilder: (context, index) {
-        final data = visibleMonsters[index];
+        final row = visibleCreatures[index];
         return SizedBox(
           height: 100,
           child: CreatureCard(
-            name: data['name'] ?? '',
-            type: data['type'] is String
-                ? data['type']
-                : (data['type']?['type'] ?? ''),
-            size: sizeNames[data['size']?[0]] ?? '',
-            cr: data['cr'] is Map
-                ? data['cr']['cr']?.toString() ?? '0'
-                : data['cr']?.toString() ?? '0',
-            source: data['source'] ?? '',
-            selected: _selectedIndex == index,
+            name: row.name,
+            type: row.type ?? '',
+            size: row.size ?? '',
+            cr: row.challengeRating ?? '0',
+            source: row.source,
+            selected: _selectedId == row.id,
             onTap: () {
               setState(() {
-                _selectedIndex = index;
-                _selectedCreature = parseCreature(data, _legendaryGroups);
+                _selectedId = row.id;
                 if (!currentEncounter.combatants.any(
-                  (combatant) => combatant.name == _selectedCreature!.name,
+                  (combatant) => combatant.name == row.name,
                 )) {
                   currentEncounter.combatants.add(
                     Combatant(
-                      name: _selectedCreature!.name,
+                      name: row.name,
                       isPlayer: false,
-                      currentHitPoints: _selectedCreature!.hitPoints,
-                      maxHitPoints: _selectedCreature!.hitPoints,
+                      currentHitPoints: row.hitPoints ?? 0,
+                      maxHitPoints: row.hitPoints ?? 0,
                       initiative: 0,
                       quantity: 1,
                     ),
@@ -242,8 +230,9 @@ class _StartCombatPageState extends State<StartCombatPage> {
         final combatant = currentEncounter.combatants[index];
         return CombatantCard(
           key: ObjectKey(combatant),
-          combatant: currentEncounter.combatants[index],
-          onDelete: () => setState( ()=> currentEncounter.combatants.remove(combatant),),
+          combatant: combatant,
+          onDelete: () =>
+              setState(() => currentEncounter.combatants.remove(combatant)),
         );
       },
     );
@@ -276,7 +265,11 @@ class _StartCombatPageState extends State<StartCombatPage> {
       child: SearchAnchor(
         searchController: searchController,
         builder: (BuildContext context, SearchController controller) {
-          return SearchBar(controller: controller, hintText: hint, onChanged: onChanged);
+          return SearchBar(
+            controller: controller,
+            hintText: hint,
+            onChanged: onChanged,
+          );
         },
         suggestionsBuilder:
             (BuildContext context, SearchController controller) {
@@ -325,10 +318,10 @@ class _StartCombatPageState extends State<StartCombatPage> {
               'Search Creatures',
               _creatureSearchController,
               (value) => setState(() => creatureSearchTerm = value),
-              () => _allMonsterFilter
+              () => _visibleCreatures
                   .map<Widget>(
-                    (monster) => Text(
-                      monster['name'] ?? '',
+                    (creature) => Text(
+                      creature.name,
                       style: Theme.of(context).textTheme.labelSmall,
                     ),
                   )
@@ -441,7 +434,7 @@ class _StartCombatPageState extends State<StartCombatPage> {
                 child: Text(
                   'No combatants yet.\nUse the buttons above to add players or creatures.',
                   textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.titleMedium,
+                  style: Theme.of(context).textTheme.bodyMedium,
                 ),
               )
             : _encounterList(),

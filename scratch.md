@@ -1,23 +1,12 @@
 
 # Scratch
 
-``` dart
-monster == null
-    ? const Text("Loading...")
-    : Text(monster!.name),
-monster == null
-    ? const Text("Loading...")
-    : Text(monster!.size),
-```
+## TODO
 
+- Add sorting - might not do anymore
+- Write to database from app
 
-## Tables
-### Players
-id
-name
-class
-level?
-hitPoints?
-armorClass?
-originalCampaign
-```
+## Done
+
+- Add filtering
+- Import creatures to database

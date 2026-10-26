@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:moonscribe/pages/combat_page.dart';
-import 'package:moonscribe/pages/encounters_page.dart';
-import 'package:moonscribe/pages/players_page.dart';
-import 'package:moonscribe/pages/creatures_page.dart';
+import 'package:gmdex/pages/combat_page.dart';
+import 'package:gmdex/pages/encounters_page.dart';
+import 'package:gmdex/pages/players_page.dart';
+import 'package:gmdex/pages/creatures_page.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
@@ -34,7 +34,7 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Text(
-              'MOONSCRIBE',
+              'GMDex',
               style: Theme.of(context).textTheme.headlineLarge,
             ),
             const SizedBox(height: 20),

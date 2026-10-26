@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:moonscribe/theme/apptheme.dart';
+import 'package:gmdex/theme/apptheme.dart';
 
 class PlayerCard extends StatelessWidget {
   final bool selected;

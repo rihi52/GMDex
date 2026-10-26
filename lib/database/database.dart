@@ -12,8 +12,18 @@ class Players extends Table {
   TextColumn get pOriginalCampaign => text().nullable()();
 }
 
-// DataClassName avoids clashing with your existing Creature, CreatureTrait,
-// CreatureAction and CreatureSpellcasting model classes.
+@DataClassName('NoteRow')
+@TableIndex(name: 'idx_note_creature', columns: {#creatureId})
+class Notes extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get creatureId =>
+      integer().references(Creatures, #id, onDelete: KeyAction.cascade)();
+  TextColumn get body => text()();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+}
+
+// DataClassName avoids clashing with your Creature model class.
 @DataClassName('CreatureRow')
 @TableIndex(
   name: 'idx_creature_name_source',
@@ -38,7 +48,7 @@ class Creatures extends Table {
 
   IntColumn get armorClass => integer().nullable()(); // first ac entry
   TextColumn get armorClassType => text().nullable()();
-  TextColumn get armorClassOther => text().nullable()(); // '15 with mage armor'
+  TextColumn get armorClassOther => text().nullable()(); // '15 (with mage armor)'
   IntColumn get hitPoints => integer().nullable()();
   TextColumn get hitPointFormula => text().nullable()();
 
@@ -81,9 +91,9 @@ class CreatureActions extends Table {
   IntColumn get creatureId =>
       integer().references(Creatures, #id, onDelete: KeyAction.cascade)();
   TextColumn get name => text()();
-  TextColumn get description => text()(); // was `text`
+  TextColumn get description => text()();
   IntColumn get sortOrder => integer()();
-  // 'action', 'bonus', 'reaction', 'legendary'
+  // 'action', 'bonus', 'reaction', 'legendary', 'special', 'villain'
   TextColumn get kind => text()();
 }
 
@@ -130,8 +140,8 @@ class CreatureSpells extends Table {
 class CreatureSaves extends Table {
   IntColumn get creatureId =>
       integer().references(Creatures, #id, onDelete: KeyAction.cascade)();
-  TextColumn get ability => text()(); // 'str', 'dex', ...
-  IntColumn get bonus => integer()(); // was text '+6'
+  TextColumn get ability => text()(); // 'str', 'dex', 'con', 'int', 'wis', 'cha'
+  IntColumn get bonus => integer()(); // JSON '+6' parsed to 6
 
   @override
   Set<Column> get primaryKey => {creatureId, ability};
@@ -141,7 +151,7 @@ class CreatureSaves extends Table {
 class CreatureSkills extends Table {
   IntColumn get creatureId =>
       integer().references(Creatures, #id, onDelete: KeyAction.cascade)();
-  TextColumn get skill => text()(); // 'sleight of hand', ...
+  TextColumn get skill => text()(); // camelCase: 'sleightOfHand', 'animalHandling'
   IntColumn get bonus => integer()();
 
   @override
@@ -205,19 +215,24 @@ class LegendaryGroupEntries extends Table {
   IntColumn get sortOrder => integer()();
 }
 
-@DriftDatabase(tables: [
-  Players,
-  Creatures,
-  CreatureActions,
-  CreatureTraits,
-  CreatureSpellcastings,
-  CreatureSpells,
-  CreatureSaves,
-  CreatureSkills,
-  CreatureSenses,
-  CreatureLanguages,
-  CreatureEnvironments,
-])
+@DriftDatabase(
+  tables: [
+    Players,
+    Notes,
+    Creatures,
+    CreatureActions,
+    CreatureTraits,
+    CreatureSpellcastings,
+    CreatureSpells,
+    CreatureSaves,
+    CreatureSkills,
+    CreatureSenses,
+    CreatureLanguages,
+    CreatureEnvironments,
+    LegendaryGroups,
+    LegendaryGroupEntries,
+  ],
+)
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.e);
 

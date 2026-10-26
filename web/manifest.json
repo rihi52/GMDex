@@ -1,6 +1,6 @@
 {
-    "name": "moonscribe",
-    "short_name": "moonscribe",
+    "name": "GMDex",
+    "short_name": "GMDex",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

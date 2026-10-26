@@ -1,4 +1,4 @@
-package com.example.moonscribe
+package com.example.GMDex
 
 import io.flutter.embedding.android.FlutterActivity
 

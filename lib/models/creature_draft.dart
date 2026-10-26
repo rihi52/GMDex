@@ -1,4 +1,4 @@
-import 'package:moonscribe/models/creature.dart';
+import 'package:gmdex/models/creature.dart';
 
 class CreatureDraft {
   String name;
@@ -399,7 +399,11 @@ class CreatureActionDraft {
   String description;
   ActionType? type;
 
-  CreatureActionDraft({this.name = '', this.description = '', this.type});
+  CreatureActionDraft({
+    this.name = '',
+    this.description = '',
+    this.type = ActionType.action,
+  });
 }
 
 class CreatureTraitDraft {

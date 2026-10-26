@@ -1,8 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/services.dart';
-import 'package:moonscribe/models/creature.dart';
-import 'package:moonscribe/components/statblock.dart';
-import 'package:moonscribe/components/creature_calculations.dart';
+import 'package:gmdex/models/creature.dart';
+import 'package:gmdex/components/creature_calculations.dart';
 
 Future<dynamic> loadMonsters() async {
   final jsonString = await rootBundle.loadString('assets/bestiary-mm.json');

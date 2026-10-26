@@ -1,7 +1,7 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
-import 'package:moonscribe/theme/apptheme.dart';
-import 'package:moonscribe/models/combat.dart';
+import 'package:gmdex/theme/apptheme.dart';
+import 'package:gmdex/models/combat.dart';
 
 class CombatantCard extends StatelessWidget {
   final bool selected;

@@ -10,6 +10,7 @@ class AppColors {
   static const Color hoverGrey = Colors.grey;
   static const Color cardBackground = Color.fromARGB(255, 68, 68, 68);
   static const Color cardSelected = Color.fromARGB(120, 255, 255, 255);
+  static const Color filterText = Color.fromARGB(120, 255, 255, 255);
 
   AppColors._(); // Private constructor to prevent instantiation
 }
@@ -63,7 +64,7 @@ class AppTheme {
           shadows: [
             Shadow(
               color: Colors.black.withValues(alpha: 0.8),
-              offset: Offset(6, 6),
+              offset: Offset(3, 3),
               blurRadius: 4,
             ),
           ],
@@ -71,7 +72,7 @@ class AppTheme {
         headlineMedium: GoogleFonts.modernAntiqua(
           fontSize: 32,
           fontWeight: FontWeight.bold,
-          color: AppColors.primary,
+          color: AppColors.cardSelected,
         ),
         headlineSmall: GoogleFonts.modernAntiqua(
           fontSize: 16,
@@ -80,9 +81,9 @@ class AppTheme {
           color: AppColors.primary,
         ),
         bodyMedium: GoogleFonts.metamorphous(
-          fontSize: 24,
-          fontWeight: FontWeight.bold,
-          color: AppColors.primary,
+          fontSize: 16,
+          fontWeight: FontWeight.normal,
+          color: AppColors.filterText,
         ),
         bodySmall: GoogleFonts.metamorphous(
           fontSize: 16,
@@ -106,7 +107,7 @@ class AppTheme {
           shadows: [
             Shadow(
               color: Colors.black.withValues(alpha: 0.4),
-              offset: Offset(4, 4),
+              offset: Offset(2, 2),
               blurRadius: 2,
             ),
           ],
@@ -118,7 +119,7 @@ class AppTheme {
           shadows: [
             Shadow(
               color: Colors.black.withValues(alpha: 0.4),
-              offset: Offset(2, 2),
+              offset: Offset(1, 1),
               blurRadius: 2,
             ),
           ],

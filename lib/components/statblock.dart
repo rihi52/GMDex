@@ -1,12 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:moonscribe/models/creature.dart';
-import 'package:moonscribe/components/creature_calculations.dart';
-import 'package:moonscribe/theme/apptheme.dart';
+import 'package:gmdex/models/creature.dart';
+import 'package:gmdex/components/creature_calculations.dart';
+import 'package:gmdex/theme/apptheme.dart';
 
 class CreatureStatBlock extends StatelessWidget {
   final Creature? creature;
+  final VoidCallback? onEditPressed;
+  final VoidCallback? onCopyPressed;
+  final VoidCallback? onNotesPressed;
 
-  const CreatureStatBlock({super.key, required this.creature});
+  const CreatureStatBlock({
+    super.key,
+    required this.creature,
+    this.onEditPressed,
+    this.onCopyPressed,
+    this.onNotesPressed,
+  });
 
   Widget _abilityScores(BuildContext context) {
     final a = creature!.abilityScores;
@@ -80,6 +89,42 @@ class CreatureStatBlock extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                SizedBox(
+                  width: 100,
+                  child: ElevatedButton(
+                    onPressed: onEditPressed,
+                    child: Text(
+                      'Edit',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: 100,
+                  child: ElevatedButton(
+                    onPressed: onCopyPressed,
+                    child: Text(
+                      'Copy',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ),
+                ),
+                if (onNotesPressed != null)
+                  SizedBox(
+                    width: 100,
+                    child: ElevatedButton(
+                      onPressed: onNotesPressed,
+                      child: Text(
+                        'Notes',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
             Container(
               padding: const EdgeInsets.only(
                 bottom: AppSpacing.spacingSmall,
@@ -164,44 +209,36 @@ class CreatureStatBlock extends StatelessWidget {
             StatblockSection(
               child: Column(
                 children: [
-                  Row(
-                    children: [
-                      Text(
-                        'Saving Throws: ',
-                        style: Theme.of(context).textTheme.titleSmall,
-                      ),
-                      if (creature!.savingThrows.strength != null)
+                  if (creature!.savingThrows.strength != null ||
+                      creature!.savingThrows.dexterity != null ||
+                      creature!.savingThrows.constitution != null ||
+                      creature!.savingThrows.intelligence != null ||
+                      creature!.savingThrows.wisdom != null ||
+                      creature!.savingThrows.charisma != null)
+                    Row(
+                      children: [
+                        Text(
+                          'Saving Throws: ',
+                          style: Theme.of(context).textTheme.titleSmall,
+                        ),
                         StatblockSmallText(
-                          data:
+                          data: [
+                            if (creature!.savingThrows.strength != null)
                               'Str ${creature!.savingThrows.strength! >= 0 ? '+' : ''}${creature!.savingThrows.strength}',
+                            if (creature!.savingThrows.dexterity != null)
+                              'Dex ${creature!.savingThrows.dexterity! >= 0 ? '+' : ''}${creature!.savingThrows.dexterity}',
+                            if (creature!.savingThrows.constitution != null)
+                              'Con ${creature!.savingThrows.constitution! >= 0 ? '+' : ''}${creature!.savingThrows.constitution}',
+                            if (creature!.savingThrows.intelligence != null)
+                              'Int ${creature!.savingThrows.intelligence! >= 0 ? '+' : ''}${creature!.savingThrows.intelligence}',
+                            if (creature!.savingThrows.wisdom != null)
+                              'Wis ${creature!.savingThrows.wisdom! >= 0 ? '+' : ''}${creature!.savingThrows.wisdom}',
+                            if (creature!.savingThrows.charisma != null)
+                              'Cha ${creature!.savingThrows.charisma! >= 0 ? '+' : ''}${creature!.savingThrows.charisma}',
+                          ].join(', '),
                         ),
-                      if (creature!.savingThrows.dexterity != null)
-                        StatblockSmallText(
-                          data:
-                              'Dex ${creature!.savingThrows.dexterity! >= 0 ? '+' : ''}${creature!.savingThrows.dexterity}, ',
-                        ),
-                      if (creature!.savingThrows.constitution != null)
-                        StatblockSmallText(
-                          data:
-                              'Con ${creature!.savingThrows.constitution! >= 0 ? '+' : ''}${creature!.savingThrows.constitution}, ',
-                        ),
-                      if (creature!.savingThrows.intelligence != null)
-                        StatblockSmallText(
-                          data:
-                              'Int ${creature!.savingThrows.intelligence! >= 0 ? '+' : ''}${creature!.savingThrows.intelligence}, ',
-                        ),
-                      if (creature!.savingThrows.wisdom != null)
-                        StatblockSmallText(
-                          data:
-                              'Wis ${creature!.savingThrows.wisdom! >= 0 ? '+' : ''}${creature!.savingThrows.wisdom}, ',
-                        ),
-                      if (creature!.savingThrows.charisma != null)
-                        StatblockSmallText(
-                          data:
-                              'Cha ${creature!.savingThrows.charisma! >= 0 ? '+' : ''}${creature!.savingThrows.charisma}, ',
-                        ),
-                    ],
-                  ),
+                      ],
+                    ),
                   Row(
                     children: [
                       Text(

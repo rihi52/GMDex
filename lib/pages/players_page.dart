@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:moonscribe/components/player_details.dart';
-import 'package:moonscribe/components/player_card.dart';
-import 'package:moonscribe/database/database.dart';
-import 'package:moonscribe/theme/apptheme.dart';
-import 'package:moonscribe/main.dart';
+import 'package:gmdex/components/player_details.dart';
+// import 'package:gmdex/components/player_card.dart';
+// import 'package:gmdex/database/database.dart';
+import 'package:gmdex/theme/apptheme.dart';
+// import 'package:gmdex/main.dart';
 
 class PlayersPage extends StatefulWidget {
   const PlayersPage({super.key});
@@ -17,6 +17,24 @@ class _PlayersPageState extends State<PlayersPage> {
 
   @override
   Widget build(BuildContext context) {
+    Widget navTitle(String title, bool selected) => Text(
+      title,
+      style: selected
+          ? const TextStyle(
+              shadows: [
+                Shadow(color: AppColors.appBlack, offset: Offset(-1, -1)),
+                Shadow(color: AppColors.appBlack, offset: Offset(0, -1)),
+                Shadow(color: AppColors.appBlack, offset: Offset(1, -1)),
+                Shadow(color: AppColors.appBlack, offset: Offset(-1, 0)),
+                Shadow(color: AppColors.appBlack, offset: Offset(1, 0)),
+                Shadow(color: AppColors.appBlack, offset: Offset(-1, 1)),
+                Shadow(color: AppColors.appBlack, offset: Offset(0, 1)),
+                Shadow(color: AppColors.appBlack, offset: Offset(1, 1)),
+              ],
+            )
+          : null,
+    );
+
     return Scaffold(
       body: Row(
         children: [
@@ -38,7 +56,7 @@ class _PlayersPageState extends State<PlayersPage> {
                 ),
                 ListTile(
                   selected: _selectedIndex == 0,
-                  title: const Text('Browse'),
+                  title: navTitle('Browse', _selectedIndex == 0),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                     side: BorderSide(
@@ -52,7 +70,7 @@ class _PlayersPageState extends State<PlayersPage> {
                 ),
                 ListTile(
                   selected: _selectedIndex == 1,
-                  title: const Text('Create'),
+                  title: navTitle('Create', _selectedIndex == 1),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                     side: BorderSide(
@@ -145,51 +163,51 @@ class _BrowsePlayerWidget extends State<BrowsePlayerWidget> {
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            StreamBuilder<List<Player>>(
-              stream: database.select(database.players).watch(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Expanded(
-                    flex: 3,
-                    child: Center(child: CircularProgressIndicator()),
-                  );
-                }
-                if (snapshot.hasError) {
-                  return Expanded(
-                    flex: 3,
-                    child: Center(child: Text('Error: ${snapshot.error}')),
-                  );
-                }
+            // StreamBuilder<List<Player>>(
+            //   stream: database.select(database.players).watch(),
+            //   builder: (context, snapshot) {
+            //     if (snapshot.connectionState == ConnectionState.waiting) {
+            //       return const Expanded(
+            //         flex: 3,
+            //         child: Center(child: CircularProgressIndicator()),
+            //       );
+            //     }
+            //     if (snapshot.hasError) {
+            //       return Expanded(
+            //         flex: 3,
+            //         child: Center(child: Text('Error: ${snapshot.error}')),
+            //       );
+            //     }
 
-                final players = snapshot.data ?? [];
+            //     final players = snapshot.data ?? [];
 
-                return Expanded(
-                  flex: 3,
-                  child: SizedBox(
-                    width: 350,
-                    child: ListView.builder(
-                      padding: const EdgeInsets.only(right: 8),
-                      itemCount: players.length,
-                      itemBuilder: (context, index) {
-                        final player = players[index];
+            //     return Expanded(
+            //       flex: 3,
+            //       child: SizedBox(
+            //         width: 350,
+            //         child: ListView.builder(
+            //           padding: const EdgeInsets.only(right: 8),
+            //           itemCount: players.length,
+            //           itemBuilder: (context, index) {
+            //             final player = players[index];
 
-                        return SizedBox(
-                          height: 100,
-                          child: PlayerCard(
-                            name: player.pName,
-                            pClass: player.pClass,
-                            level: player.pLevel ?? 1,
-                            originalCampaign: player.pOriginalCampaign,
-                            selected: false,
-                            onTap: () {},
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                );
-              },
-            ),
+            //             return SizedBox(
+            //               height: 100,
+            //               child: PlayerCard(
+            //                 name: player.pName,
+            //                 pClass: player.pClass,
+            //                 level: player.pLevel ?? 1,
+            //                 originalCampaign: player.pOriginalCampaign,
+            //                 selected: false,
+            //                 onTap: () {},
+            //               ),
+            //             );
+            //           },
+            //         ),
+            //       ),
+            //     );
+            //   },
+            // ),
             Container(width: 8),
             Expanded(
               flex: 7,

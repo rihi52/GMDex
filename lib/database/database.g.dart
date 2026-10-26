@@ -2693,6 +2693,356 @@ class CreaturesCompanion extends UpdateCompanion<CreatureRow> {
   }
 }
 
+class $NotesTable extends Notes with TableInfo<$NotesTable, NoteRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $NotesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _creatureIdMeta = const VerificationMeta(
+    'creatureId',
+  );
+  @override
+  late final GeneratedColumn<int> creatureId = GeneratedColumn<int>(
+    'creature_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES creatures (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _bodyMeta = const VerificationMeta('body');
+  @override
+  late final GeneratedColumn<String> body = GeneratedColumn<String>(
+    'body',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    creatureId,
+    body,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'notes';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<NoteRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('creature_id')) {
+      context.handle(
+        _creatureIdMeta,
+        creatureId.isAcceptableOrUnknown(data['creature_id']!, _creatureIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_creatureIdMeta);
+    }
+    if (data.containsKey('body')) {
+      context.handle(
+        _bodyMeta,
+        body.isAcceptableOrUnknown(data['body']!, _bodyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_bodyMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  NoteRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return NoteRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      creatureId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}creature_id'],
+      )!,
+      body: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}body'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $NotesTable createAlias(String alias) {
+    return $NotesTable(attachedDatabase, alias);
+  }
+}
+
+class NoteRow extends DataClass implements Insertable<NoteRow> {
+  final int id;
+  final int creatureId;
+  final String body;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const NoteRow({
+    required this.id,
+    required this.creatureId,
+    required this.body,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['creature_id'] = Variable<int>(creatureId);
+    map['body'] = Variable<String>(body);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  NotesCompanion toCompanion(bool nullToAbsent) {
+    return NotesCompanion(
+      id: Value(id),
+      creatureId: Value(creatureId),
+      body: Value(body),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory NoteRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return NoteRow(
+      id: serializer.fromJson<int>(json['id']),
+      creatureId: serializer.fromJson<int>(json['creatureId']),
+      body: serializer.fromJson<String>(json['body']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'creatureId': serializer.toJson<int>(creatureId),
+      'body': serializer.toJson<String>(body),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  NoteRow copyWith({
+    int? id,
+    int? creatureId,
+    String? body,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) => NoteRow(
+    id: id ?? this.id,
+    creatureId: creatureId ?? this.creatureId,
+    body: body ?? this.body,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  NoteRow copyWithCompanion(NotesCompanion data) {
+    return NoteRow(
+      id: data.id.present ? data.id.value : this.id,
+      creatureId: data.creatureId.present
+          ? data.creatureId.value
+          : this.creatureId,
+      body: data.body.present ? data.body.value : this.body,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('NoteRow(')
+          ..write('id: $id, ')
+          ..write('creatureId: $creatureId, ')
+          ..write('body: $body, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, creatureId, body, createdAt, updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is NoteRow &&
+          other.id == this.id &&
+          other.creatureId == this.creatureId &&
+          other.body == this.body &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class NotesCompanion extends UpdateCompanion<NoteRow> {
+  final Value<int> id;
+  final Value<int> creatureId;
+  final Value<String> body;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  const NotesCompanion({
+    this.id = const Value.absent(),
+    this.creatureId = const Value.absent(),
+    this.body = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+  });
+  NotesCompanion.insert({
+    this.id = const Value.absent(),
+    required int creatureId,
+    required String body,
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+  }) : creatureId = Value(creatureId),
+       body = Value(body);
+  static Insertable<NoteRow> custom({
+    Expression<int>? id,
+    Expression<int>? creatureId,
+    Expression<String>? body,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (creatureId != null) 'creature_id': creatureId,
+      if (body != null) 'body': body,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+    });
+  }
+
+  NotesCompanion copyWith({
+    Value<int>? id,
+    Value<int>? creatureId,
+    Value<String>? body,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+  }) {
+    return NotesCompanion(
+      id: id ?? this.id,
+      creatureId: creatureId ?? this.creatureId,
+      body: body ?? this.body,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (creatureId.present) {
+      map['creature_id'] = Variable<int>(creatureId.value);
+    }
+    if (body.present) {
+      map['body'] = Variable<String>(body.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('NotesCompanion(')
+          ..write('id: $id, ')
+          ..write('creatureId: $creatureId, ')
+          ..write('body: $body, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $CreatureActionsTable extends CreatureActions
     with TableInfo<$CreatureActionsTable, CreatureActionRow> {
   @override
@@ -5659,6 +6009,455 @@ class CreatureEnvironmentsCompanion
   }
 }
 
+class $LegendaryGroupEntriesTable extends LegendaryGroupEntries
+    with TableInfo<$LegendaryGroupEntriesTable, LegendaryGroupEntryRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LegendaryGroupEntriesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _groupIdMeta = const VerificationMeta(
+    'groupId',
+  );
+  @override
+  late final GeneratedColumn<int> groupId = GeneratedColumn<int>(
+    'group_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES legendary_groups (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _sectionMeta = const VerificationMeta(
+    'section',
+  );
+  @override
+  late final GeneratedColumn<String> section = GeneratedColumn<String>(
+    'section',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _kindMeta = const VerificationMeta('kind');
+  @override
+  late final GeneratedColumn<String> kind = GeneratedColumn<String>(
+    'kind',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+    'title',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _bodyMeta = const VerificationMeta('body');
+  @override
+  late final GeneratedColumn<String> body = GeneratedColumn<String>(
+    'body',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sortOrderMeta = const VerificationMeta(
+    'sortOrder',
+  );
+  @override
+  late final GeneratedColumn<int> sortOrder = GeneratedColumn<int>(
+    'sort_order',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    groupId,
+    section,
+    kind,
+    title,
+    body,
+    sortOrder,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'legendary_group_entries';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LegendaryGroupEntryRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('group_id')) {
+      context.handle(
+        _groupIdMeta,
+        groupId.isAcceptableOrUnknown(data['group_id']!, _groupIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_groupIdMeta);
+    }
+    if (data.containsKey('section')) {
+      context.handle(
+        _sectionMeta,
+        section.isAcceptableOrUnknown(data['section']!, _sectionMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_sectionMeta);
+    }
+    if (data.containsKey('kind')) {
+      context.handle(
+        _kindMeta,
+        kind.isAcceptableOrUnknown(data['kind']!, _kindMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_kindMeta);
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+        _titleMeta,
+        title.isAcceptableOrUnknown(data['title']!, _titleMeta),
+      );
+    }
+    if (data.containsKey('body')) {
+      context.handle(
+        _bodyMeta,
+        body.isAcceptableOrUnknown(data['body']!, _bodyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_bodyMeta);
+    }
+    if (data.containsKey('sort_order')) {
+      context.handle(
+        _sortOrderMeta,
+        sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_sortOrderMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  LegendaryGroupEntryRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LegendaryGroupEntryRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      groupId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}group_id'],
+      )!,
+      section: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}section'],
+      )!,
+      kind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}kind'],
+      )!,
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      ),
+      body: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}body'],
+      )!,
+      sortOrder: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sort_order'],
+      )!,
+    );
+  }
+
+  @override
+  $LegendaryGroupEntriesTable createAlias(String alias) {
+    return $LegendaryGroupEntriesTable(attachedDatabase, alias);
+  }
+}
+
+class LegendaryGroupEntryRow extends DataClass
+    implements Insertable<LegendaryGroupEntryRow> {
+  final int id;
+  final int groupId;
+  final String section;
+  final String kind;
+  final String? title;
+  final String body;
+  final int sortOrder;
+  const LegendaryGroupEntryRow({
+    required this.id,
+    required this.groupId,
+    required this.section,
+    required this.kind,
+    this.title,
+    required this.body,
+    required this.sortOrder,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['group_id'] = Variable<int>(groupId);
+    map['section'] = Variable<String>(section);
+    map['kind'] = Variable<String>(kind);
+    if (!nullToAbsent || title != null) {
+      map['title'] = Variable<String>(title);
+    }
+    map['body'] = Variable<String>(body);
+    map['sort_order'] = Variable<int>(sortOrder);
+    return map;
+  }
+
+  LegendaryGroupEntriesCompanion toCompanion(bool nullToAbsent) {
+    return LegendaryGroupEntriesCompanion(
+      id: Value(id),
+      groupId: Value(groupId),
+      section: Value(section),
+      kind: Value(kind),
+      title: title == null && nullToAbsent
+          ? const Value.absent()
+          : Value(title),
+      body: Value(body),
+      sortOrder: Value(sortOrder),
+    );
+  }
+
+  factory LegendaryGroupEntryRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LegendaryGroupEntryRow(
+      id: serializer.fromJson<int>(json['id']),
+      groupId: serializer.fromJson<int>(json['groupId']),
+      section: serializer.fromJson<String>(json['section']),
+      kind: serializer.fromJson<String>(json['kind']),
+      title: serializer.fromJson<String?>(json['title']),
+      body: serializer.fromJson<String>(json['body']),
+      sortOrder: serializer.fromJson<int>(json['sortOrder']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'groupId': serializer.toJson<int>(groupId),
+      'section': serializer.toJson<String>(section),
+      'kind': serializer.toJson<String>(kind),
+      'title': serializer.toJson<String?>(title),
+      'body': serializer.toJson<String>(body),
+      'sortOrder': serializer.toJson<int>(sortOrder),
+    };
+  }
+
+  LegendaryGroupEntryRow copyWith({
+    int? id,
+    int? groupId,
+    String? section,
+    String? kind,
+    Value<String?> title = const Value.absent(),
+    String? body,
+    int? sortOrder,
+  }) => LegendaryGroupEntryRow(
+    id: id ?? this.id,
+    groupId: groupId ?? this.groupId,
+    section: section ?? this.section,
+    kind: kind ?? this.kind,
+    title: title.present ? title.value : this.title,
+    body: body ?? this.body,
+    sortOrder: sortOrder ?? this.sortOrder,
+  );
+  LegendaryGroupEntryRow copyWithCompanion(
+    LegendaryGroupEntriesCompanion data,
+  ) {
+    return LegendaryGroupEntryRow(
+      id: data.id.present ? data.id.value : this.id,
+      groupId: data.groupId.present ? data.groupId.value : this.groupId,
+      section: data.section.present ? data.section.value : this.section,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      title: data.title.present ? data.title.value : this.title,
+      body: data.body.present ? data.body.value : this.body,
+      sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LegendaryGroupEntryRow(')
+          ..write('id: $id, ')
+          ..write('groupId: $groupId, ')
+          ..write('section: $section, ')
+          ..write('kind: $kind, ')
+          ..write('title: $title, ')
+          ..write('body: $body, ')
+          ..write('sortOrder: $sortOrder')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, groupId, section, kind, title, body, sortOrder);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LegendaryGroupEntryRow &&
+          other.id == this.id &&
+          other.groupId == this.groupId &&
+          other.section == this.section &&
+          other.kind == this.kind &&
+          other.title == this.title &&
+          other.body == this.body &&
+          other.sortOrder == this.sortOrder);
+}
+
+class LegendaryGroupEntriesCompanion
+    extends UpdateCompanion<LegendaryGroupEntryRow> {
+  final Value<int> id;
+  final Value<int> groupId;
+  final Value<String> section;
+  final Value<String> kind;
+  final Value<String?> title;
+  final Value<String> body;
+  final Value<int> sortOrder;
+  const LegendaryGroupEntriesCompanion({
+    this.id = const Value.absent(),
+    this.groupId = const Value.absent(),
+    this.section = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.title = const Value.absent(),
+    this.body = const Value.absent(),
+    this.sortOrder = const Value.absent(),
+  });
+  LegendaryGroupEntriesCompanion.insert({
+    this.id = const Value.absent(),
+    required int groupId,
+    required String section,
+    required String kind,
+    this.title = const Value.absent(),
+    required String body,
+    required int sortOrder,
+  }) : groupId = Value(groupId),
+       section = Value(section),
+       kind = Value(kind),
+       body = Value(body),
+       sortOrder = Value(sortOrder);
+  static Insertable<LegendaryGroupEntryRow> custom({
+    Expression<int>? id,
+    Expression<int>? groupId,
+    Expression<String>? section,
+    Expression<String>? kind,
+    Expression<String>? title,
+    Expression<String>? body,
+    Expression<int>? sortOrder,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (groupId != null) 'group_id': groupId,
+      if (section != null) 'section': section,
+      if (kind != null) 'kind': kind,
+      if (title != null) 'title': title,
+      if (body != null) 'body': body,
+      if (sortOrder != null) 'sort_order': sortOrder,
+    });
+  }
+
+  LegendaryGroupEntriesCompanion copyWith({
+    Value<int>? id,
+    Value<int>? groupId,
+    Value<String>? section,
+    Value<String>? kind,
+    Value<String?>? title,
+    Value<String>? body,
+    Value<int>? sortOrder,
+  }) {
+    return LegendaryGroupEntriesCompanion(
+      id: id ?? this.id,
+      groupId: groupId ?? this.groupId,
+      section: section ?? this.section,
+      kind: kind ?? this.kind,
+      title: title ?? this.title,
+      body: body ?? this.body,
+      sortOrder: sortOrder ?? this.sortOrder,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (groupId.present) {
+      map['group_id'] = Variable<int>(groupId.value);
+    }
+    if (section.present) {
+      map['section'] = Variable<String>(section.value);
+    }
+    if (kind.present) {
+      map['kind'] = Variable<String>(kind.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (body.present) {
+      map['body'] = Variable<String>(body.value);
+    }
+    if (sortOrder.present) {
+      map['sort_order'] = Variable<int>(sortOrder.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LegendaryGroupEntriesCompanion(')
+          ..write('id: $id, ')
+          ..write('groupId: $groupId, ')
+          ..write('section: $section, ')
+          ..write('kind: $kind, ')
+          ..write('title: $title, ')
+          ..write('body: $body, ')
+          ..write('sortOrder: $sortOrder')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -5667,6 +6466,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     this,
   );
   late final $CreaturesTable creatures = $CreaturesTable(this);
+  late final $NotesTable notes = $NotesTable(this);
   late final $CreatureActionsTable creatureActions = $CreatureActionsTable(
     this,
   );
@@ -5681,6 +6481,12 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $CreatureLanguagesTable(this);
   late final $CreatureEnvironmentsTable creatureEnvironments =
       $CreatureEnvironmentsTable(this);
+  late final $LegendaryGroupEntriesTable legendaryGroupEntries =
+      $LegendaryGroupEntriesTable(this);
+  late final Index idxNoteCreature = Index(
+    'idx_note_creature',
+    'CREATE INDEX idx_note_creature ON notes (creature_id)',
+  );
   late final Index idxCreatureNameSource = Index(
     'idx_creature_name_source',
     'CREATE UNIQUE INDEX idx_creature_name_source ON creatures (name, source)',
@@ -5709,6 +6515,14 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     'idx_spell_spellcasting',
     'CREATE INDEX idx_spell_spellcasting ON creature_spells (spellcasting_id)',
   );
+  late final Index idxLegendaryGroupNameSource = Index(
+    'idx_legendary_group_name_source',
+    'CREATE UNIQUE INDEX idx_legendary_group_name_source ON legendary_groups (name, source)',
+  );
+  late final Index idxGroupEntryGroup = Index(
+    'idx_group_entry_group',
+    'CREATE INDEX idx_group_entry_group ON legendary_group_entries (group_id)',
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -5717,6 +6531,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     players,
     legendaryGroups,
     creatures,
+    notes,
     creatureActions,
     creatureTraits,
     creatureSpellcastings,
@@ -5726,6 +6541,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     creatureSenses,
     creatureLanguages,
     creatureEnvironments,
+    legendaryGroupEntries,
+    idxNoteCreature,
     idxCreatureNameSource,
     idxCreatureCr,
     idxCreatureType,
@@ -5733,6 +6550,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     idxTraitCreature,
     idxSpellcastingCreature,
     idxSpellSpellcasting,
+    idxLegendaryGroupNameSource,
+    idxGroupEntryGroup,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -5742,6 +6561,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('creatures', kind: UpdateKind.update)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'creatures',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('notes', kind: UpdateKind.delete)],
     ),
     WritePropagation(
       on: TableUpdateQuery.onTableName(
@@ -5805,6 +6631,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('creature_environments', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'legendary_groups',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('legendary_group_entries', kind: UpdateKind.delete)],
     ),
   ]);
 }
@@ -6086,6 +6919,31 @@ final class $$LegendaryGroupsTableReferences
       manager.$state.copyWith(prefetchedData: cache),
     );
   }
+
+  static MultiTypedResultKey<
+    $LegendaryGroupEntriesTable,
+    List<LegendaryGroupEntryRow>
+  >
+  _legendaryGroupEntriesRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.legendaryGroupEntries,
+        aliasName: 'legendary_groups__id__legendary_group_entries__group_id',
+      );
+
+  $$LegendaryGroupEntriesTableProcessedTableManager
+  get legendaryGroupEntriesRefs {
+    final manager = $$LegendaryGroupEntriesTableTableManager(
+      $_db,
+      $_db.legendaryGroupEntries,
+    ).filter((f) => f.groupId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _legendaryGroupEntriesRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$LegendaryGroupsTableFilterComposer
@@ -6139,6 +6997,32 @@ class $$LegendaryGroupsTableFilterComposer
                 $removeJoinBuilderFromRootComposer,
           ),
     );
+    return f(composer);
+  }
+
+  Expression<bool> legendaryGroupEntriesRefs(
+    Expression<bool> Function($$LegendaryGroupEntriesTableFilterComposer f) f,
+  ) {
+    final $$LegendaryGroupEntriesTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.legendaryGroupEntries,
+          getReferencedColumn: (t) => t.groupId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$LegendaryGroupEntriesTableFilterComposer(
+                $db: $db,
+                $table: $db.legendaryGroupEntries,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
     return f(composer);
   }
 }
@@ -6218,6 +7102,32 @@ class $$LegendaryGroupsTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> legendaryGroupEntriesRefs<T extends Object>(
+    Expression<T> Function($$LegendaryGroupEntriesTableAnnotationComposer a) f,
+  ) {
+    final $$LegendaryGroupEntriesTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.legendaryGroupEntries,
+          getReferencedColumn: (t) => t.groupId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$LegendaryGroupEntriesTableAnnotationComposer(
+                $db: $db,
+                $table: $db.legendaryGroupEntries,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
 }
 
 class $$LegendaryGroupsTableTableManager
@@ -6233,7 +7143,10 @@ class $$LegendaryGroupsTableTableManager
           $$LegendaryGroupsTableUpdateCompanionBuilder,
           (LegendaryGroupRow, $$LegendaryGroupsTableReferences),
           LegendaryGroupRow,
-          PrefetchHooks Function({bool creaturesRefs})
+          PrefetchHooks Function({
+            bool creaturesRefs,
+            bool legendaryGroupEntriesRefs,
+          })
         > {
   $$LegendaryGroupsTableTableManager(
     _$AppDatabase db,
@@ -6280,38 +7193,63 @@ class $$LegendaryGroupsTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({creaturesRefs = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [if (creaturesRefs) db.creatures],
-              addJoins: null,
-              getPrefetchedDataCallback: (items) async {
-                return [
-                  if (creaturesRefs)
-                    await $_getPrefetchedData<
-                      LegendaryGroupRow,
-                      $LegendaryGroupsTable,
-                      CreatureRow
-                    >(
-                      currentTable: table,
-                      referencedTable: $$LegendaryGroupsTableReferences
-                          ._creaturesRefsTable(db),
-                      managerFromTypedResult: (p0) =>
-                          $$LegendaryGroupsTableReferences(
-                            db,
-                            table,
-                            p0,
-                          ).creaturesRefs,
-                      referencedItemsForCurrentItem: (item, referencedItems) =>
-                          referencedItems.where(
-                            (e) => e.legendaryGroupId == item.id,
-                          ),
-                      typedResults: items,
-                    ),
-                ];
+          prefetchHooksCallback:
+              ({creaturesRefs = false, legendaryGroupEntriesRefs = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (creaturesRefs) db.creatures,
+                    if (legendaryGroupEntriesRefs) db.legendaryGroupEntries,
+                  ],
+                  addJoins: null,
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (creaturesRefs)
+                        await $_getPrefetchedData<
+                          LegendaryGroupRow,
+                          $LegendaryGroupsTable,
+                          CreatureRow
+                        >(
+                          currentTable: table,
+                          referencedTable: $$LegendaryGroupsTableReferences
+                              ._creaturesRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$LegendaryGroupsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).creaturesRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.legendaryGroupId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (legendaryGroupEntriesRefs)
+                        await $_getPrefetchedData<
+                          LegendaryGroupRow,
+                          $LegendaryGroupsTable,
+                          LegendaryGroupEntryRow
+                        >(
+                          currentTable: table,
+                          referencedTable: $$LegendaryGroupsTableReferences
+                              ._legendaryGroupEntriesRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$LegendaryGroupsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).legendaryGroupEntriesRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.groupId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
               },
-            );
-          },
         ),
       );
 }
@@ -6328,7 +7266,10 @@ typedef $$LegendaryGroupsTableProcessedTableManager =
       $$LegendaryGroupsTableUpdateCompanionBuilder,
       (LegendaryGroupRow, $$LegendaryGroupsTableReferences),
       LegendaryGroupRow,
-      PrefetchHooks Function({bool creaturesRefs})
+      PrefetchHooks Function({
+        bool creaturesRefs,
+        bool legendaryGroupEntriesRefs,
+      })
     >;
 typedef $$CreaturesTableCreateCompanionBuilder =
     CreaturesCompanion Function({
@@ -6426,6 +7367,25 @@ final class $$CreaturesTableReferences
     if (item == null) return manager;
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<$NotesTable, List<NoteRow>> _notesRefsTable(
+    _$AppDatabase db,
+  ) => MultiTypedResultKey.fromTable(
+    db.notes,
+    aliasName: 'creatures__id__notes__creature_id',
+  );
+
+  $$NotesTableProcessedTableManager get notesRefs {
+    final manager = $$NotesTableTableManager(
+      $_db,
+      $_db.notes,
+    ).filter((f) => f.creatureId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_notesRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
     );
   }
 
@@ -6793,6 +7753,31 @@ class $$CreaturesTableFilterComposer
           ),
     );
     return composer;
+  }
+
+  Expression<bool> notesRefs(
+    Expression<bool> Function($$NotesTableFilterComposer f) f,
+  ) {
+    final $$NotesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.notes,
+      getReferencedColumn: (t) => t.creatureId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$NotesTableFilterComposer(
+            $db: $db,
+            $table: $db.notes,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
   }
 
   Expression<bool> creatureActionsRefs(
@@ -7368,6 +8353,31 @@ class $$CreaturesTableAnnotationComposer
     return composer;
   }
 
+  Expression<T> notesRefs<T extends Object>(
+    Expression<T> Function($$NotesTableAnnotationComposer a) f,
+  ) {
+    final $$NotesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.notes,
+      getReferencedColumn: (t) => t.creatureId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$NotesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.notes,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
   Expression<T> creatureActionsRefs<T extends Object>(
     Expression<T> Function($$CreatureActionsTableAnnotationComposer a) f,
   ) {
@@ -7587,6 +8597,7 @@ class $$CreaturesTableTableManager
           CreatureRow,
           PrefetchHooks Function({
             bool legendaryGroupId,
+            bool notesRefs,
             bool creatureActionsRefs,
             bool creatureTraitsRefs,
             bool creatureSpellcastingsRefs,
@@ -7767,6 +8778,7 @@ class $$CreaturesTableTableManager
           prefetchHooksCallback:
               ({
                 legendaryGroupId = false,
+                notesRefs = false,
                 creatureActionsRefs = false,
                 creatureTraitsRefs = false,
                 creatureSpellcastingsRefs = false,
@@ -7779,6 +8791,7 @@ class $$CreaturesTableTableManager
                 return PrefetchHooks(
                   db: db,
                   explicitlyWatchedTables: [
+                    if (notesRefs) db.notes,
                     if (creatureActionsRefs) db.creatureActions,
                     if (creatureTraitsRefs) db.creatureTraits,
                     if (creatureSpellcastingsRefs) db.creatureSpellcastings,
@@ -7822,6 +8835,27 @@ class $$CreaturesTableTableManager
                       },
                   getPrefetchedDataCallback: (items) async {
                     return [
+                      if (notesRefs)
+                        await $_getPrefetchedData<
+                          CreatureRow,
+                          $CreaturesTable,
+                          NoteRow
+                        >(
+                          currentTable: table,
+                          referencedTable: $$CreaturesTableReferences
+                              ._notesRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$CreaturesTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).notesRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.creatureId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                       if (creatureActionsRefs)
                         await $_getPrefetchedData<
                           CreatureRow,
@@ -8012,6 +9046,7 @@ typedef $$CreaturesTableProcessedTableManager =
       CreatureRow,
       PrefetchHooks Function({
         bool legendaryGroupId,
+        bool notesRefs,
         bool creatureActionsRefs,
         bool creatureTraitsRefs,
         bool creatureSpellcastingsRefs,
@@ -8021,6 +9056,314 @@ typedef $$CreaturesTableProcessedTableManager =
         bool creatureLanguagesRefs,
         bool creatureEnvironmentsRefs,
       })
+    >;
+typedef $$NotesTableCreateCompanionBuilder =
+    NotesCompanion Function({
+      Value<int> id,
+      required int creatureId,
+      required String body,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+    });
+typedef $$NotesTableUpdateCompanionBuilder =
+    NotesCompanion Function({
+      Value<int> id,
+      Value<int> creatureId,
+      Value<String> body,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+    });
+
+final class $$NotesTableReferences
+    extends BaseReferences<_$AppDatabase, $NotesTable, NoteRow> {
+  $$NotesTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $CreaturesTable _creatureIdTable(_$AppDatabase db) =>
+      db.creatures.createAlias('notes__creature_id__creatures__id');
+
+  $$CreaturesTableProcessedTableManager get creatureId {
+    final $_column = $_itemColumn<int>('creature_id')!;
+
+    final manager = $$CreaturesTableTableManager(
+      $_db,
+      $_db.creatures,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_creatureIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$NotesTableFilterComposer extends Composer<_$AppDatabase, $NotesTable> {
+  $$NotesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get body => $composableBuilder(
+    column: $table.body,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$CreaturesTableFilterComposer get creatureId {
+    final $$CreaturesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.creatureId,
+      referencedTable: $db.creatures,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CreaturesTableFilterComposer(
+            $db: $db,
+            $table: $db.creatures,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$NotesTableOrderingComposer
+    extends Composer<_$AppDatabase, $NotesTable> {
+  $$NotesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get body => $composableBuilder(
+    column: $table.body,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$CreaturesTableOrderingComposer get creatureId {
+    final $$CreaturesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.creatureId,
+      referencedTable: $db.creatures,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CreaturesTableOrderingComposer(
+            $db: $db,
+            $table: $db.creatures,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$NotesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $NotesTable> {
+  $$NotesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get body =>
+      $composableBuilder(column: $table.body, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  $$CreaturesTableAnnotationComposer get creatureId {
+    final $$CreaturesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.creatureId,
+      referencedTable: $db.creatures,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CreaturesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.creatures,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$NotesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $NotesTable,
+          NoteRow,
+          $$NotesTableFilterComposer,
+          $$NotesTableOrderingComposer,
+          $$NotesTableAnnotationComposer,
+          $$NotesTableCreateCompanionBuilder,
+          $$NotesTableUpdateCompanionBuilder,
+          (NoteRow, $$NotesTableReferences),
+          NoteRow,
+          PrefetchHooks Function({bool creatureId})
+        > {
+  $$NotesTableTableManager(_$AppDatabase db, $NotesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$NotesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$NotesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$NotesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> creatureId = const Value.absent(),
+                Value<String> body = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+              }) => NotesCompanion(
+                id: id,
+                creatureId: creatureId,
+                body: body,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int creatureId,
+                required String body,
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+              }) => NotesCompanion.insert(
+                id: id,
+                creatureId: creatureId,
+                body: body,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) =>
+                    (e.readTable(table), $$NotesTableReferences(db, table, e)),
+              )
+              .toList(),
+          prefetchHooksCallback: ({creatureId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (creatureId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.creatureId,
+                                referencedTable: $$NotesTableReferences
+                                    ._creatureIdTable(db),
+                                referencedColumn: $$NotesTableReferences
+                                    ._creatureIdTable(db)
+                                    .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$NotesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $NotesTable,
+      NoteRow,
+      $$NotesTableFilterComposer,
+      $$NotesTableOrderingComposer,
+      $$NotesTableAnnotationComposer,
+      $$NotesTableCreateCompanionBuilder,
+      $$NotesTableUpdateCompanionBuilder,
+      (NoteRow, $$NotesTableReferences),
+      NoteRow,
+      PrefetchHooks Function({bool creatureId})
     >;
 typedef $$CreatureActionsTableCreateCompanionBuilder =
     CreatureActionsCompanion Function({
@@ -10938,6 +12281,378 @@ typedef $$CreatureEnvironmentsTableProcessedTableManager =
       CreatureEnvironmentRow,
       PrefetchHooks Function({bool creatureId})
     >;
+typedef $$LegendaryGroupEntriesTableCreateCompanionBuilder =
+    LegendaryGroupEntriesCompanion Function({
+      Value<int> id,
+      required int groupId,
+      required String section,
+      required String kind,
+      Value<String?> title,
+      required String body,
+      required int sortOrder,
+    });
+typedef $$LegendaryGroupEntriesTableUpdateCompanionBuilder =
+    LegendaryGroupEntriesCompanion Function({
+      Value<int> id,
+      Value<int> groupId,
+      Value<String> section,
+      Value<String> kind,
+      Value<String?> title,
+      Value<String> body,
+      Value<int> sortOrder,
+    });
+
+final class $$LegendaryGroupEntriesTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $LegendaryGroupEntriesTable,
+          LegendaryGroupEntryRow
+        > {
+  $$LegendaryGroupEntriesTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $LegendaryGroupsTable _groupIdTable(_$AppDatabase db) => db
+      .legendaryGroups
+      .createAlias('legendary_group_entries__group_id__legendary_groups__id');
+
+  $$LegendaryGroupsTableProcessedTableManager get groupId {
+    final $_column = $_itemColumn<int>('group_id')!;
+
+    final manager = $$LegendaryGroupsTableTableManager(
+      $_db,
+      $_db.legendaryGroups,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_groupIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$LegendaryGroupEntriesTableFilterComposer
+    extends Composer<_$AppDatabase, $LegendaryGroupEntriesTable> {
+  $$LegendaryGroupEntriesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get section => $composableBuilder(
+    column: $table.section,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get body => $composableBuilder(
+    column: $table.body,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$LegendaryGroupsTableFilterComposer get groupId {
+    final $$LegendaryGroupsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.groupId,
+      referencedTable: $db.legendaryGroups,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LegendaryGroupsTableFilterComposer(
+            $db: $db,
+            $table: $db.legendaryGroups,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$LegendaryGroupEntriesTableOrderingComposer
+    extends Composer<_$AppDatabase, $LegendaryGroupEntriesTable> {
+  $$LegendaryGroupEntriesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get section => $composableBuilder(
+    column: $table.section,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get body => $composableBuilder(
+    column: $table.body,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$LegendaryGroupsTableOrderingComposer get groupId {
+    final $$LegendaryGroupsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.groupId,
+      referencedTable: $db.legendaryGroups,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LegendaryGroupsTableOrderingComposer(
+            $db: $db,
+            $table: $db.legendaryGroups,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$LegendaryGroupEntriesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LegendaryGroupEntriesTable> {
+  $$LegendaryGroupEntriesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get section =>
+      $composableBuilder(column: $table.section, builder: (column) => column);
+
+  GeneratedColumn<String> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<String> get body =>
+      $composableBuilder(column: $table.body, builder: (column) => column);
+
+  GeneratedColumn<int> get sortOrder =>
+      $composableBuilder(column: $table.sortOrder, builder: (column) => column);
+
+  $$LegendaryGroupsTableAnnotationComposer get groupId {
+    final $$LegendaryGroupsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.groupId,
+      referencedTable: $db.legendaryGroups,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LegendaryGroupsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.legendaryGroups,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$LegendaryGroupEntriesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LegendaryGroupEntriesTable,
+          LegendaryGroupEntryRow,
+          $$LegendaryGroupEntriesTableFilterComposer,
+          $$LegendaryGroupEntriesTableOrderingComposer,
+          $$LegendaryGroupEntriesTableAnnotationComposer,
+          $$LegendaryGroupEntriesTableCreateCompanionBuilder,
+          $$LegendaryGroupEntriesTableUpdateCompanionBuilder,
+          (LegendaryGroupEntryRow, $$LegendaryGroupEntriesTableReferences),
+          LegendaryGroupEntryRow,
+          PrefetchHooks Function({bool groupId})
+        > {
+  $$LegendaryGroupEntriesTableTableManager(
+    _$AppDatabase db,
+    $LegendaryGroupEntriesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LegendaryGroupEntriesTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$LegendaryGroupEntriesTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$LegendaryGroupEntriesTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> groupId = const Value.absent(),
+                Value<String> section = const Value.absent(),
+                Value<String> kind = const Value.absent(),
+                Value<String?> title = const Value.absent(),
+                Value<String> body = const Value.absent(),
+                Value<int> sortOrder = const Value.absent(),
+              }) => LegendaryGroupEntriesCompanion(
+                id: id,
+                groupId: groupId,
+                section: section,
+                kind: kind,
+                title: title,
+                body: body,
+                sortOrder: sortOrder,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int groupId,
+                required String section,
+                required String kind,
+                Value<String?> title = const Value.absent(),
+                required String body,
+                required int sortOrder,
+              }) => LegendaryGroupEntriesCompanion.insert(
+                id: id,
+                groupId: groupId,
+                section: section,
+                kind: kind,
+                title: title,
+                body: body,
+                sortOrder: sortOrder,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$LegendaryGroupEntriesTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({groupId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (groupId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.groupId,
+                                referencedTable:
+                                    $$LegendaryGroupEntriesTableReferences
+                                        ._groupIdTable(db),
+                                referencedColumn:
+                                    $$LegendaryGroupEntriesTableReferences
+                                        ._groupIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$LegendaryGroupEntriesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LegendaryGroupEntriesTable,
+      LegendaryGroupEntryRow,
+      $$LegendaryGroupEntriesTableFilterComposer,
+      $$LegendaryGroupEntriesTableOrderingComposer,
+      $$LegendaryGroupEntriesTableAnnotationComposer,
+      $$LegendaryGroupEntriesTableCreateCompanionBuilder,
+      $$LegendaryGroupEntriesTableUpdateCompanionBuilder,
+      (LegendaryGroupEntryRow, $$LegendaryGroupEntriesTableReferences),
+      LegendaryGroupEntryRow,
+      PrefetchHooks Function({bool groupId})
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -10948,6 +12663,8 @@ class $AppDatabaseManager {
       $$LegendaryGroupsTableTableManager(_db, _db.legendaryGroups);
   $$CreaturesTableTableManager get creatures =>
       $$CreaturesTableTableManager(_db, _db.creatures);
+  $$NotesTableTableManager get notes =>
+      $$NotesTableTableManager(_db, _db.notes);
   $$CreatureActionsTableTableManager get creatureActions =>
       $$CreatureActionsTableTableManager(_db, _db.creatureActions);
   $$CreatureTraitsTableTableManager get creatureTraits =>
@@ -10966,4 +12683,6 @@ class $AppDatabaseManager {
       $$CreatureLanguagesTableTableManager(_db, _db.creatureLanguages);
   $$CreatureEnvironmentsTableTableManager get creatureEnvironments =>
       $$CreatureEnvironmentsTableTableManager(_db, _db.creatureEnvironments);
+  $$LegendaryGroupEntriesTableTableManager get legendaryGroupEntries =>
+      $$LegendaryGroupEntriesTableTableManager(_db, _db.legendaryGroupEntries);
 }

@@ -4,8 +4,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:moonscribe/components/statblock.dart';
-import 'package:moonscribe/database/read.dart';
+import 'package:gmdex/components/statblock.dart';
+import 'package:gmdex/database/read.dart';
 
 late final List<dynamic> _monsters;
 late final Map<String, dynamic> _legendaryGroups;
