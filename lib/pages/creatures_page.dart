@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math' show min;
-import 'package:drift/drift.dart' show OrderingTerm;
+import 'package:drift/drift.dart' show CustomExpression, OrderingTerm;
 import 'package:gmdex/models/creature.dart';
 import 'package:gmdex/theme/apptheme.dart';
 import 'package:gmdex/components/creature_card.dart';
@@ -225,9 +225,11 @@ class _BrowseCreatureWidgetState extends State<BrowseCreatureWidget> {
   }
 
   Future<void> _loadData() async {
-    final rows = await (database.select(
-      database.creatures,
-    )..orderBy([(c) => OrderingTerm.asc(c.name)])).get();
+    final rows =
+        await (database.select(database.creatures)..orderBy([
+              (c) => OrderingTerm.asc(CustomExpression<String>('LOWER(name)')),
+            ]))
+            .get();
     if (!mounted) return;
     setState(() {
       _allCreatures = rows;
@@ -261,6 +263,82 @@ class _BrowseCreatureWidgetState extends State<BrowseCreatureWidget> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) _scaffoldKey.currentState?.openEndDrawer();
       });
+    }
+  }
+
+  Future<void> _confirmDeleteSelectedCreature() async {
+    final creature = _selectedCreature;
+    final id = _selectedId;
+    if (creature == null || id == null) return;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Delete creature?'),
+        content: Text(
+          'Are you sure you want to delete "${creature.name}"? '
+          'This cannot be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (!mounted || confirmed != true) return;
+
+    final messenger = ScaffoldMessenger.of(context);
+    final int deleted;
+    try {
+      deleted = await (database.delete(
+        database.creatures,
+      )..where((row) => row.id.equals(id))).go();
+    } catch (error) {
+      if (mounted) {
+        messenger.showSnackBar(
+          SnackBar(content: Text('Could not delete ${creature.name}: $error')),
+        );
+      }
+      return;
+    }
+    if (!mounted) return;
+
+    _scaffoldKey.currentState?.closeEndDrawer();
+    setState(() {
+      _selectedId = null;
+      _selectedCreature = null;
+    });
+
+    try {
+      await _loadData();
+    } catch (error) {
+      if (mounted) {
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(
+              'Deleted ${creature.name}, but could not reload: $error',
+            ),
+          ),
+        );
+      }
+      return;
+    }
+    if (mounted) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            deleted == 0
+                ? 'Creature was already deleted.'
+                : 'Deleted ${creature.name}.',
+          ),
+        ),
+      );
     }
   }
 
@@ -533,6 +611,7 @@ class _BrowseCreatureWidgetState extends State<BrowseCreatureWidget> {
                   onCopyPressed: widget.onCopy == null
                       ? null
                       : () => widget.onCopy!(_selectedCreature!),
+                  onDeletePressed: _confirmDeleteSelectedCreature,
                   onNotesPressed: isWide
                       ? () => _scaffoldKey.currentState?.openEndDrawer()
                       : null,
@@ -606,6 +685,7 @@ class _BrowseCreatureWidgetState extends State<BrowseCreatureWidget> {
                   onCopyPressed: widget.onCopy == null
                       ? null
                       : () => widget.onCopy!(_selectedCreature!),
+                  onDeletePressed: _confirmDeleteSelectedCreature,
                   onSaved: () {},
                 ),
           body: Padding(

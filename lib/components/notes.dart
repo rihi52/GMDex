@@ -9,6 +9,7 @@ class NestedDrawer extends StatefulWidget {
     this.maxWidth,
     this.onEditPressed,
     this.onCopyPressed,
+    this.onDeletePressed,
     required this.onSaved,
     required this.creature,
   });
@@ -17,6 +18,7 @@ class NestedDrawer extends StatefulWidget {
   final double? maxWidth;
   final VoidCallback? onEditPressed;
   final VoidCallback? onCopyPressed;
+  final VoidCallback? onDeletePressed;
   final VoidCallback onSaved;
   final Creature creature;
 
@@ -81,6 +83,7 @@ class _NestedDrawerState extends State<NestedDrawer> {
                     creature: widget.creature,
                     onEditPressed: widget.onEditPressed,
                     onCopyPressed: widget.onCopyPressed,
+                    onDeletePressed: widget.onDeletePressed,
                   ),
                   NotesSheet(
                     key: ValueKey(widget.creature.id ?? widget.creature.name),

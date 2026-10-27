@@ -7,6 +7,7 @@ class CreatureStatBlock extends StatelessWidget {
   final Creature? creature;
   final VoidCallback? onEditPressed;
   final VoidCallback? onCopyPressed;
+  final VoidCallback? onDeletePressed;
   final VoidCallback? onNotesPressed;
 
   const CreatureStatBlock({
@@ -14,6 +15,7 @@ class CreatureStatBlock extends StatelessWidget {
     required this.creature,
     this.onEditPressed,
     this.onCopyPressed,
+    this.onDeletePressed,
     this.onNotesPressed,
   });
 
@@ -77,6 +79,7 @@ class CreatureStatBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double topButtonWidth = 110;
     if (creature == null) return const Text("Loading...");
 
     return SingleChildScrollView(
@@ -93,7 +96,7 @@ class CreatureStatBlock extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 SizedBox(
-                  width: 100,
+                  width: topButtonWidth,
                   child: ElevatedButton(
                     onPressed: onEditPressed,
                     child: Text(
@@ -103,7 +106,7 @@ class CreatureStatBlock extends StatelessWidget {
                   ),
                 ),
                 SizedBox(
-                  width: 100,
+                  width: topButtonWidth,
                   child: ElevatedButton(
                     onPressed: onCopyPressed,
                     child: Text(
@@ -112,9 +115,19 @@ class CreatureStatBlock extends StatelessWidget {
                     ),
                   ),
                 ),
+                SizedBox(
+                  width: topButtonWidth,
+                  child: ElevatedButton(
+                    onPressed: onDeletePressed,
+                    child: Text(
+                      'Delete',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ),
+                ),
                 if (onNotesPressed != null)
                   SizedBox(
-                    width: 100,
+                    width: topButtonWidth,
                     child: ElevatedButton(
                       onPressed: onNotesPressed,
                       child: Text(
