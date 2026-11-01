@@ -1,116 +1,37 @@
-import 'dart:io';
-
-import 'package:drift/drift.dart' show Value;
-import 'package:drift/native.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+// Application entry point and top-level route/theme configuration.
+//
+// Database initialization runs before the widget tree is mounted so pages
+// can safely use the shared database as soon as they are built.
+import 'package:flutter/foundation.dart'
+    show defaultTargetPlatform, kIsWeb, TargetPlatform;
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
-import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
 import 'package:window_manager/window_manager.dart';
-
-import 'package:gmdex/database/database.dart';
+import 'package:gmdex/pages/creatures_page.dart';
+import 'package:gmdex/pages/encounters_page.dart';
 import 'package:gmdex/pages/home_page.dart';
+import 'package:gmdex/pages/players_page.dart';
+import 'package:gmdex/pages/settings.dart' show SettingsPage;
 import 'package:gmdex/theme/apptheme.dart';
-import 'package:gmdex/database/bestiary_importer.dart';
+import 'package:gmdex/database/database_initialize.dart';
+import 'package:gmdex/models/difficulty_calculator_ruleset.dart';
+import 'package:gmdex/models/turn_highlight_preference.dart';
+import 'package:gmdex/pages/player_face_combat.dart';
 
-late AppDatabase _database;
-AppDatabase get database => _database;
-
-Future<Directory> _databaseDirectory() async {
-  final inCodespaces = Platform.environment['CODESPACES'] == 'true';
-
-  final Directory dir = inCodespaces
-      ? Directory('/workspaces/GMDex/dev_data')
-      : await getApplicationDocumentsDirectory();
-
-  if (!dir.existsSync()) {
-    dir.createSync(recursive: true);
-  }
-  return dir;
-}
-
-Future<AppDatabase> _openDatabase() async {
-  final dir = await _databaseDirectory();
-  final file = File(p.join(dir.path, 'GMDex.db'));
-  return AppDatabase(NativeDatabase(file));
-}
-
-Future<void> _initializeDatabase() async {
-  if (kIsWeb) {
-    print('Database initialization skipped on web platform');
-    return;
-  }
-
-  try {
-    _database = await _openDatabase();
-
-    // Only seed if the table is empty so we don't duplicate on every launch
-    final existing = await _database.select(_database.players).get();
-    if (existing.isEmpty) {
-      await _database.batch((b) {
-        b.insertAll(_database.players, [
-          PlayersCompanion.insert(
-            pName: 'Ravi',
-            pClass: 'Rogue',
-            pArmorClass: Value(15),
-            pHitPoints: Value(38),
-            pLevel: Value(5),
-            pOriginalCampaign: Value('Finndalin'),
-          ),
-          PlayersCompanion.insert(
-            pName: 'Finn',
-            pClass: 'Bard',
-            pArmorClass: Value(15),
-            pHitPoints: Value(40),
-            pLevel: Value(5),
-            pOriginalCampaign: Value('Finndalin'),
-          ),
-          PlayersCompanion.insert(
-            pName: 'Pax',
-            pClass: 'Fighter',
-            pArmorClass: Value(19),
-            pHitPoints: Value(45),
-            pLevel: Value(5),
-            pOriginalCampaign: Value('Finndalin'),
-          ),
-          PlayersCompanion.insert(
-            pName: 'Theon',
-            pClass: 'Fighter',
-            pArmorClass: Value(18),
-            pHitPoints: Value(42),
-            pLevel: Value(5),
-            pOriginalCampaign: Value('Finndalin'),
-          ),
-        ]);
-      });
-      print('Database seeded with initial player');
-    }
-
-    final hasCreatures = (await (_database.select(
-      _database.creatures,
-    )..limit(1)).get()).isNotEmpty;
-    if (!hasCreatures) {
-      final result = await importBestiary(_database);
-      print('Bestiary import: $result');
-      for (final f in result.failed.take(10)) {
-        print('  failed: $f');
-      }
-    }
-
-    final allItems = await _database.select(_database.players).get();
-    print('Players in database: $allItems');
-  } catch (e) {
-    print('Database initialization failed: $e');
-  }
-}
-
-void main() async {
+void main(List<String> args) async {
+  // Flutter services must be initialized before asynchronous startup work.
   WidgetsFlutterBinding.ensureInitialized();
+  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
-  await _initializeDatabase();
+  await initializeDatabase();
+  await loadDifficultyCalculatorRuleset();
+  await loadTurnHighlightPreference();
 
-  await windowManager.ensureInitialized();
-  await windowManager.setMinimumSize(const Size(1346, 682));
+  // The window manager is only supported by the native Windows desktop build.
+  if (!kIsWeb && defaultTargetPlatform == TargetPlatform.windows) {
+    await windowManager.ensureInitialized();
+    await windowManager.setMinimumSize(const Size(1346, 682));
+  }
 
   runApp(const MyApp());
 }
@@ -120,11 +41,20 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Named routes provide the shared destinations used by the page sidebars.
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: AppTheme.dark(),
       home: const MyHomePage(),
+      routes: {
+        '/home': (context) => const MyHomePage(),
+        '/players': (context) => const PlayersPage(),
+        '/creatures': (context) => const CreaturesPage(),
+        '/encounters': (context) => const EncountersPage(),
+        '/settings': (context) => const SettingsPage(),
+        '/player_combat': (context) => const PlayerFacingCombatPage(),
+      },
     );
   }
 }

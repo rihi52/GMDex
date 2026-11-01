@@ -1,11 +1,18 @@
+// Form for creating or editing a creature's nested stat-block data.
+//
+// Input is collected into a CreatureDraft, validated, then converted to the
+// immutable creature model expected by the page's persistence callback.
 import 'package:flutter/material.dart';
+import 'package:gmdex/components/responsive_layout.dart';
 import 'package:flutter/services.dart';
 import 'package:gmdex/models/creature.dart';
 import 'package:gmdex/models/creature_draft.dart';
 import 'package:gmdex/theme/apptheme.dart';
 import 'package:gmdex/components/statblock.dart';
 import 'package:gmdex/components/creature_calculations.dart';
+import 'package:gmdex/components/dividers.dart';
 
+/// Builds an editable stat block, optionally prefilled from an existing one.
 class StatblockEditorForm extends StatefulWidget {
   const StatblockEditorForm({
     super.key,
@@ -54,7 +61,7 @@ class _StatblockEditorForm extends State<StatblockEditorForm> {
 
   double smallBoxWidth = 150;
   double checkBoxWidth = 50;
-  double checkBoxTableHeight = 455;
+  double checkBoxTableHeight = 400;
   double columnWidth = 150 * 2;
 
   double buttonWidth = 30;
@@ -64,6 +71,8 @@ class _StatblockEditorForm extends State<StatblockEditorForm> {
   void initState() {
     super.initState();
 
+    // Initialize nested sections from the existing model, with defaults for
+    // new creatures so the form can always build a complete draft.
     final traits = widget.creature?.traits ?? const <CreatureTrait>[];
     final actions = widget.creature?.actions ?? const <CreatureAction>[];
     final spellcasting = widget.creature?.spellCasting;
@@ -308,9 +317,22 @@ class _StatblockEditorForm extends State<StatblockEditorForm> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              StatblockSection(
-                child: ElevatedButton(onPressed: _submit, child: Text('Save')),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: ElevatedButton(
+                  onPressed: _submit,
+                  child: Text(
+                    widget.isEditing ? 'Save' : 'Create',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ),
               ),
+              const SizedBox(height: AppSpacing.spacingSmall),
+              HorizontalDivider(),
+              const SizedBox(height: AppSpacing.spacingSmall),
+              // StatblockSection(
+              //   child: ElevatedButton(onPressed: _submit, child: Text('Save')),
+              // ),
               StatblockSection(
                 child: TextFormField(
                   initialValue: c == null
@@ -480,6 +502,10 @@ class _StatblockEditorForm extends State<StatblockEditorForm> {
                 child: LayoutBuilder(
                   builder: (context, constraints) {
                     const double gap = AppSpacing.spacingMedium;
+                    final bool isNarrow = ResponsiveLayout.isNarrow(
+                      constraints.maxWidth,
+                      breakpoint: (columnWidth * 3) + (gap * 2),
+                    );
 
                     // Width left over after three fixed columns and their gaps.
                     final double remaining =
@@ -493,7 +519,7 @@ class _StatblockEditorForm extends State<StatblockEditorForm> {
                         ? constraints.maxWidth
                         : columnWidth;
                     final double sensesWidth = remaining >= columnWidth
-                        ? remaining - 100
+                        ? remaining - 50
                         : maxAvailable;
 
                     return Wrap(
@@ -503,8 +529,8 @@ class _StatblockEditorForm extends State<StatblockEditorForm> {
                       children: [
                         // ----- Column 1: ability scores + saving throws -----
                         SizedBox(
-                          height: checkBoxTableHeight,
-                          width: columnWidth,
+                          height: isNarrow ? null : checkBoxTableHeight,
+                          width: isNarrow ? null : columnWidth,
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.center,
@@ -695,15 +721,16 @@ class _StatblockEditorForm extends State<StatblockEditorForm> {
                                   ),
                                 ],
                               ),
+                              if (isNarrow) HorizontalDivider(),
                             ],
                           ),
                         ),
-                        if (remaining >= columnWidth)
+                        if (!isNarrow || remaining >= columnWidth)
                           StatblockVerticalDivider(height: checkBoxTableHeight),
                         // ----- Column 2: skills (first half) -----
                         SizedBox(
-                          height: checkBoxTableHeight,
-                          width: columnWidth,
+                          height: isNarrow ? null : checkBoxTableHeight,
+                          width: isNarrow ? null : columnWidth,
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.center,
@@ -798,138 +825,233 @@ class _StatblockEditorForm extends State<StatblockEditorForm> {
                                   isInvestigation = value;
                                 }),
                               ),
+                              if (isNarrow) ...[
+                                StatblockCheckboxRow(
+                                  label: 'Medicine',
+                                  initalValue:
+                                      c?.skills?.isMedicineProf ?? isMedicine,
+                                  width: smallBoxWidth,
+                                  onChanged: (value) => setState(() {
+                                    isMedicine = value;
+                                  }),
+                                ),
+                                StatblockCheckboxRow(
+                                  label: 'Nature',
+                                  initalValue:
+                                      c?.skills?.isNatureProf ?? isNature,
+                                  width: smallBoxWidth,
+                                  onChanged: (value) => setState(() {
+                                    isNature = value;
+                                  }),
+                                ),
+                                StatblockCheckboxRow(
+                                  label: 'Perception',
+                                  initalValue:
+                                      c?.skills?.isPerceptionProf ??
+                                      isPerception,
+                                  width: smallBoxWidth,
+                                  onChanged: (value) => setState(() {
+                                    isPerception = value;
+                                  }),
+                                ),
+                                StatblockCheckboxRow(
+                                  label: 'Performance',
+                                  initalValue:
+                                      c?.skills?.isPerformanceProf ??
+                                      isPerformance,
+                                  width: smallBoxWidth,
+                                  onChanged: (value) => setState(() {
+                                    isPerformance = value;
+                                  }),
+                                ),
+                                StatblockCheckboxRow(
+                                  label: 'Persuasion',
+                                  initalValue:
+                                      c?.skills?.isPersuasionProf ??
+                                      isPersuasion,
+                                  width: smallBoxWidth,
+                                  onChanged: (value) => setState(() {
+                                    isPersuasion = value;
+                                  }),
+                                ),
+                                StatblockCheckboxRow(
+                                  label: 'Religion',
+                                  initalValue:
+                                      c?.skills?.isReligionProf ?? isReligion,
+                                  width: smallBoxWidth,
+                                  onChanged: (value) => setState(() {
+                                    isReligion = value;
+                                  }),
+                                ),
+                                StatblockCheckboxRow(
+                                  label: 'Sleight of Hand',
+                                  initalValue:
+                                      c?.skills?.isSleightOfHandProf ??
+                                      isSleightHand,
+                                  width: smallBoxWidth,
+                                  onChanged: (value) => setState(() {
+                                    isSleightHand = value;
+                                  }),
+                                ),
+                                StatblockCheckboxRow(
+                                  label: 'Stealth',
+                                  initalValue:
+                                      c?.skills?.isStealthProf ?? isStealth,
+                                  width: smallBoxWidth,
+                                  onChanged: (value) => setState(() {
+                                    isStealth = value;
+                                  }),
+                                ),
+                                StatblockCheckboxRow(
+                                  label: 'Survival',
+                                  initalValue:
+                                      c?.skills?.isSurvivalProf ?? isSurvival,
+                                  width: smallBoxWidth,
+                                  onChanged: (value) => setState(() {
+                                    isSurvival = value;
+                                  }),
+                                ),
+                              ],
+                              if (isNarrow) HorizontalDivider(),
                             ],
                           ),
                         ),
-                        if (remaining >= columnWidth)
+                        if (!isNarrow || remaining >= columnWidth)
                           StatblockVerticalDivider(height: checkBoxTableHeight),
                         // ----- Column 3: skills (second half) -----
-                        SizedBox(
-                          height: checkBoxTableHeight,
-                          width: columnWidth,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              StatblockLabelRow(
-                                dataOne: 'Skill',
-                                dataTwo: 'Proficient',
-                                alignment: TextAlign.center,
-                                width: smallBoxWidth,
-                              ),
-                              StatblockCheckboxRow(
-                                label: 'Medicine',
-                                initalValue:
-                                    c?.skills?.isMedicineProf ?? isMedicine,
-                                width: smallBoxWidth,
-                                onChanged: (value) => setState(() {
-                                  isMedicine = value;
-                                }),
-                              ),
-                              StatblockCheckboxRow(
-                                label: 'Nature',
-                                initalValue:
-                                    c?.skills?.isNatureProf ?? isNature,
-                                width: smallBoxWidth,
-                                onChanged: (value) => setState(() {
-                                  isNature = value;
-                                }),
-                              ),
-                              StatblockCheckboxRow(
-                                label: 'Perception',
-                                initalValue:
-                                    c?.skills?.isPerceptionProf ?? isPerception,
-                                width: smallBoxWidth,
-                                onChanged: (value) => setState(() {
-                                  isPerception = value;
-                                }),
-                              ),
-                              StatblockCheckboxRow(
-                                label: 'Performance',
-                                initalValue:
-                                    c?.skills?.isPerformanceProf ??
-                                    isPerformance,
-                                width: smallBoxWidth,
-                                onChanged: (value) => setState(() {
-                                  isPerformance = value;
-                                }),
-                              ),
-                              StatblockCheckboxRow(
-                                label: 'Persuasion',
-                                initalValue:
-                                    c?.skills?.isPersuasionProf ?? isPersuasion,
-                                width: smallBoxWidth,
-                                onChanged: (value) => setState(() {
-                                  isPersuasion = value;
-                                }),
-                              ),
-                              StatblockCheckboxRow(
-                                label: 'Religion',
-                                initalValue:
-                                    c?.skills?.isReligionProf ?? isReligion,
-                                width: smallBoxWidth,
-                                onChanged: (value) => setState(() {
-                                  isReligion = value;
-                                }),
-                              ),
-                              StatblockCheckboxRow(
-                                label: 'Sleight of Hand',
-                                initalValue:
-                                    c?.skills?.isSleightOfHandProf ??
-                                    isSleightHand,
-                                width: smallBoxWidth,
-                                onChanged: (value) => setState(() {
-                                  isSleightHand = value;
-                                }),
-                              ),
-                              StatblockCheckboxRow(
-                                label: 'Stealth',
-                                initalValue:
-                                    c?.skills?.isStealthProf ?? isStealth,
-                                width: smallBoxWidth,
-                                onChanged: (value) => setState(() {
-                                  isStealth = value;
-                                }),
-                              ),
-                              StatblockCheckboxRow(
-                                label: 'Survival',
-                                initalValue:
-                                    c?.skills?.isSurvivalProf ?? isSurvival,
-                                width: smallBoxWidth,
-                                onChanged: (value) => setState(() {
-                                  isSurvival = value;
-                                }),
-                              ),
-                            ],
+                        if (!isNarrow)
+                          SizedBox(
+                            height: checkBoxTableHeight,
+                            width: columnWidth,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                if (!isNarrow)
+                                  StatblockLabelRow(
+                                    dataOne: 'Skill',
+                                    dataTwo: 'Proficient',
+                                    alignment: TextAlign.center,
+                                    width: smallBoxWidth,
+                                  ),
+                                StatblockCheckboxRow(
+                                  label: 'Medicine',
+                                  initalValue:
+                                      c?.skills?.isMedicineProf ?? isMedicine,
+                                  width: smallBoxWidth,
+                                  onChanged: (value) => setState(() {
+                                    isMedicine = value;
+                                  }),
+                                ),
+                                StatblockCheckboxRow(
+                                  label: 'Nature',
+                                  initalValue:
+                                      c?.skills?.isNatureProf ?? isNature,
+                                  width: smallBoxWidth,
+                                  onChanged: (value) => setState(() {
+                                    isNature = value;
+                                  }),
+                                ),
+                                StatblockCheckboxRow(
+                                  label: 'Perception',
+                                  initalValue:
+                                      c?.skills?.isPerceptionProf ??
+                                      isPerception,
+                                  width: smallBoxWidth,
+                                  onChanged: (value) => setState(() {
+                                    isPerception = value;
+                                  }),
+                                ),
+                                StatblockCheckboxRow(
+                                  label: 'Performance',
+                                  initalValue:
+                                      c?.skills?.isPerformanceProf ??
+                                      isPerformance,
+                                  width: smallBoxWidth,
+                                  onChanged: (value) => setState(() {
+                                    isPerformance = value;
+                                  }),
+                                ),
+                                StatblockCheckboxRow(
+                                  label: 'Persuasion',
+                                  initalValue:
+                                      c?.skills?.isPersuasionProf ??
+                                      isPersuasion,
+                                  width: smallBoxWidth,
+                                  onChanged: (value) => setState(() {
+                                    isPersuasion = value;
+                                  }),
+                                ),
+                                StatblockCheckboxRow(
+                                  label: 'Religion',
+                                  initalValue:
+                                      c?.skills?.isReligionProf ?? isReligion,
+                                  width: smallBoxWidth,
+                                  onChanged: (value) => setState(() {
+                                    isReligion = value;
+                                  }),
+                                ),
+                                StatblockCheckboxRow(
+                                  label: 'Sleight of Hand',
+                                  initalValue:
+                                      c?.skills?.isSleightOfHandProf ??
+                                      isSleightHand,
+                                  width: smallBoxWidth,
+                                  onChanged: (value) => setState(() {
+                                    isSleightHand = value;
+                                  }),
+                                ),
+                                StatblockCheckboxRow(
+                                  label: 'Stealth',
+                                  initalValue:
+                                      c?.skills?.isStealthProf ?? isStealth,
+                                  width: smallBoxWidth,
+                                  onChanged: (value) => setState(() {
+                                    isStealth = value;
+                                  }),
+                                ),
+                                StatblockCheckboxRow(
+                                  label: 'Survival',
+                                  initalValue:
+                                      c?.skills?.isSurvivalProf ?? isSurvival,
+                                  width: smallBoxWidth,
+                                  onChanged: (value) => setState(() {
+                                    isSurvival = value;
+                                  }),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
                         if (remaining >= columnWidth)
                           StatblockVerticalDivider(height: checkBoxTableHeight),
                         // ----- Block 4: senses / languages / CR -----
                         SizedBox(
                           height: checkBoxTableHeight,
-                          width: sensesWidth,
+                          width: isNarrow ? null : sensesWidth,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               Expanded(
+                                flex: 4,
                                 child: StatblockEditSmallText(
                                   labelText: 'Senses',
                                   startingValue: c?.senses.toString(),
                                   onSaved: (value) => _draft.senses = value,
-                                  maxLines: 4,
+                                  maxLines: isNarrow ? 4 : 6,
                                 ),
                               ),
                               Expanded(
+                                flex: 4,
                                 child: StatblockEditSmallText(
                                   labelText: 'Languages',
                                   startingValue: c?.languages.toString(),
                                   onSaved: (value) => _draft.languages = value,
-                                  maxLines: 4,
+                                  maxLines: isNarrow ? 4 : 6,
                                 ),
                               ),
                               Expanded(
+                                flex: 2,
                                 child: StatblockEditSmallText(
                                   labelText: 'Challenge Rating',
                                   startingValue: c?.challengeRating.cr
@@ -1115,6 +1237,7 @@ class _StatblockEditorForm extends State<StatblockEditorForm> {
 /// Statblock Components
 /// ***************
 
+/// Compact text styling shared by fields in the stat-block editor.
 class StatblockEditSmallText extends StatelessWidget {
   const StatblockEditSmallText({
     super.key,
@@ -1168,6 +1291,7 @@ class StatblockEditSmallText extends StatelessWidget {
   }
 }
 
+/// Checkbox with the editor's shared visual treatment and label.
 class StatblockCheckbox extends StatefulWidget {
   const StatblockCheckbox({
     super.key,
@@ -1210,6 +1334,7 @@ class _StatblockCheckboxState extends State<StatblockCheckbox> {
   }
 }
 
+/// Lays out a stat-block field label beside its corresponding value/editor.
 class StatblockLabelRow extends StatelessWidget {
   const StatblockLabelRow({
     super.key,
@@ -1259,6 +1384,7 @@ class StatblockLabelRow extends StatelessWidget {
   }
 }
 
+/// Arranges related proficiency checkboxes into a consistent row.
 class StatblockCheckboxRow extends StatelessWidget {
   const StatblockCheckboxRow({
     super.key,
@@ -1293,6 +1419,7 @@ class StatblockCheckboxRow extends StatelessWidget {
   }
 }
 
+/// Expands and edits one spellcasting block in the creature editor.
 class SpellCastingTile extends StatefulWidget {
   const SpellCastingTile({
     super.key,

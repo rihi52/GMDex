@@ -1,3 +1,7 @@
+// Reconstructs full creature domain objects from normalized Drift rows.
+//
+// Related records are loaded in presentation order and converted to the model
+// shape consumed by stat blocks and the creature editor.
 import 'package:drift/drift.dart' show CustomExpression, OrderingTerm;
 
 import 'package:gmdex/components/creature_calculations.dart';
@@ -14,8 +18,7 @@ const _kindToType = <String, ActionType>{
   'villain': ActionType.villainAction,
 };
 
-/// Loads one creature and everything attached to it, and assembles the
-/// Creature your widgets already understand.
+/// Loads one creature and its related records into the UI-facing model.
 Future<Creature?> loadCreature(AppDatabase db, int id) async {
   final row = await (db.select(
     db.creatures,

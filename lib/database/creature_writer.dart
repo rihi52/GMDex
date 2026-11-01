@@ -1,3 +1,7 @@
+// Saves editable creature stat blocks and their normalized child records.
+//
+// The writer preserves import-only metadata on updates, while replacing the
+// child records controlled by the editor in a single transaction.
 import 'package:drift/drift.dart' show BooleanExpressionOperators, InsertMode, Value;
 
 import 'package:gmdex/components/creature_calculations.dart';
@@ -6,6 +10,7 @@ import 'package:gmdex/models/creature.dart';
 
 /// Thrown when another creature already has this name and source.
 class CreatureNameTaken implements Exception {
+  /// Creates a conflict error for a name/source pair already in use.
   CreatureNameTaken(this.name);
   final String name;
 
@@ -39,6 +44,10 @@ List<String> _split(String? s) => (s ?? '')
 
 /// Inserts a new creature, or updates one in place when [existingId] is given.
 /// Returns the creature's id. Throws [CreatureNameTaken] on a name clash.
+/// Inserts or updates a creature and its editor-managed child data.
+///
+/// A creature's name must be unique within its source. Existing records retain
+/// their source and import-only metadata; new records use [newSource].
 Future<int> saveCreature(
   AppDatabase db,
   Creature c, {
@@ -110,6 +119,10 @@ Future<int> saveCreature(
   });
 }
 
+/// Deletes only the child rows rebuilt by the editor before reinserting them.
+///
+/// Notes, environment rows, and legendary-group associations are intentionally
+/// preserved because this editor does not own those fields.
 Future<void> _clearChildren(AppDatabase db, int id) async {
   await (db.delete(db.creatureActions)..where((t) => t.creatureId.equals(id))).go();
   await (db.delete(db.creatureTraits)..where((t) => t.creatureId.equals(id))).go();
@@ -122,6 +135,10 @@ Future<void> _clearChildren(AppDatabase db, int id) async {
   // Environments, notes and legendary-group rows are not touched.
 }
 
+/// Converts nested model values into the creature's normalized child tables.
+///
+/// This includes proficiency rows, senses/languages, traits, actions, and
+/// spellcasting data; list order is persisted for presentation.
 Future<void> _insertChildren(AppDatabase db, int id, Creature c) async {
   final a = c.abilityScores;
   final pb =

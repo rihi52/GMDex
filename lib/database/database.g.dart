@@ -3,7 +3,7 @@
 part of 'database.dart';
 
 // ignore_for_file: type=lint
-class $PlayersTable extends Players with TableInfo<$PlayersTable, Player> {
+class $PlayersTable extends Players with TableInfo<$PlayersTable, PlayerRow> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -70,6 +70,16 @@ class $PlayersTable extends Players with TableInfo<$PlayersTable, Player> {
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _pPassivePerceptionMeta =
+      const VerificationMeta('pPassivePerception');
+  @override
+  late final GeneratedColumn<int> pPassivePerception = GeneratedColumn<int>(
+    'p_passive_perception',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _pOriginalCampaignMeta = const VerificationMeta(
     'pOriginalCampaign',
   );
@@ -82,6 +92,15 @@ class $PlayersTable extends Players with TableInfo<$PlayersTable, Player> {
         type: DriftSqlType.string,
         requiredDuringInsert: false,
       );
+  static const VerificationMeta _pNotesMeta = const VerificationMeta('pNotes');
+  @override
+  late final GeneratedColumn<String> pNotes = GeneratedColumn<String>(
+    'p_notes',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     pId,
@@ -90,7 +109,9 @@ class $PlayersTable extends Players with TableInfo<$PlayersTable, Player> {
     pLevel,
     pHitPoints,
     pArmorClass,
+    pPassivePerception,
     pOriginalCampaign,
+    pNotes,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -99,7 +120,7 @@ class $PlayersTable extends Players with TableInfo<$PlayersTable, Player> {
   static const String $name = 'players';
   @override
   VerificationContext validateIntegrity(
-    Insertable<Player> instance, {
+    Insertable<PlayerRow> instance, {
     bool isInserting = false,
   }) {
     final context = VerificationContext();
@@ -150,6 +171,15 @@ class $PlayersTable extends Players with TableInfo<$PlayersTable, Player> {
         ),
       );
     }
+    if (data.containsKey('p_passive_perception')) {
+      context.handle(
+        _pPassivePerceptionMeta,
+        pPassivePerception.isAcceptableOrUnknown(
+          data['p_passive_perception']!,
+          _pPassivePerceptionMeta,
+        ),
+      );
+    }
     if (data.containsKey('p_original_campaign')) {
       context.handle(
         _pOriginalCampaignMeta,
@@ -159,15 +189,21 @@ class $PlayersTable extends Players with TableInfo<$PlayersTable, Player> {
         ),
       );
     }
+    if (data.containsKey('p_notes')) {
+      context.handle(
+        _pNotesMeta,
+        pNotes.isAcceptableOrUnknown(data['p_notes']!, _pNotesMeta),
+      );
+    }
     return context;
   }
 
   @override
   Set<GeneratedColumn> get $primaryKey => {pId};
   @override
-  Player map(Map<String, dynamic> data, {String? tablePrefix}) {
+  PlayerRow map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return Player(
+    return PlayerRow(
       pId: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}p_id'],
@@ -192,9 +228,17 @@ class $PlayersTable extends Players with TableInfo<$PlayersTable, Player> {
         DriftSqlType.int,
         data['${effectivePrefix}p_armor_class'],
       ),
+      pPassivePerception: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}p_passive_perception'],
+      ),
       pOriginalCampaign: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}p_original_campaign'],
+      ),
+      pNotes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}p_notes'],
       ),
     );
   }
@@ -205,22 +249,26 @@ class $PlayersTable extends Players with TableInfo<$PlayersTable, Player> {
   }
 }
 
-class Player extends DataClass implements Insertable<Player> {
+class PlayerRow extends DataClass implements Insertable<PlayerRow> {
   final int pId;
   final String pName;
   final String pClass;
   final int? pLevel;
   final int? pHitPoints;
   final int? pArmorClass;
+  final int? pPassivePerception;
   final String? pOriginalCampaign;
-  const Player({
+  final String? pNotes;
+  const PlayerRow({
     required this.pId,
     required this.pName,
     required this.pClass,
     this.pLevel,
     this.pHitPoints,
     this.pArmorClass,
+    this.pPassivePerception,
     this.pOriginalCampaign,
+    this.pNotes,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -237,8 +285,14 @@ class Player extends DataClass implements Insertable<Player> {
     if (!nullToAbsent || pArmorClass != null) {
       map['p_armor_class'] = Variable<int>(pArmorClass);
     }
+    if (!nullToAbsent || pPassivePerception != null) {
+      map['p_passive_perception'] = Variable<int>(pPassivePerception);
+    }
     if (!nullToAbsent || pOriginalCampaign != null) {
       map['p_original_campaign'] = Variable<String>(pOriginalCampaign);
+    }
+    if (!nullToAbsent || pNotes != null) {
+      map['p_notes'] = Variable<String>(pNotes);
     }
     return map;
   }
@@ -257,27 +311,35 @@ class Player extends DataClass implements Insertable<Player> {
       pArmorClass: pArmorClass == null && nullToAbsent
           ? const Value.absent()
           : Value(pArmorClass),
+      pPassivePerception: pPassivePerception == null && nullToAbsent
+          ? const Value.absent()
+          : Value(pPassivePerception),
       pOriginalCampaign: pOriginalCampaign == null && nullToAbsent
           ? const Value.absent()
           : Value(pOriginalCampaign),
+      pNotes: pNotes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(pNotes),
     );
   }
 
-  factory Player.fromJson(
+  factory PlayerRow.fromJson(
     Map<String, dynamic> json, {
     ValueSerializer? serializer,
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return Player(
+    return PlayerRow(
       pId: serializer.fromJson<int>(json['pId']),
       pName: serializer.fromJson<String>(json['pName']),
       pClass: serializer.fromJson<String>(json['pClass']),
       pLevel: serializer.fromJson<int?>(json['pLevel']),
       pHitPoints: serializer.fromJson<int?>(json['pHitPoints']),
       pArmorClass: serializer.fromJson<int?>(json['pArmorClass']),
+      pPassivePerception: serializer.fromJson<int?>(json['pPassivePerception']),
       pOriginalCampaign: serializer.fromJson<String?>(
         json['pOriginalCampaign'],
       ),
+      pNotes: serializer.fromJson<String?>(json['pNotes']),
     );
   }
   @override
@@ -290,31 +352,39 @@ class Player extends DataClass implements Insertable<Player> {
       'pLevel': serializer.toJson<int?>(pLevel),
       'pHitPoints': serializer.toJson<int?>(pHitPoints),
       'pArmorClass': serializer.toJson<int?>(pArmorClass),
+      'pPassivePerception': serializer.toJson<int?>(pPassivePerception),
       'pOriginalCampaign': serializer.toJson<String?>(pOriginalCampaign),
+      'pNotes': serializer.toJson<String?>(pNotes),
     };
   }
 
-  Player copyWith({
+  PlayerRow copyWith({
     int? pId,
     String? pName,
     String? pClass,
     Value<int?> pLevel = const Value.absent(),
     Value<int?> pHitPoints = const Value.absent(),
     Value<int?> pArmorClass = const Value.absent(),
+    Value<int?> pPassivePerception = const Value.absent(),
     Value<String?> pOriginalCampaign = const Value.absent(),
-  }) => Player(
+    Value<String?> pNotes = const Value.absent(),
+  }) => PlayerRow(
     pId: pId ?? this.pId,
     pName: pName ?? this.pName,
     pClass: pClass ?? this.pClass,
     pLevel: pLevel.present ? pLevel.value : this.pLevel,
     pHitPoints: pHitPoints.present ? pHitPoints.value : this.pHitPoints,
     pArmorClass: pArmorClass.present ? pArmorClass.value : this.pArmorClass,
+    pPassivePerception: pPassivePerception.present
+        ? pPassivePerception.value
+        : this.pPassivePerception,
     pOriginalCampaign: pOriginalCampaign.present
         ? pOriginalCampaign.value
         : this.pOriginalCampaign,
+    pNotes: pNotes.present ? pNotes.value : this.pNotes,
   );
-  Player copyWithCompanion(PlayersCompanion data) {
-    return Player(
+  PlayerRow copyWithCompanion(PlayersCompanion data) {
+    return PlayerRow(
       pId: data.pId.present ? data.pId.value : this.pId,
       pName: data.pName.present ? data.pName.value : this.pName,
       pClass: data.pClass.present ? data.pClass.value : this.pClass,
@@ -325,22 +395,28 @@ class Player extends DataClass implements Insertable<Player> {
       pArmorClass: data.pArmorClass.present
           ? data.pArmorClass.value
           : this.pArmorClass,
+      pPassivePerception: data.pPassivePerception.present
+          ? data.pPassivePerception.value
+          : this.pPassivePerception,
       pOriginalCampaign: data.pOriginalCampaign.present
           ? data.pOriginalCampaign.value
           : this.pOriginalCampaign,
+      pNotes: data.pNotes.present ? data.pNotes.value : this.pNotes,
     );
   }
 
   @override
   String toString() {
-    return (StringBuffer('Player(')
+    return (StringBuffer('PlayerRow(')
           ..write('pId: $pId, ')
           ..write('pName: $pName, ')
           ..write('pClass: $pClass, ')
           ..write('pLevel: $pLevel, ')
           ..write('pHitPoints: $pHitPoints, ')
           ..write('pArmorClass: $pArmorClass, ')
-          ..write('pOriginalCampaign: $pOriginalCampaign')
+          ..write('pPassivePerception: $pPassivePerception, ')
+          ..write('pOriginalCampaign: $pOriginalCampaign, ')
+          ..write('pNotes: $pNotes')
           ..write(')'))
         .toString();
   }
@@ -353,29 +429,35 @@ class Player extends DataClass implements Insertable<Player> {
     pLevel,
     pHitPoints,
     pArmorClass,
+    pPassivePerception,
     pOriginalCampaign,
+    pNotes,
   );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is Player &&
+      (other is PlayerRow &&
           other.pId == this.pId &&
           other.pName == this.pName &&
           other.pClass == this.pClass &&
           other.pLevel == this.pLevel &&
           other.pHitPoints == this.pHitPoints &&
           other.pArmorClass == this.pArmorClass &&
-          other.pOriginalCampaign == this.pOriginalCampaign);
+          other.pPassivePerception == this.pPassivePerception &&
+          other.pOriginalCampaign == this.pOriginalCampaign &&
+          other.pNotes == this.pNotes);
 }
 
-class PlayersCompanion extends UpdateCompanion<Player> {
+class PlayersCompanion extends UpdateCompanion<PlayerRow> {
   final Value<int> pId;
   final Value<String> pName;
   final Value<String> pClass;
   final Value<int?> pLevel;
   final Value<int?> pHitPoints;
   final Value<int?> pArmorClass;
+  final Value<int?> pPassivePerception;
   final Value<String?> pOriginalCampaign;
+  final Value<String?> pNotes;
   const PlayersCompanion({
     this.pId = const Value.absent(),
     this.pName = const Value.absent(),
@@ -383,7 +465,9 @@ class PlayersCompanion extends UpdateCompanion<Player> {
     this.pLevel = const Value.absent(),
     this.pHitPoints = const Value.absent(),
     this.pArmorClass = const Value.absent(),
+    this.pPassivePerception = const Value.absent(),
     this.pOriginalCampaign = const Value.absent(),
+    this.pNotes = const Value.absent(),
   });
   PlayersCompanion.insert({
     this.pId = const Value.absent(),
@@ -392,17 +476,21 @@ class PlayersCompanion extends UpdateCompanion<Player> {
     this.pLevel = const Value.absent(),
     this.pHitPoints = const Value.absent(),
     this.pArmorClass = const Value.absent(),
+    this.pPassivePerception = const Value.absent(),
     this.pOriginalCampaign = const Value.absent(),
+    this.pNotes = const Value.absent(),
   }) : pName = Value(pName),
        pClass = Value(pClass);
-  static Insertable<Player> custom({
+  static Insertable<PlayerRow> custom({
     Expression<int>? pId,
     Expression<String>? pName,
     Expression<String>? pClass,
     Expression<int>? pLevel,
     Expression<int>? pHitPoints,
     Expression<int>? pArmorClass,
+    Expression<int>? pPassivePerception,
     Expression<String>? pOriginalCampaign,
+    Expression<String>? pNotes,
   }) {
     return RawValuesInsertable({
       if (pId != null) 'p_id': pId,
@@ -411,7 +499,10 @@ class PlayersCompanion extends UpdateCompanion<Player> {
       if (pLevel != null) 'p_level': pLevel,
       if (pHitPoints != null) 'p_hit_points': pHitPoints,
       if (pArmorClass != null) 'p_armor_class': pArmorClass,
+      if (pPassivePerception != null)
+        'p_passive_perception': pPassivePerception,
       if (pOriginalCampaign != null) 'p_original_campaign': pOriginalCampaign,
+      if (pNotes != null) 'p_notes': pNotes,
     });
   }
 
@@ -422,7 +513,9 @@ class PlayersCompanion extends UpdateCompanion<Player> {
     Value<int?>? pLevel,
     Value<int?>? pHitPoints,
     Value<int?>? pArmorClass,
+    Value<int?>? pPassivePerception,
     Value<String?>? pOriginalCampaign,
+    Value<String?>? pNotes,
   }) {
     return PlayersCompanion(
       pId: pId ?? this.pId,
@@ -431,7 +524,9 @@ class PlayersCompanion extends UpdateCompanion<Player> {
       pLevel: pLevel ?? this.pLevel,
       pHitPoints: pHitPoints ?? this.pHitPoints,
       pArmorClass: pArmorClass ?? this.pArmorClass,
+      pPassivePerception: pPassivePerception ?? this.pPassivePerception,
       pOriginalCampaign: pOriginalCampaign ?? this.pOriginalCampaign,
+      pNotes: pNotes ?? this.pNotes,
     );
   }
 
@@ -456,8 +551,14 @@ class PlayersCompanion extends UpdateCompanion<Player> {
     if (pArmorClass.present) {
       map['p_armor_class'] = Variable<int>(pArmorClass.value);
     }
+    if (pPassivePerception.present) {
+      map['p_passive_perception'] = Variable<int>(pPassivePerception.value);
+    }
     if (pOriginalCampaign.present) {
       map['p_original_campaign'] = Variable<String>(pOriginalCampaign.value);
+    }
+    if (pNotes.present) {
+      map['p_notes'] = Variable<String>(pNotes.value);
     }
     return map;
   }
@@ -471,7 +572,510 @@ class PlayersCompanion extends UpdateCompanion<Player> {
           ..write('pLevel: $pLevel, ')
           ..write('pHitPoints: $pHitPoints, ')
           ..write('pArmorClass: $pArmorClass, ')
-          ..write('pOriginalCampaign: $pOriginalCampaign')
+          ..write('pPassivePerception: $pPassivePerception, ')
+          ..write('pOriginalCampaign: $pOriginalCampaign, ')
+          ..write('pNotes: $pNotes')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $EncountersTable extends Encounters
+    with TableInfo<$EncountersTable, EncounterRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $EncountersTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
+  @override
+  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
+    'notes',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _totalXpMeta = const VerificationMeta(
+    'totalXp',
+  );
+  @override
+  late final GeneratedColumn<int> totalXp = GeneratedColumn<int>(
+    'total_xp',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _adjustedXpMeta = const VerificationMeta(
+    'adjustedXp',
+  );
+  @override
+  late final GeneratedColumn<int> adjustedXp = GeneratedColumn<int>(
+    'adjusted_xp',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _hasStartedMeta = const VerificationMeta(
+    'hasStarted',
+  );
+  @override
+  late final GeneratedColumn<bool> hasStarted = GeneratedColumn<bool>(
+    'has_started',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("has_started" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    name,
+    notes,
+    totalXp,
+    adjustedXp,
+    hasStarted,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'encounters';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<EncounterRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('notes')) {
+      context.handle(
+        _notesMeta,
+        notes.isAcceptableOrUnknown(data['notes']!, _notesMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_notesMeta);
+    }
+    if (data.containsKey('total_xp')) {
+      context.handle(
+        _totalXpMeta,
+        totalXp.isAcceptableOrUnknown(data['total_xp']!, _totalXpMeta),
+      );
+    }
+    if (data.containsKey('adjusted_xp')) {
+      context.handle(
+        _adjustedXpMeta,
+        adjustedXp.isAcceptableOrUnknown(data['adjusted_xp']!, _adjustedXpMeta),
+      );
+    }
+    if (data.containsKey('has_started')) {
+      context.handle(
+        _hasStartedMeta,
+        hasStarted.isAcceptableOrUnknown(data['has_started']!, _hasStartedMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  EncounterRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return EncounterRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      notes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}notes'],
+      )!,
+      totalXp: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}total_xp'],
+      ),
+      adjustedXp: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}adjusted_xp'],
+      ),
+      hasStarted: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}has_started'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $EncountersTable createAlias(String alias) {
+    return $EncountersTable(attachedDatabase, alias);
+  }
+}
+
+class EncounterRow extends DataClass implements Insertable<EncounterRow> {
+  final int id;
+  final String name;
+  final String notes;
+  final int? totalXp;
+  final int? adjustedXp;
+  final bool hasStarted;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const EncounterRow({
+    required this.id,
+    required this.name,
+    required this.notes,
+    this.totalXp,
+    this.adjustedXp,
+    required this.hasStarted,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['name'] = Variable<String>(name);
+    map['notes'] = Variable<String>(notes);
+    if (!nullToAbsent || totalXp != null) {
+      map['total_xp'] = Variable<int>(totalXp);
+    }
+    if (!nullToAbsent || adjustedXp != null) {
+      map['adjusted_xp'] = Variable<int>(adjustedXp);
+    }
+    map['has_started'] = Variable<bool>(hasStarted);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  EncountersCompanion toCompanion(bool nullToAbsent) {
+    return EncountersCompanion(
+      id: Value(id),
+      name: Value(name),
+      notes: Value(notes),
+      totalXp: totalXp == null && nullToAbsent
+          ? const Value.absent()
+          : Value(totalXp),
+      adjustedXp: adjustedXp == null && nullToAbsent
+          ? const Value.absent()
+          : Value(adjustedXp),
+      hasStarted: Value(hasStarted),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory EncounterRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return EncounterRow(
+      id: serializer.fromJson<int>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      notes: serializer.fromJson<String>(json['notes']),
+      totalXp: serializer.fromJson<int?>(json['totalXp']),
+      adjustedXp: serializer.fromJson<int?>(json['adjustedXp']),
+      hasStarted: serializer.fromJson<bool>(json['hasStarted']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'name': serializer.toJson<String>(name),
+      'notes': serializer.toJson<String>(notes),
+      'totalXp': serializer.toJson<int?>(totalXp),
+      'adjustedXp': serializer.toJson<int?>(adjustedXp),
+      'hasStarted': serializer.toJson<bool>(hasStarted),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  EncounterRow copyWith({
+    int? id,
+    String? name,
+    String? notes,
+    Value<int?> totalXp = const Value.absent(),
+    Value<int?> adjustedXp = const Value.absent(),
+    bool? hasStarted,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) => EncounterRow(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    notes: notes ?? this.notes,
+    totalXp: totalXp.present ? totalXp.value : this.totalXp,
+    adjustedXp: adjustedXp.present ? adjustedXp.value : this.adjustedXp,
+    hasStarted: hasStarted ?? this.hasStarted,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  EncounterRow copyWithCompanion(EncountersCompanion data) {
+    return EncounterRow(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      notes: data.notes.present ? data.notes.value : this.notes,
+      totalXp: data.totalXp.present ? data.totalXp.value : this.totalXp,
+      adjustedXp: data.adjustedXp.present
+          ? data.adjustedXp.value
+          : this.adjustedXp,
+      hasStarted: data.hasStarted.present
+          ? data.hasStarted.value
+          : this.hasStarted,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('EncounterRow(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('notes: $notes, ')
+          ..write('totalXp: $totalXp, ')
+          ..write('adjustedXp: $adjustedXp, ')
+          ..write('hasStarted: $hasStarted, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    name,
+    notes,
+    totalXp,
+    adjustedXp,
+    hasStarted,
+    createdAt,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is EncounterRow &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.notes == this.notes &&
+          other.totalXp == this.totalXp &&
+          other.adjustedXp == this.adjustedXp &&
+          other.hasStarted == this.hasStarted &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class EncountersCompanion extends UpdateCompanion<EncounterRow> {
+  final Value<int> id;
+  final Value<String> name;
+  final Value<String> notes;
+  final Value<int?> totalXp;
+  final Value<int?> adjustedXp;
+  final Value<bool> hasStarted;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  const EncountersCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.notes = const Value.absent(),
+    this.totalXp = const Value.absent(),
+    this.adjustedXp = const Value.absent(),
+    this.hasStarted = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+  });
+  EncountersCompanion.insert({
+    this.id = const Value.absent(),
+    required String name,
+    required String notes,
+    this.totalXp = const Value.absent(),
+    this.adjustedXp = const Value.absent(),
+    this.hasStarted = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+  }) : name = Value(name),
+       notes = Value(notes);
+  static Insertable<EncounterRow> custom({
+    Expression<int>? id,
+    Expression<String>? name,
+    Expression<String>? notes,
+    Expression<int>? totalXp,
+    Expression<int>? adjustedXp,
+    Expression<bool>? hasStarted,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (notes != null) 'notes': notes,
+      if (totalXp != null) 'total_xp': totalXp,
+      if (adjustedXp != null) 'adjusted_xp': adjustedXp,
+      if (hasStarted != null) 'has_started': hasStarted,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+    });
+  }
+
+  EncountersCompanion copyWith({
+    Value<int>? id,
+    Value<String>? name,
+    Value<String>? notes,
+    Value<int?>? totalXp,
+    Value<int?>? adjustedXp,
+    Value<bool>? hasStarted,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+  }) {
+    return EncountersCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      notes: notes ?? this.notes,
+      totalXp: totalXp ?? this.totalXp,
+      adjustedXp: adjustedXp ?? this.adjustedXp,
+      hasStarted: hasStarted ?? this.hasStarted,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (notes.present) {
+      map['notes'] = Variable<String>(notes.value);
+    }
+    if (totalXp.present) {
+      map['total_xp'] = Variable<int>(totalXp.value);
+    }
+    if (adjustedXp.present) {
+      map['adjusted_xp'] = Variable<int>(adjustedXp.value);
+    }
+    if (hasStarted.present) {
+      map['has_started'] = Variable<bool>(hasStarted.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('EncountersCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('notes: $notes, ')
+          ..write('totalXp: $totalXp, ')
+          ..write('adjustedXp: $adjustedXp, ')
+          ..write('hasStarted: $hasStarted, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
           ..write(')'))
         .toString();
   }
@@ -1165,6 +1769,28 @@ class $CreaturesTable extends Creatures
       'REFERENCES legendary_groups (id) ON DELETE SET NULL',
     ),
   );
+  static const VerificationMeta _legendaryGroupNameMeta =
+      const VerificationMeta('legendaryGroupName');
+  @override
+  late final GeneratedColumn<String> legendaryGroupName =
+      GeneratedColumn<String>(
+        'legendary_group_name',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _legendaryGroupSourceMeta =
+      const VerificationMeta('legendaryGroupSource');
+  @override
+  late final GeneratedColumn<String> legendaryGroupSource =
+      GeneratedColumn<String>(
+        'legendary_group_source',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1202,6 +1828,8 @@ class $CreaturesTable extends Creatures
     damageImmunities,
     conditionImmunities,
     legendaryGroupId,
+    legendaryGroupName,
+    legendaryGroupSource,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1469,6 +2097,24 @@ class $CreaturesTable extends Creatures
         ),
       );
     }
+    if (data.containsKey('legendary_group_name')) {
+      context.handle(
+        _legendaryGroupNameMeta,
+        legendaryGroupName.isAcceptableOrUnknown(
+          data['legendary_group_name']!,
+          _legendaryGroupNameMeta,
+        ),
+      );
+    }
+    if (data.containsKey('legendary_group_source')) {
+      context.handle(
+        _legendaryGroupSourceMeta,
+        legendaryGroupSource.isAcceptableOrUnknown(
+          data['legendary_group_source']!,
+          _legendaryGroupSourceMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -1618,6 +2264,14 @@ class $CreaturesTable extends Creatures
         DriftSqlType.int,
         data['${effectivePrefix}legendary_group_id'],
       ),
+      legendaryGroupName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}legendary_group_name'],
+      ),
+      legendaryGroupSource: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}legendary_group_source'],
+      ),
     );
   }
 
@@ -1663,6 +2317,8 @@ class CreatureRow extends DataClass implements Insertable<CreatureRow> {
   final String? damageImmunities;
   final String? conditionImmunities;
   final int? legendaryGroupId;
+  final String? legendaryGroupName;
+  final String? legendaryGroupSource;
   const CreatureRow({
     required this.id,
     required this.name,
@@ -1699,6 +2355,8 @@ class CreatureRow extends DataClass implements Insertable<CreatureRow> {
     this.damageImmunities,
     this.conditionImmunities,
     this.legendaryGroupId,
+    this.legendaryGroupName,
+    this.legendaryGroupSource,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1788,6 +2446,12 @@ class CreatureRow extends DataClass implements Insertable<CreatureRow> {
     if (!nullToAbsent || legendaryGroupId != null) {
       map['legendary_group_id'] = Variable<int>(legendaryGroupId);
     }
+    if (!nullToAbsent || legendaryGroupName != null) {
+      map['legendary_group_name'] = Variable<String>(legendaryGroupName);
+    }
+    if (!nullToAbsent || legendaryGroupSource != null) {
+      map['legendary_group_source'] = Variable<String>(legendaryGroupSource);
+    }
     return map;
   }
 
@@ -1872,6 +2536,12 @@ class CreatureRow extends DataClass implements Insertable<CreatureRow> {
       legendaryGroupId: legendaryGroupId == null && nullToAbsent
           ? const Value.absent()
           : Value(legendaryGroupId),
+      legendaryGroupName: legendaryGroupName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(legendaryGroupName),
+      legendaryGroupSource: legendaryGroupSource == null && nullToAbsent
+          ? const Value.absent()
+          : Value(legendaryGroupSource),
     );
   }
 
@@ -1926,6 +2596,12 @@ class CreatureRow extends DataClass implements Insertable<CreatureRow> {
         json['conditionImmunities'],
       ),
       legendaryGroupId: serializer.fromJson<int?>(json['legendaryGroupId']),
+      legendaryGroupName: serializer.fromJson<String?>(
+        json['legendaryGroupName'],
+      ),
+      legendaryGroupSource: serializer.fromJson<String?>(
+        json['legendaryGroupSource'],
+      ),
     );
   }
   @override
@@ -1969,6 +2645,8 @@ class CreatureRow extends DataClass implements Insertable<CreatureRow> {
       'damageImmunities': serializer.toJson<String?>(damageImmunities),
       'conditionImmunities': serializer.toJson<String?>(conditionImmunities),
       'legendaryGroupId': serializer.toJson<int?>(legendaryGroupId),
+      'legendaryGroupName': serializer.toJson<String?>(legendaryGroupName),
+      'legendaryGroupSource': serializer.toJson<String?>(legendaryGroupSource),
     };
   }
 
@@ -2008,6 +2686,8 @@ class CreatureRow extends DataClass implements Insertable<CreatureRow> {
     Value<String?> damageImmunities = const Value.absent(),
     Value<String?> conditionImmunities = const Value.absent(),
     Value<int?> legendaryGroupId = const Value.absent(),
+    Value<String?> legendaryGroupName = const Value.absent(),
+    Value<String?> legendaryGroupSource = const Value.absent(),
   }) => CreatureRow(
     id: id ?? this.id,
     name: name ?? this.name,
@@ -2068,6 +2748,12 @@ class CreatureRow extends DataClass implements Insertable<CreatureRow> {
     legendaryGroupId: legendaryGroupId.present
         ? legendaryGroupId.value
         : this.legendaryGroupId,
+    legendaryGroupName: legendaryGroupName.present
+        ? legendaryGroupName.value
+        : this.legendaryGroupName,
+    legendaryGroupSource: legendaryGroupSource.present
+        ? legendaryGroupSource.value
+        : this.legendaryGroupSource,
   );
   CreatureRow copyWithCompanion(CreaturesCompanion data) {
     return CreatureRow(
@@ -2142,6 +2828,12 @@ class CreatureRow extends DataClass implements Insertable<CreatureRow> {
       legendaryGroupId: data.legendaryGroupId.present
           ? data.legendaryGroupId.value
           : this.legendaryGroupId,
+      legendaryGroupName: data.legendaryGroupName.present
+          ? data.legendaryGroupName.value
+          : this.legendaryGroupName,
+      legendaryGroupSource: data.legendaryGroupSource.present
+          ? data.legendaryGroupSource.value
+          : this.legendaryGroupSource,
     );
   }
 
@@ -2182,7 +2874,9 @@ class CreatureRow extends DataClass implements Insertable<CreatureRow> {
           ..write('damageResistances: $damageResistances, ')
           ..write('damageImmunities: $damageImmunities, ')
           ..write('conditionImmunities: $conditionImmunities, ')
-          ..write('legendaryGroupId: $legendaryGroupId')
+          ..write('legendaryGroupId: $legendaryGroupId, ')
+          ..write('legendaryGroupName: $legendaryGroupName, ')
+          ..write('legendaryGroupSource: $legendaryGroupSource')
           ..write(')'))
         .toString();
   }
@@ -2224,6 +2918,8 @@ class CreatureRow extends DataClass implements Insertable<CreatureRow> {
     damageImmunities,
     conditionImmunities,
     legendaryGroupId,
+    legendaryGroupName,
+    legendaryGroupSource,
   ]);
   @override
   bool operator ==(Object other) =>
@@ -2263,7 +2959,9 @@ class CreatureRow extends DataClass implements Insertable<CreatureRow> {
           other.damageResistances == this.damageResistances &&
           other.damageImmunities == this.damageImmunities &&
           other.conditionImmunities == this.conditionImmunities &&
-          other.legendaryGroupId == this.legendaryGroupId);
+          other.legendaryGroupId == this.legendaryGroupId &&
+          other.legendaryGroupName == this.legendaryGroupName &&
+          other.legendaryGroupSource == this.legendaryGroupSource);
 }
 
 class CreaturesCompanion extends UpdateCompanion<CreatureRow> {
@@ -2302,6 +3000,8 @@ class CreaturesCompanion extends UpdateCompanion<CreatureRow> {
   final Value<String?> damageImmunities;
   final Value<String?> conditionImmunities;
   final Value<int?> legendaryGroupId;
+  final Value<String?> legendaryGroupName;
+  final Value<String?> legendaryGroupSource;
   const CreaturesCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
@@ -2338,6 +3038,8 @@ class CreaturesCompanion extends UpdateCompanion<CreatureRow> {
     this.damageImmunities = const Value.absent(),
     this.conditionImmunities = const Value.absent(),
     this.legendaryGroupId = const Value.absent(),
+    this.legendaryGroupName = const Value.absent(),
+    this.legendaryGroupSource = const Value.absent(),
   });
   CreaturesCompanion.insert({
     this.id = const Value.absent(),
@@ -2375,6 +3077,8 @@ class CreaturesCompanion extends UpdateCompanion<CreatureRow> {
     this.damageImmunities = const Value.absent(),
     this.conditionImmunities = const Value.absent(),
     this.legendaryGroupId = const Value.absent(),
+    this.legendaryGroupName = const Value.absent(),
+    this.legendaryGroupSource = const Value.absent(),
   }) : name = Value(name);
   static Insertable<CreatureRow> custom({
     Expression<int>? id,
@@ -2412,6 +3116,8 @@ class CreaturesCompanion extends UpdateCompanion<CreatureRow> {
     Expression<String>? damageImmunities,
     Expression<String>? conditionImmunities,
     Expression<int>? legendaryGroupId,
+    Expression<String>? legendaryGroupName,
+    Expression<String>? legendaryGroupSource,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -2453,6 +3159,10 @@ class CreaturesCompanion extends UpdateCompanion<CreatureRow> {
       if (conditionImmunities != null)
         'condition_immunities': conditionImmunities,
       if (legendaryGroupId != null) 'legendary_group_id': legendaryGroupId,
+      if (legendaryGroupName != null)
+        'legendary_group_name': legendaryGroupName,
+      if (legendaryGroupSource != null)
+        'legendary_group_source': legendaryGroupSource,
     });
   }
 
@@ -2492,6 +3202,8 @@ class CreaturesCompanion extends UpdateCompanion<CreatureRow> {
     Value<String?>? damageImmunities,
     Value<String?>? conditionImmunities,
     Value<int?>? legendaryGroupId,
+    Value<String?>? legendaryGroupName,
+    Value<String?>? legendaryGroupSource,
   }) {
     return CreaturesCompanion(
       id: id ?? this.id,
@@ -2530,6 +3242,8 @@ class CreaturesCompanion extends UpdateCompanion<CreatureRow> {
       damageImmunities: damageImmunities ?? this.damageImmunities,
       conditionImmunities: conditionImmunities ?? this.conditionImmunities,
       legendaryGroupId: legendaryGroupId ?? this.legendaryGroupId,
+      legendaryGroupName: legendaryGroupName ?? this.legendaryGroupName,
+      legendaryGroupSource: legendaryGroupSource ?? this.legendaryGroupSource,
     );
   }
 
@@ -2647,6 +3361,14 @@ class CreaturesCompanion extends UpdateCompanion<CreatureRow> {
     if (legendaryGroupId.present) {
       map['legendary_group_id'] = Variable<int>(legendaryGroupId.value);
     }
+    if (legendaryGroupName.present) {
+      map['legendary_group_name'] = Variable<String>(legendaryGroupName.value);
+    }
+    if (legendaryGroupSource.present) {
+      map['legendary_group_source'] = Variable<String>(
+        legendaryGroupSource.value,
+      );
+    }
     return map;
   }
 
@@ -2687,7 +3409,2646 @@ class CreaturesCompanion extends UpdateCompanion<CreatureRow> {
           ..write('damageResistances: $damageResistances, ')
           ..write('damageImmunities: $damageImmunities, ')
           ..write('conditionImmunities: $conditionImmunities, ')
-          ..write('legendaryGroupId: $legendaryGroupId')
+          ..write('legendaryGroupId: $legendaryGroupId, ')
+          ..write('legendaryGroupName: $legendaryGroupName, ')
+          ..write('legendaryGroupSource: $legendaryGroupSource')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $EncounterCreaturesTable extends EncounterCreatures
+    with TableInfo<$EncounterCreaturesTable, EncounterCreaturesRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $EncounterCreaturesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _encounterIdMeta = const VerificationMeta(
+    'encounterId',
+  );
+  @override
+  late final GeneratedColumn<int> encounterId = GeneratedColumn<int>(
+    'encounter_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES encounters (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _creatureIdMeta = const VerificationMeta(
+    'creatureId',
+  );
+  @override
+  late final GeneratedColumn<int> creatureId = GeneratedColumn<int>(
+    'creature_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES creatures (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _initiativeMeta = const VerificationMeta(
+    'initiative',
+  );
+  @override
+  late final GeneratedColumn<int> initiative = GeneratedColumn<int>(
+    'initiative',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _currentHitpointsMeta = const VerificationMeta(
+    'currentHitpoints',
+  );
+  @override
+  late final GeneratedColumn<int> currentHitpoints = GeneratedColumn<int>(
+    'current_hitpoints',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _isBlindedMeta = const VerificationMeta(
+    'isBlinded',
+  );
+  @override
+  late final GeneratedColumn<bool> isBlinded = GeneratedColumn<bool>(
+    'is_blinded',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_blinded" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _isCharmedMeta = const VerificationMeta(
+    'isCharmed',
+  );
+  @override
+  late final GeneratedColumn<bool> isCharmed = GeneratedColumn<bool>(
+    'is_charmed',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_charmed" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _isDeafenedMeta = const VerificationMeta(
+    'isDeafened',
+  );
+  @override
+  late final GeneratedColumn<bool> isDeafened = GeneratedColumn<bool>(
+    'is_deafened',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_deafened" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _exhaustionLevelMeta = const VerificationMeta(
+    'exhaustionLevel',
+  );
+  @override
+  late final GeneratedColumn<int> exhaustionLevel = GeneratedColumn<int>(
+    'exhaustion_level',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _isFrightenedMeta = const VerificationMeta(
+    'isFrightened',
+  );
+  @override
+  late final GeneratedColumn<bool> isFrightened = GeneratedColumn<bool>(
+    'is_frightened',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_frightened" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _isGrappledMeta = const VerificationMeta(
+    'isGrappled',
+  );
+  @override
+  late final GeneratedColumn<bool> isGrappled = GeneratedColumn<bool>(
+    'is_grappled',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_grappled" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _isIncapacitatedMeta = const VerificationMeta(
+    'isIncapacitated',
+  );
+  @override
+  late final GeneratedColumn<bool> isIncapacitated = GeneratedColumn<bool>(
+    'is_incapacitated',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_incapacitated" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _isInvisibleMeta = const VerificationMeta(
+    'isInvisible',
+  );
+  @override
+  late final GeneratedColumn<bool> isInvisible = GeneratedColumn<bool>(
+    'is_invisible',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_invisible" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _isParalyzedMeta = const VerificationMeta(
+    'isParalyzed',
+  );
+  @override
+  late final GeneratedColumn<bool> isParalyzed = GeneratedColumn<bool>(
+    'is_paralyzed',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_paralyzed" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _isPetrifiedMeta = const VerificationMeta(
+    'isPetrified',
+  );
+  @override
+  late final GeneratedColumn<bool> isPetrified = GeneratedColumn<bool>(
+    'is_petrified',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_petrified" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _isPoisonedMeta = const VerificationMeta(
+    'isPoisoned',
+  );
+  @override
+  late final GeneratedColumn<bool> isPoisoned = GeneratedColumn<bool>(
+    'is_poisoned',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_poisoned" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _isProneMeta = const VerificationMeta(
+    'isProne',
+  );
+  @override
+  late final GeneratedColumn<bool> isProne = GeneratedColumn<bool>(
+    'is_prone',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_prone" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _isRestrainedMeta = const VerificationMeta(
+    'isRestrained',
+  );
+  @override
+  late final GeneratedColumn<bool> isRestrained = GeneratedColumn<bool>(
+    'is_restrained',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_restrained" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _isStunnedMeta = const VerificationMeta(
+    'isStunned',
+  );
+  @override
+  late final GeneratedColumn<bool> isStunned = GeneratedColumn<bool>(
+    'is_stunned',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_stunned" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _isUnconsciousMeta = const VerificationMeta(
+    'isUnconscious',
+  );
+  @override
+  late final GeneratedColumn<bool> isUnconscious = GeneratedColumn<bool>(
+    'is_unconscious',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_unconscious" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _isTurnMeta = const VerificationMeta('isTurn');
+  @override
+  late final GeneratedColumn<bool> isTurn = GeneratedColumn<bool>(
+    'is_turn',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_turn" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    encounterId,
+    creatureId,
+    initiative,
+    currentHitpoints,
+    createdAt,
+    updatedAt,
+    isBlinded,
+    isCharmed,
+    isDeafened,
+    exhaustionLevel,
+    isFrightened,
+    isGrappled,
+    isIncapacitated,
+    isInvisible,
+    isParalyzed,
+    isPetrified,
+    isPoisoned,
+    isProne,
+    isRestrained,
+    isStunned,
+    isUnconscious,
+    isTurn,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'encounter_creatures';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<EncounterCreaturesRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('encounter_id')) {
+      context.handle(
+        _encounterIdMeta,
+        encounterId.isAcceptableOrUnknown(
+          data['encounter_id']!,
+          _encounterIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_encounterIdMeta);
+    }
+    if (data.containsKey('creature_id')) {
+      context.handle(
+        _creatureIdMeta,
+        creatureId.isAcceptableOrUnknown(data['creature_id']!, _creatureIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_creatureIdMeta);
+    }
+    if (data.containsKey('initiative')) {
+      context.handle(
+        _initiativeMeta,
+        initiative.isAcceptableOrUnknown(data['initiative']!, _initiativeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_initiativeMeta);
+    }
+    if (data.containsKey('current_hitpoints')) {
+      context.handle(
+        _currentHitpointsMeta,
+        currentHitpoints.isAcceptableOrUnknown(
+          data['current_hitpoints']!,
+          _currentHitpointsMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_currentHitpointsMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('is_blinded')) {
+      context.handle(
+        _isBlindedMeta,
+        isBlinded.isAcceptableOrUnknown(data['is_blinded']!, _isBlindedMeta),
+      );
+    }
+    if (data.containsKey('is_charmed')) {
+      context.handle(
+        _isCharmedMeta,
+        isCharmed.isAcceptableOrUnknown(data['is_charmed']!, _isCharmedMeta),
+      );
+    }
+    if (data.containsKey('is_deafened')) {
+      context.handle(
+        _isDeafenedMeta,
+        isDeafened.isAcceptableOrUnknown(data['is_deafened']!, _isDeafenedMeta),
+      );
+    }
+    if (data.containsKey('exhaustion_level')) {
+      context.handle(
+        _exhaustionLevelMeta,
+        exhaustionLevel.isAcceptableOrUnknown(
+          data['exhaustion_level']!,
+          _exhaustionLevelMeta,
+        ),
+      );
+    }
+    if (data.containsKey('is_frightened')) {
+      context.handle(
+        _isFrightenedMeta,
+        isFrightened.isAcceptableOrUnknown(
+          data['is_frightened']!,
+          _isFrightenedMeta,
+        ),
+      );
+    }
+    if (data.containsKey('is_grappled')) {
+      context.handle(
+        _isGrappledMeta,
+        isGrappled.isAcceptableOrUnknown(data['is_grappled']!, _isGrappledMeta),
+      );
+    }
+    if (data.containsKey('is_incapacitated')) {
+      context.handle(
+        _isIncapacitatedMeta,
+        isIncapacitated.isAcceptableOrUnknown(
+          data['is_incapacitated']!,
+          _isIncapacitatedMeta,
+        ),
+      );
+    }
+    if (data.containsKey('is_invisible')) {
+      context.handle(
+        _isInvisibleMeta,
+        isInvisible.isAcceptableOrUnknown(
+          data['is_invisible']!,
+          _isInvisibleMeta,
+        ),
+      );
+    }
+    if (data.containsKey('is_paralyzed')) {
+      context.handle(
+        _isParalyzedMeta,
+        isParalyzed.isAcceptableOrUnknown(
+          data['is_paralyzed']!,
+          _isParalyzedMeta,
+        ),
+      );
+    }
+    if (data.containsKey('is_petrified')) {
+      context.handle(
+        _isPetrifiedMeta,
+        isPetrified.isAcceptableOrUnknown(
+          data['is_petrified']!,
+          _isPetrifiedMeta,
+        ),
+      );
+    }
+    if (data.containsKey('is_poisoned')) {
+      context.handle(
+        _isPoisonedMeta,
+        isPoisoned.isAcceptableOrUnknown(data['is_poisoned']!, _isPoisonedMeta),
+      );
+    }
+    if (data.containsKey('is_prone')) {
+      context.handle(
+        _isProneMeta,
+        isProne.isAcceptableOrUnknown(data['is_prone']!, _isProneMeta),
+      );
+    }
+    if (data.containsKey('is_restrained')) {
+      context.handle(
+        _isRestrainedMeta,
+        isRestrained.isAcceptableOrUnknown(
+          data['is_restrained']!,
+          _isRestrainedMeta,
+        ),
+      );
+    }
+    if (data.containsKey('is_stunned')) {
+      context.handle(
+        _isStunnedMeta,
+        isStunned.isAcceptableOrUnknown(data['is_stunned']!, _isStunnedMeta),
+      );
+    }
+    if (data.containsKey('is_unconscious')) {
+      context.handle(
+        _isUnconsciousMeta,
+        isUnconscious.isAcceptableOrUnknown(
+          data['is_unconscious']!,
+          _isUnconsciousMeta,
+        ),
+      );
+    }
+    if (data.containsKey('is_turn')) {
+      context.handle(
+        _isTurnMeta,
+        isTurn.isAcceptableOrUnknown(data['is_turn']!, _isTurnMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  EncounterCreaturesRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return EncounterCreaturesRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      encounterId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}encounter_id'],
+      )!,
+      creatureId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}creature_id'],
+      )!,
+      initiative: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}initiative'],
+      )!,
+      currentHitpoints: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}current_hitpoints'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      isBlinded: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_blinded'],
+      )!,
+      isCharmed: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_charmed'],
+      )!,
+      isDeafened: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_deafened'],
+      )!,
+      exhaustionLevel: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}exhaustion_level'],
+      )!,
+      isFrightened: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_frightened'],
+      )!,
+      isGrappled: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_grappled'],
+      )!,
+      isIncapacitated: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_incapacitated'],
+      )!,
+      isInvisible: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_invisible'],
+      )!,
+      isParalyzed: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_paralyzed'],
+      )!,
+      isPetrified: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_petrified'],
+      )!,
+      isPoisoned: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_poisoned'],
+      )!,
+      isProne: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_prone'],
+      )!,
+      isRestrained: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_restrained'],
+      )!,
+      isStunned: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_stunned'],
+      )!,
+      isUnconscious: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_unconscious'],
+      )!,
+      isTurn: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_turn'],
+      )!,
+    );
+  }
+
+  @override
+  $EncounterCreaturesTable createAlias(String alias) {
+    return $EncounterCreaturesTable(attachedDatabase, alias);
+  }
+}
+
+class EncounterCreaturesRow extends DataClass
+    implements Insertable<EncounterCreaturesRow> {
+  final int id;
+  final int encounterId;
+  final int creatureId;
+  final int initiative;
+  final int currentHitpoints;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final bool isBlinded;
+  final bool isCharmed;
+  final bool isDeafened;
+  final int exhaustionLevel;
+  final bool isFrightened;
+  final bool isGrappled;
+  final bool isIncapacitated;
+  final bool isInvisible;
+  final bool isParalyzed;
+  final bool isPetrified;
+  final bool isPoisoned;
+  final bool isProne;
+  final bool isRestrained;
+  final bool isStunned;
+  final bool isUnconscious;
+  final bool isTurn;
+  const EncounterCreaturesRow({
+    required this.id,
+    required this.encounterId,
+    required this.creatureId,
+    required this.initiative,
+    required this.currentHitpoints,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.isBlinded,
+    required this.isCharmed,
+    required this.isDeafened,
+    required this.exhaustionLevel,
+    required this.isFrightened,
+    required this.isGrappled,
+    required this.isIncapacitated,
+    required this.isInvisible,
+    required this.isParalyzed,
+    required this.isPetrified,
+    required this.isPoisoned,
+    required this.isProne,
+    required this.isRestrained,
+    required this.isStunned,
+    required this.isUnconscious,
+    required this.isTurn,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['encounter_id'] = Variable<int>(encounterId);
+    map['creature_id'] = Variable<int>(creatureId);
+    map['initiative'] = Variable<int>(initiative);
+    map['current_hitpoints'] = Variable<int>(currentHitpoints);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['is_blinded'] = Variable<bool>(isBlinded);
+    map['is_charmed'] = Variable<bool>(isCharmed);
+    map['is_deafened'] = Variable<bool>(isDeafened);
+    map['exhaustion_level'] = Variable<int>(exhaustionLevel);
+    map['is_frightened'] = Variable<bool>(isFrightened);
+    map['is_grappled'] = Variable<bool>(isGrappled);
+    map['is_incapacitated'] = Variable<bool>(isIncapacitated);
+    map['is_invisible'] = Variable<bool>(isInvisible);
+    map['is_paralyzed'] = Variable<bool>(isParalyzed);
+    map['is_petrified'] = Variable<bool>(isPetrified);
+    map['is_poisoned'] = Variable<bool>(isPoisoned);
+    map['is_prone'] = Variable<bool>(isProne);
+    map['is_restrained'] = Variable<bool>(isRestrained);
+    map['is_stunned'] = Variable<bool>(isStunned);
+    map['is_unconscious'] = Variable<bool>(isUnconscious);
+    map['is_turn'] = Variable<bool>(isTurn);
+    return map;
+  }
+
+  EncounterCreaturesCompanion toCompanion(bool nullToAbsent) {
+    return EncounterCreaturesCompanion(
+      id: Value(id),
+      encounterId: Value(encounterId),
+      creatureId: Value(creatureId),
+      initiative: Value(initiative),
+      currentHitpoints: Value(currentHitpoints),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      isBlinded: Value(isBlinded),
+      isCharmed: Value(isCharmed),
+      isDeafened: Value(isDeafened),
+      exhaustionLevel: Value(exhaustionLevel),
+      isFrightened: Value(isFrightened),
+      isGrappled: Value(isGrappled),
+      isIncapacitated: Value(isIncapacitated),
+      isInvisible: Value(isInvisible),
+      isParalyzed: Value(isParalyzed),
+      isPetrified: Value(isPetrified),
+      isPoisoned: Value(isPoisoned),
+      isProne: Value(isProne),
+      isRestrained: Value(isRestrained),
+      isStunned: Value(isStunned),
+      isUnconscious: Value(isUnconscious),
+      isTurn: Value(isTurn),
+    );
+  }
+
+  factory EncounterCreaturesRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return EncounterCreaturesRow(
+      id: serializer.fromJson<int>(json['id']),
+      encounterId: serializer.fromJson<int>(json['encounterId']),
+      creatureId: serializer.fromJson<int>(json['creatureId']),
+      initiative: serializer.fromJson<int>(json['initiative']),
+      currentHitpoints: serializer.fromJson<int>(json['currentHitpoints']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      isBlinded: serializer.fromJson<bool>(json['isBlinded']),
+      isCharmed: serializer.fromJson<bool>(json['isCharmed']),
+      isDeafened: serializer.fromJson<bool>(json['isDeafened']),
+      exhaustionLevel: serializer.fromJson<int>(json['exhaustionLevel']),
+      isFrightened: serializer.fromJson<bool>(json['isFrightened']),
+      isGrappled: serializer.fromJson<bool>(json['isGrappled']),
+      isIncapacitated: serializer.fromJson<bool>(json['isIncapacitated']),
+      isInvisible: serializer.fromJson<bool>(json['isInvisible']),
+      isParalyzed: serializer.fromJson<bool>(json['isParalyzed']),
+      isPetrified: serializer.fromJson<bool>(json['isPetrified']),
+      isPoisoned: serializer.fromJson<bool>(json['isPoisoned']),
+      isProne: serializer.fromJson<bool>(json['isProne']),
+      isRestrained: serializer.fromJson<bool>(json['isRestrained']),
+      isStunned: serializer.fromJson<bool>(json['isStunned']),
+      isUnconscious: serializer.fromJson<bool>(json['isUnconscious']),
+      isTurn: serializer.fromJson<bool>(json['isTurn']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'encounterId': serializer.toJson<int>(encounterId),
+      'creatureId': serializer.toJson<int>(creatureId),
+      'initiative': serializer.toJson<int>(initiative),
+      'currentHitpoints': serializer.toJson<int>(currentHitpoints),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'isBlinded': serializer.toJson<bool>(isBlinded),
+      'isCharmed': serializer.toJson<bool>(isCharmed),
+      'isDeafened': serializer.toJson<bool>(isDeafened),
+      'exhaustionLevel': serializer.toJson<int>(exhaustionLevel),
+      'isFrightened': serializer.toJson<bool>(isFrightened),
+      'isGrappled': serializer.toJson<bool>(isGrappled),
+      'isIncapacitated': serializer.toJson<bool>(isIncapacitated),
+      'isInvisible': serializer.toJson<bool>(isInvisible),
+      'isParalyzed': serializer.toJson<bool>(isParalyzed),
+      'isPetrified': serializer.toJson<bool>(isPetrified),
+      'isPoisoned': serializer.toJson<bool>(isPoisoned),
+      'isProne': serializer.toJson<bool>(isProne),
+      'isRestrained': serializer.toJson<bool>(isRestrained),
+      'isStunned': serializer.toJson<bool>(isStunned),
+      'isUnconscious': serializer.toJson<bool>(isUnconscious),
+      'isTurn': serializer.toJson<bool>(isTurn),
+    };
+  }
+
+  EncounterCreaturesRow copyWith({
+    int? id,
+    int? encounterId,
+    int? creatureId,
+    int? initiative,
+    int? currentHitpoints,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    bool? isBlinded,
+    bool? isCharmed,
+    bool? isDeafened,
+    int? exhaustionLevel,
+    bool? isFrightened,
+    bool? isGrappled,
+    bool? isIncapacitated,
+    bool? isInvisible,
+    bool? isParalyzed,
+    bool? isPetrified,
+    bool? isPoisoned,
+    bool? isProne,
+    bool? isRestrained,
+    bool? isStunned,
+    bool? isUnconscious,
+    bool? isTurn,
+  }) => EncounterCreaturesRow(
+    id: id ?? this.id,
+    encounterId: encounterId ?? this.encounterId,
+    creatureId: creatureId ?? this.creatureId,
+    initiative: initiative ?? this.initiative,
+    currentHitpoints: currentHitpoints ?? this.currentHitpoints,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    isBlinded: isBlinded ?? this.isBlinded,
+    isCharmed: isCharmed ?? this.isCharmed,
+    isDeafened: isDeafened ?? this.isDeafened,
+    exhaustionLevel: exhaustionLevel ?? this.exhaustionLevel,
+    isFrightened: isFrightened ?? this.isFrightened,
+    isGrappled: isGrappled ?? this.isGrappled,
+    isIncapacitated: isIncapacitated ?? this.isIncapacitated,
+    isInvisible: isInvisible ?? this.isInvisible,
+    isParalyzed: isParalyzed ?? this.isParalyzed,
+    isPetrified: isPetrified ?? this.isPetrified,
+    isPoisoned: isPoisoned ?? this.isPoisoned,
+    isProne: isProne ?? this.isProne,
+    isRestrained: isRestrained ?? this.isRestrained,
+    isStunned: isStunned ?? this.isStunned,
+    isUnconscious: isUnconscious ?? this.isUnconscious,
+    isTurn: isTurn ?? this.isTurn,
+  );
+  EncounterCreaturesRow copyWithCompanion(EncounterCreaturesCompanion data) {
+    return EncounterCreaturesRow(
+      id: data.id.present ? data.id.value : this.id,
+      encounterId: data.encounterId.present
+          ? data.encounterId.value
+          : this.encounterId,
+      creatureId: data.creatureId.present
+          ? data.creatureId.value
+          : this.creatureId,
+      initiative: data.initiative.present
+          ? data.initiative.value
+          : this.initiative,
+      currentHitpoints: data.currentHitpoints.present
+          ? data.currentHitpoints.value
+          : this.currentHitpoints,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      isBlinded: data.isBlinded.present ? data.isBlinded.value : this.isBlinded,
+      isCharmed: data.isCharmed.present ? data.isCharmed.value : this.isCharmed,
+      isDeafened: data.isDeafened.present
+          ? data.isDeafened.value
+          : this.isDeafened,
+      exhaustionLevel: data.exhaustionLevel.present
+          ? data.exhaustionLevel.value
+          : this.exhaustionLevel,
+      isFrightened: data.isFrightened.present
+          ? data.isFrightened.value
+          : this.isFrightened,
+      isGrappled: data.isGrappled.present
+          ? data.isGrappled.value
+          : this.isGrappled,
+      isIncapacitated: data.isIncapacitated.present
+          ? data.isIncapacitated.value
+          : this.isIncapacitated,
+      isInvisible: data.isInvisible.present
+          ? data.isInvisible.value
+          : this.isInvisible,
+      isParalyzed: data.isParalyzed.present
+          ? data.isParalyzed.value
+          : this.isParalyzed,
+      isPetrified: data.isPetrified.present
+          ? data.isPetrified.value
+          : this.isPetrified,
+      isPoisoned: data.isPoisoned.present
+          ? data.isPoisoned.value
+          : this.isPoisoned,
+      isProne: data.isProne.present ? data.isProne.value : this.isProne,
+      isRestrained: data.isRestrained.present
+          ? data.isRestrained.value
+          : this.isRestrained,
+      isStunned: data.isStunned.present ? data.isStunned.value : this.isStunned,
+      isUnconscious: data.isUnconscious.present
+          ? data.isUnconscious.value
+          : this.isUnconscious,
+      isTurn: data.isTurn.present ? data.isTurn.value : this.isTurn,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('EncounterCreaturesRow(')
+          ..write('id: $id, ')
+          ..write('encounterId: $encounterId, ')
+          ..write('creatureId: $creatureId, ')
+          ..write('initiative: $initiative, ')
+          ..write('currentHitpoints: $currentHitpoints, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('isBlinded: $isBlinded, ')
+          ..write('isCharmed: $isCharmed, ')
+          ..write('isDeafened: $isDeafened, ')
+          ..write('exhaustionLevel: $exhaustionLevel, ')
+          ..write('isFrightened: $isFrightened, ')
+          ..write('isGrappled: $isGrappled, ')
+          ..write('isIncapacitated: $isIncapacitated, ')
+          ..write('isInvisible: $isInvisible, ')
+          ..write('isParalyzed: $isParalyzed, ')
+          ..write('isPetrified: $isPetrified, ')
+          ..write('isPoisoned: $isPoisoned, ')
+          ..write('isProne: $isProne, ')
+          ..write('isRestrained: $isRestrained, ')
+          ..write('isStunned: $isStunned, ')
+          ..write('isUnconscious: $isUnconscious, ')
+          ..write('isTurn: $isTurn')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hashAll([
+    id,
+    encounterId,
+    creatureId,
+    initiative,
+    currentHitpoints,
+    createdAt,
+    updatedAt,
+    isBlinded,
+    isCharmed,
+    isDeafened,
+    exhaustionLevel,
+    isFrightened,
+    isGrappled,
+    isIncapacitated,
+    isInvisible,
+    isParalyzed,
+    isPetrified,
+    isPoisoned,
+    isProne,
+    isRestrained,
+    isStunned,
+    isUnconscious,
+    isTurn,
+  ]);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is EncounterCreaturesRow &&
+          other.id == this.id &&
+          other.encounterId == this.encounterId &&
+          other.creatureId == this.creatureId &&
+          other.initiative == this.initiative &&
+          other.currentHitpoints == this.currentHitpoints &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.isBlinded == this.isBlinded &&
+          other.isCharmed == this.isCharmed &&
+          other.isDeafened == this.isDeafened &&
+          other.exhaustionLevel == this.exhaustionLevel &&
+          other.isFrightened == this.isFrightened &&
+          other.isGrappled == this.isGrappled &&
+          other.isIncapacitated == this.isIncapacitated &&
+          other.isInvisible == this.isInvisible &&
+          other.isParalyzed == this.isParalyzed &&
+          other.isPetrified == this.isPetrified &&
+          other.isPoisoned == this.isPoisoned &&
+          other.isProne == this.isProne &&
+          other.isRestrained == this.isRestrained &&
+          other.isStunned == this.isStunned &&
+          other.isUnconscious == this.isUnconscious &&
+          other.isTurn == this.isTurn);
+}
+
+class EncounterCreaturesCompanion
+    extends UpdateCompanion<EncounterCreaturesRow> {
+  final Value<int> id;
+  final Value<int> encounterId;
+  final Value<int> creatureId;
+  final Value<int> initiative;
+  final Value<int> currentHitpoints;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<bool> isBlinded;
+  final Value<bool> isCharmed;
+  final Value<bool> isDeafened;
+  final Value<int> exhaustionLevel;
+  final Value<bool> isFrightened;
+  final Value<bool> isGrappled;
+  final Value<bool> isIncapacitated;
+  final Value<bool> isInvisible;
+  final Value<bool> isParalyzed;
+  final Value<bool> isPetrified;
+  final Value<bool> isPoisoned;
+  final Value<bool> isProne;
+  final Value<bool> isRestrained;
+  final Value<bool> isStunned;
+  final Value<bool> isUnconscious;
+  final Value<bool> isTurn;
+  const EncounterCreaturesCompanion({
+    this.id = const Value.absent(),
+    this.encounterId = const Value.absent(),
+    this.creatureId = const Value.absent(),
+    this.initiative = const Value.absent(),
+    this.currentHitpoints = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.isBlinded = const Value.absent(),
+    this.isCharmed = const Value.absent(),
+    this.isDeafened = const Value.absent(),
+    this.exhaustionLevel = const Value.absent(),
+    this.isFrightened = const Value.absent(),
+    this.isGrappled = const Value.absent(),
+    this.isIncapacitated = const Value.absent(),
+    this.isInvisible = const Value.absent(),
+    this.isParalyzed = const Value.absent(),
+    this.isPetrified = const Value.absent(),
+    this.isPoisoned = const Value.absent(),
+    this.isProne = const Value.absent(),
+    this.isRestrained = const Value.absent(),
+    this.isStunned = const Value.absent(),
+    this.isUnconscious = const Value.absent(),
+    this.isTurn = const Value.absent(),
+  });
+  EncounterCreaturesCompanion.insert({
+    this.id = const Value.absent(),
+    required int encounterId,
+    required int creatureId,
+    required int initiative,
+    required int currentHitpoints,
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.isBlinded = const Value.absent(),
+    this.isCharmed = const Value.absent(),
+    this.isDeafened = const Value.absent(),
+    this.exhaustionLevel = const Value.absent(),
+    this.isFrightened = const Value.absent(),
+    this.isGrappled = const Value.absent(),
+    this.isIncapacitated = const Value.absent(),
+    this.isInvisible = const Value.absent(),
+    this.isParalyzed = const Value.absent(),
+    this.isPetrified = const Value.absent(),
+    this.isPoisoned = const Value.absent(),
+    this.isProne = const Value.absent(),
+    this.isRestrained = const Value.absent(),
+    this.isStunned = const Value.absent(),
+    this.isUnconscious = const Value.absent(),
+    this.isTurn = const Value.absent(),
+  }) : encounterId = Value(encounterId),
+       creatureId = Value(creatureId),
+       initiative = Value(initiative),
+       currentHitpoints = Value(currentHitpoints);
+  static Insertable<EncounterCreaturesRow> custom({
+    Expression<int>? id,
+    Expression<int>? encounterId,
+    Expression<int>? creatureId,
+    Expression<int>? initiative,
+    Expression<int>? currentHitpoints,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<bool>? isBlinded,
+    Expression<bool>? isCharmed,
+    Expression<bool>? isDeafened,
+    Expression<int>? exhaustionLevel,
+    Expression<bool>? isFrightened,
+    Expression<bool>? isGrappled,
+    Expression<bool>? isIncapacitated,
+    Expression<bool>? isInvisible,
+    Expression<bool>? isParalyzed,
+    Expression<bool>? isPetrified,
+    Expression<bool>? isPoisoned,
+    Expression<bool>? isProne,
+    Expression<bool>? isRestrained,
+    Expression<bool>? isStunned,
+    Expression<bool>? isUnconscious,
+    Expression<bool>? isTurn,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (encounterId != null) 'encounter_id': encounterId,
+      if (creatureId != null) 'creature_id': creatureId,
+      if (initiative != null) 'initiative': initiative,
+      if (currentHitpoints != null) 'current_hitpoints': currentHitpoints,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (isBlinded != null) 'is_blinded': isBlinded,
+      if (isCharmed != null) 'is_charmed': isCharmed,
+      if (isDeafened != null) 'is_deafened': isDeafened,
+      if (exhaustionLevel != null) 'exhaustion_level': exhaustionLevel,
+      if (isFrightened != null) 'is_frightened': isFrightened,
+      if (isGrappled != null) 'is_grappled': isGrappled,
+      if (isIncapacitated != null) 'is_incapacitated': isIncapacitated,
+      if (isInvisible != null) 'is_invisible': isInvisible,
+      if (isParalyzed != null) 'is_paralyzed': isParalyzed,
+      if (isPetrified != null) 'is_petrified': isPetrified,
+      if (isPoisoned != null) 'is_poisoned': isPoisoned,
+      if (isProne != null) 'is_prone': isProne,
+      if (isRestrained != null) 'is_restrained': isRestrained,
+      if (isStunned != null) 'is_stunned': isStunned,
+      if (isUnconscious != null) 'is_unconscious': isUnconscious,
+      if (isTurn != null) 'is_turn': isTurn,
+    });
+  }
+
+  EncounterCreaturesCompanion copyWith({
+    Value<int>? id,
+    Value<int>? encounterId,
+    Value<int>? creatureId,
+    Value<int>? initiative,
+    Value<int>? currentHitpoints,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<bool>? isBlinded,
+    Value<bool>? isCharmed,
+    Value<bool>? isDeafened,
+    Value<int>? exhaustionLevel,
+    Value<bool>? isFrightened,
+    Value<bool>? isGrappled,
+    Value<bool>? isIncapacitated,
+    Value<bool>? isInvisible,
+    Value<bool>? isParalyzed,
+    Value<bool>? isPetrified,
+    Value<bool>? isPoisoned,
+    Value<bool>? isProne,
+    Value<bool>? isRestrained,
+    Value<bool>? isStunned,
+    Value<bool>? isUnconscious,
+    Value<bool>? isTurn,
+  }) {
+    return EncounterCreaturesCompanion(
+      id: id ?? this.id,
+      encounterId: encounterId ?? this.encounterId,
+      creatureId: creatureId ?? this.creatureId,
+      initiative: initiative ?? this.initiative,
+      currentHitpoints: currentHitpoints ?? this.currentHitpoints,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      isBlinded: isBlinded ?? this.isBlinded,
+      isCharmed: isCharmed ?? this.isCharmed,
+      isDeafened: isDeafened ?? this.isDeafened,
+      exhaustionLevel: exhaustionLevel ?? this.exhaustionLevel,
+      isFrightened: isFrightened ?? this.isFrightened,
+      isGrappled: isGrappled ?? this.isGrappled,
+      isIncapacitated: isIncapacitated ?? this.isIncapacitated,
+      isInvisible: isInvisible ?? this.isInvisible,
+      isParalyzed: isParalyzed ?? this.isParalyzed,
+      isPetrified: isPetrified ?? this.isPetrified,
+      isPoisoned: isPoisoned ?? this.isPoisoned,
+      isProne: isProne ?? this.isProne,
+      isRestrained: isRestrained ?? this.isRestrained,
+      isStunned: isStunned ?? this.isStunned,
+      isUnconscious: isUnconscious ?? this.isUnconscious,
+      isTurn: isTurn ?? this.isTurn,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (encounterId.present) {
+      map['encounter_id'] = Variable<int>(encounterId.value);
+    }
+    if (creatureId.present) {
+      map['creature_id'] = Variable<int>(creatureId.value);
+    }
+    if (initiative.present) {
+      map['initiative'] = Variable<int>(initiative.value);
+    }
+    if (currentHitpoints.present) {
+      map['current_hitpoints'] = Variable<int>(currentHitpoints.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (isBlinded.present) {
+      map['is_blinded'] = Variable<bool>(isBlinded.value);
+    }
+    if (isCharmed.present) {
+      map['is_charmed'] = Variable<bool>(isCharmed.value);
+    }
+    if (isDeafened.present) {
+      map['is_deafened'] = Variable<bool>(isDeafened.value);
+    }
+    if (exhaustionLevel.present) {
+      map['exhaustion_level'] = Variable<int>(exhaustionLevel.value);
+    }
+    if (isFrightened.present) {
+      map['is_frightened'] = Variable<bool>(isFrightened.value);
+    }
+    if (isGrappled.present) {
+      map['is_grappled'] = Variable<bool>(isGrappled.value);
+    }
+    if (isIncapacitated.present) {
+      map['is_incapacitated'] = Variable<bool>(isIncapacitated.value);
+    }
+    if (isInvisible.present) {
+      map['is_invisible'] = Variable<bool>(isInvisible.value);
+    }
+    if (isParalyzed.present) {
+      map['is_paralyzed'] = Variable<bool>(isParalyzed.value);
+    }
+    if (isPetrified.present) {
+      map['is_petrified'] = Variable<bool>(isPetrified.value);
+    }
+    if (isPoisoned.present) {
+      map['is_poisoned'] = Variable<bool>(isPoisoned.value);
+    }
+    if (isProne.present) {
+      map['is_prone'] = Variable<bool>(isProne.value);
+    }
+    if (isRestrained.present) {
+      map['is_restrained'] = Variable<bool>(isRestrained.value);
+    }
+    if (isStunned.present) {
+      map['is_stunned'] = Variable<bool>(isStunned.value);
+    }
+    if (isUnconscious.present) {
+      map['is_unconscious'] = Variable<bool>(isUnconscious.value);
+    }
+    if (isTurn.present) {
+      map['is_turn'] = Variable<bool>(isTurn.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('EncounterCreaturesCompanion(')
+          ..write('id: $id, ')
+          ..write('encounterId: $encounterId, ')
+          ..write('creatureId: $creatureId, ')
+          ..write('initiative: $initiative, ')
+          ..write('currentHitpoints: $currentHitpoints, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('isBlinded: $isBlinded, ')
+          ..write('isCharmed: $isCharmed, ')
+          ..write('isDeafened: $isDeafened, ')
+          ..write('exhaustionLevel: $exhaustionLevel, ')
+          ..write('isFrightened: $isFrightened, ')
+          ..write('isGrappled: $isGrappled, ')
+          ..write('isIncapacitated: $isIncapacitated, ')
+          ..write('isInvisible: $isInvisible, ')
+          ..write('isParalyzed: $isParalyzed, ')
+          ..write('isPetrified: $isPetrified, ')
+          ..write('isPoisoned: $isPoisoned, ')
+          ..write('isProne: $isProne, ')
+          ..write('isRestrained: $isRestrained, ')
+          ..write('isStunned: $isStunned, ')
+          ..write('isUnconscious: $isUnconscious, ')
+          ..write('isTurn: $isTurn')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $EncounterPlayersTable extends EncounterPlayers
+    with TableInfo<$EncounterPlayersTable, EncounterPlayersRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $EncounterPlayersTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _encounterIdMeta = const VerificationMeta(
+    'encounterId',
+  );
+  @override
+  late final GeneratedColumn<int> encounterId = GeneratedColumn<int>(
+    'encounter_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES encounters (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _playerIdMeta = const VerificationMeta(
+    'playerId',
+  );
+  @override
+  late final GeneratedColumn<int> playerId = GeneratedColumn<int>(
+    'player_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES players (p_id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _initiativeMeta = const VerificationMeta(
+    'initiative',
+  );
+  @override
+  late final GeneratedColumn<int> initiative = GeneratedColumn<int>(
+    'initiative',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _quantityMeta = const VerificationMeta(
+    'quantity',
+  );
+  @override
+  late final GeneratedColumn<int> quantity = GeneratedColumn<int>(
+    'quantity',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _currentHitpointsMeta = const VerificationMeta(
+    'currentHitpoints',
+  );
+  @override
+  late final GeneratedColumn<int> currentHitpoints = GeneratedColumn<int>(
+    'current_hitpoints',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _isBlindedMeta = const VerificationMeta(
+    'isBlinded',
+  );
+  @override
+  late final GeneratedColumn<bool> isBlinded = GeneratedColumn<bool>(
+    'is_blinded',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_blinded" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _isCharmedMeta = const VerificationMeta(
+    'isCharmed',
+  );
+  @override
+  late final GeneratedColumn<bool> isCharmed = GeneratedColumn<bool>(
+    'is_charmed',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_charmed" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _isDeafenedMeta = const VerificationMeta(
+    'isDeafened',
+  );
+  @override
+  late final GeneratedColumn<bool> isDeafened = GeneratedColumn<bool>(
+    'is_deafened',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_deafened" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _exhaustionLevelMeta = const VerificationMeta(
+    'exhaustionLevel',
+  );
+  @override
+  late final GeneratedColumn<int> exhaustionLevel = GeneratedColumn<int>(
+    'exhaustion_level',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _isFrightenedMeta = const VerificationMeta(
+    'isFrightened',
+  );
+  @override
+  late final GeneratedColumn<bool> isFrightened = GeneratedColumn<bool>(
+    'is_frightened',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_frightened" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _isGrappledMeta = const VerificationMeta(
+    'isGrappled',
+  );
+  @override
+  late final GeneratedColumn<bool> isGrappled = GeneratedColumn<bool>(
+    'is_grappled',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_grappled" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _isIncapacitatedMeta = const VerificationMeta(
+    'isIncapacitated',
+  );
+  @override
+  late final GeneratedColumn<bool> isIncapacitated = GeneratedColumn<bool>(
+    'is_incapacitated',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_incapacitated" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _isInvisibleMeta = const VerificationMeta(
+    'isInvisible',
+  );
+  @override
+  late final GeneratedColumn<bool> isInvisible = GeneratedColumn<bool>(
+    'is_invisible',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_invisible" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _isParalyzedMeta = const VerificationMeta(
+    'isParalyzed',
+  );
+  @override
+  late final GeneratedColumn<bool> isParalyzed = GeneratedColumn<bool>(
+    'is_paralyzed',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_paralyzed" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _isPetrifiedMeta = const VerificationMeta(
+    'isPetrified',
+  );
+  @override
+  late final GeneratedColumn<bool> isPetrified = GeneratedColumn<bool>(
+    'is_petrified',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_petrified" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _isPoisonedMeta = const VerificationMeta(
+    'isPoisoned',
+  );
+  @override
+  late final GeneratedColumn<bool> isPoisoned = GeneratedColumn<bool>(
+    'is_poisoned',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_poisoned" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _isProneMeta = const VerificationMeta(
+    'isProne',
+  );
+  @override
+  late final GeneratedColumn<bool> isProne = GeneratedColumn<bool>(
+    'is_prone',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_prone" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _isRestrainedMeta = const VerificationMeta(
+    'isRestrained',
+  );
+  @override
+  late final GeneratedColumn<bool> isRestrained = GeneratedColumn<bool>(
+    'is_restrained',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_restrained" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _isStunnedMeta = const VerificationMeta(
+    'isStunned',
+  );
+  @override
+  late final GeneratedColumn<bool> isStunned = GeneratedColumn<bool>(
+    'is_stunned',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_stunned" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _isUnconsciousMeta = const VerificationMeta(
+    'isUnconscious',
+  );
+  @override
+  late final GeneratedColumn<bool> isUnconscious = GeneratedColumn<bool>(
+    'is_unconscious',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_unconscious" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _isTurnMeta = const VerificationMeta('isTurn');
+  @override
+  late final GeneratedColumn<bool> isTurn = GeneratedColumn<bool>(
+    'is_turn',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_turn" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    encounterId,
+    playerId,
+    initiative,
+    quantity,
+    currentHitpoints,
+    createdAt,
+    updatedAt,
+    isBlinded,
+    isCharmed,
+    isDeafened,
+    exhaustionLevel,
+    isFrightened,
+    isGrappled,
+    isIncapacitated,
+    isInvisible,
+    isParalyzed,
+    isPetrified,
+    isPoisoned,
+    isProne,
+    isRestrained,
+    isStunned,
+    isUnconscious,
+    isTurn,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'encounter_players';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<EncounterPlayersRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('encounter_id')) {
+      context.handle(
+        _encounterIdMeta,
+        encounterId.isAcceptableOrUnknown(
+          data['encounter_id']!,
+          _encounterIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_encounterIdMeta);
+    }
+    if (data.containsKey('player_id')) {
+      context.handle(
+        _playerIdMeta,
+        playerId.isAcceptableOrUnknown(data['player_id']!, _playerIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_playerIdMeta);
+    }
+    if (data.containsKey('initiative')) {
+      context.handle(
+        _initiativeMeta,
+        initiative.isAcceptableOrUnknown(data['initiative']!, _initiativeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_initiativeMeta);
+    }
+    if (data.containsKey('quantity')) {
+      context.handle(
+        _quantityMeta,
+        quantity.isAcceptableOrUnknown(data['quantity']!, _quantityMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_quantityMeta);
+    }
+    if (data.containsKey('current_hitpoints')) {
+      context.handle(
+        _currentHitpointsMeta,
+        currentHitpoints.isAcceptableOrUnknown(
+          data['current_hitpoints']!,
+          _currentHitpointsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('is_blinded')) {
+      context.handle(
+        _isBlindedMeta,
+        isBlinded.isAcceptableOrUnknown(data['is_blinded']!, _isBlindedMeta),
+      );
+    }
+    if (data.containsKey('is_charmed')) {
+      context.handle(
+        _isCharmedMeta,
+        isCharmed.isAcceptableOrUnknown(data['is_charmed']!, _isCharmedMeta),
+      );
+    }
+    if (data.containsKey('is_deafened')) {
+      context.handle(
+        _isDeafenedMeta,
+        isDeafened.isAcceptableOrUnknown(data['is_deafened']!, _isDeafenedMeta),
+      );
+    }
+    if (data.containsKey('exhaustion_level')) {
+      context.handle(
+        _exhaustionLevelMeta,
+        exhaustionLevel.isAcceptableOrUnknown(
+          data['exhaustion_level']!,
+          _exhaustionLevelMeta,
+        ),
+      );
+    }
+    if (data.containsKey('is_frightened')) {
+      context.handle(
+        _isFrightenedMeta,
+        isFrightened.isAcceptableOrUnknown(
+          data['is_frightened']!,
+          _isFrightenedMeta,
+        ),
+      );
+    }
+    if (data.containsKey('is_grappled')) {
+      context.handle(
+        _isGrappledMeta,
+        isGrappled.isAcceptableOrUnknown(data['is_grappled']!, _isGrappledMeta),
+      );
+    }
+    if (data.containsKey('is_incapacitated')) {
+      context.handle(
+        _isIncapacitatedMeta,
+        isIncapacitated.isAcceptableOrUnknown(
+          data['is_incapacitated']!,
+          _isIncapacitatedMeta,
+        ),
+      );
+    }
+    if (data.containsKey('is_invisible')) {
+      context.handle(
+        _isInvisibleMeta,
+        isInvisible.isAcceptableOrUnknown(
+          data['is_invisible']!,
+          _isInvisibleMeta,
+        ),
+      );
+    }
+    if (data.containsKey('is_paralyzed')) {
+      context.handle(
+        _isParalyzedMeta,
+        isParalyzed.isAcceptableOrUnknown(
+          data['is_paralyzed']!,
+          _isParalyzedMeta,
+        ),
+      );
+    }
+    if (data.containsKey('is_petrified')) {
+      context.handle(
+        _isPetrifiedMeta,
+        isPetrified.isAcceptableOrUnknown(
+          data['is_petrified']!,
+          _isPetrifiedMeta,
+        ),
+      );
+    }
+    if (data.containsKey('is_poisoned')) {
+      context.handle(
+        _isPoisonedMeta,
+        isPoisoned.isAcceptableOrUnknown(data['is_poisoned']!, _isPoisonedMeta),
+      );
+    }
+    if (data.containsKey('is_prone')) {
+      context.handle(
+        _isProneMeta,
+        isProne.isAcceptableOrUnknown(data['is_prone']!, _isProneMeta),
+      );
+    }
+    if (data.containsKey('is_restrained')) {
+      context.handle(
+        _isRestrainedMeta,
+        isRestrained.isAcceptableOrUnknown(
+          data['is_restrained']!,
+          _isRestrainedMeta,
+        ),
+      );
+    }
+    if (data.containsKey('is_stunned')) {
+      context.handle(
+        _isStunnedMeta,
+        isStunned.isAcceptableOrUnknown(data['is_stunned']!, _isStunnedMeta),
+      );
+    }
+    if (data.containsKey('is_unconscious')) {
+      context.handle(
+        _isUnconsciousMeta,
+        isUnconscious.isAcceptableOrUnknown(
+          data['is_unconscious']!,
+          _isUnconsciousMeta,
+        ),
+      );
+    }
+    if (data.containsKey('is_turn')) {
+      context.handle(
+        _isTurnMeta,
+        isTurn.isAcceptableOrUnknown(data['is_turn']!, _isTurnMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  EncounterPlayersRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return EncounterPlayersRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      encounterId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}encounter_id'],
+      )!,
+      playerId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}player_id'],
+      )!,
+      initiative: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}initiative'],
+      )!,
+      quantity: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}quantity'],
+      )!,
+      currentHitpoints: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}current_hitpoints'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      isBlinded: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_blinded'],
+      )!,
+      isCharmed: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_charmed'],
+      )!,
+      isDeafened: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_deafened'],
+      )!,
+      exhaustionLevel: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}exhaustion_level'],
+      )!,
+      isFrightened: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_frightened'],
+      )!,
+      isGrappled: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_grappled'],
+      )!,
+      isIncapacitated: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_incapacitated'],
+      )!,
+      isInvisible: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_invisible'],
+      )!,
+      isParalyzed: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_paralyzed'],
+      )!,
+      isPetrified: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_petrified'],
+      )!,
+      isPoisoned: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_poisoned'],
+      )!,
+      isProne: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_prone'],
+      )!,
+      isRestrained: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_restrained'],
+      )!,
+      isStunned: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_stunned'],
+      )!,
+      isUnconscious: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_unconscious'],
+      )!,
+      isTurn: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_turn'],
+      )!,
+    );
+  }
+
+  @override
+  $EncounterPlayersTable createAlias(String alias) {
+    return $EncounterPlayersTable(attachedDatabase, alias);
+  }
+}
+
+class EncounterPlayersRow extends DataClass
+    implements Insertable<EncounterPlayersRow> {
+  final int id;
+  final int encounterId;
+  final int playerId;
+  final int initiative;
+  final int quantity;
+  final int currentHitpoints;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final bool isBlinded;
+  final bool isCharmed;
+  final bool isDeafened;
+  final int exhaustionLevel;
+  final bool isFrightened;
+  final bool isGrappled;
+  final bool isIncapacitated;
+  final bool isInvisible;
+  final bool isParalyzed;
+  final bool isPetrified;
+  final bool isPoisoned;
+  final bool isProne;
+  final bool isRestrained;
+  final bool isStunned;
+  final bool isUnconscious;
+  final bool isTurn;
+  const EncounterPlayersRow({
+    required this.id,
+    required this.encounterId,
+    required this.playerId,
+    required this.initiative,
+    required this.quantity,
+    required this.currentHitpoints,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.isBlinded,
+    required this.isCharmed,
+    required this.isDeafened,
+    required this.exhaustionLevel,
+    required this.isFrightened,
+    required this.isGrappled,
+    required this.isIncapacitated,
+    required this.isInvisible,
+    required this.isParalyzed,
+    required this.isPetrified,
+    required this.isPoisoned,
+    required this.isProne,
+    required this.isRestrained,
+    required this.isStunned,
+    required this.isUnconscious,
+    required this.isTurn,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['encounter_id'] = Variable<int>(encounterId);
+    map['player_id'] = Variable<int>(playerId);
+    map['initiative'] = Variable<int>(initiative);
+    map['quantity'] = Variable<int>(quantity);
+    map['current_hitpoints'] = Variable<int>(currentHitpoints);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['is_blinded'] = Variable<bool>(isBlinded);
+    map['is_charmed'] = Variable<bool>(isCharmed);
+    map['is_deafened'] = Variable<bool>(isDeafened);
+    map['exhaustion_level'] = Variable<int>(exhaustionLevel);
+    map['is_frightened'] = Variable<bool>(isFrightened);
+    map['is_grappled'] = Variable<bool>(isGrappled);
+    map['is_incapacitated'] = Variable<bool>(isIncapacitated);
+    map['is_invisible'] = Variable<bool>(isInvisible);
+    map['is_paralyzed'] = Variable<bool>(isParalyzed);
+    map['is_petrified'] = Variable<bool>(isPetrified);
+    map['is_poisoned'] = Variable<bool>(isPoisoned);
+    map['is_prone'] = Variable<bool>(isProne);
+    map['is_restrained'] = Variable<bool>(isRestrained);
+    map['is_stunned'] = Variable<bool>(isStunned);
+    map['is_unconscious'] = Variable<bool>(isUnconscious);
+    map['is_turn'] = Variable<bool>(isTurn);
+    return map;
+  }
+
+  EncounterPlayersCompanion toCompanion(bool nullToAbsent) {
+    return EncounterPlayersCompanion(
+      id: Value(id),
+      encounterId: Value(encounterId),
+      playerId: Value(playerId),
+      initiative: Value(initiative),
+      quantity: Value(quantity),
+      currentHitpoints: Value(currentHitpoints),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      isBlinded: Value(isBlinded),
+      isCharmed: Value(isCharmed),
+      isDeafened: Value(isDeafened),
+      exhaustionLevel: Value(exhaustionLevel),
+      isFrightened: Value(isFrightened),
+      isGrappled: Value(isGrappled),
+      isIncapacitated: Value(isIncapacitated),
+      isInvisible: Value(isInvisible),
+      isParalyzed: Value(isParalyzed),
+      isPetrified: Value(isPetrified),
+      isPoisoned: Value(isPoisoned),
+      isProne: Value(isProne),
+      isRestrained: Value(isRestrained),
+      isStunned: Value(isStunned),
+      isUnconscious: Value(isUnconscious),
+      isTurn: Value(isTurn),
+    );
+  }
+
+  factory EncounterPlayersRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return EncounterPlayersRow(
+      id: serializer.fromJson<int>(json['id']),
+      encounterId: serializer.fromJson<int>(json['encounterId']),
+      playerId: serializer.fromJson<int>(json['playerId']),
+      initiative: serializer.fromJson<int>(json['initiative']),
+      quantity: serializer.fromJson<int>(json['quantity']),
+      currentHitpoints: serializer.fromJson<int>(json['currentHitpoints']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      isBlinded: serializer.fromJson<bool>(json['isBlinded']),
+      isCharmed: serializer.fromJson<bool>(json['isCharmed']),
+      isDeafened: serializer.fromJson<bool>(json['isDeafened']),
+      exhaustionLevel: serializer.fromJson<int>(json['exhaustionLevel']),
+      isFrightened: serializer.fromJson<bool>(json['isFrightened']),
+      isGrappled: serializer.fromJson<bool>(json['isGrappled']),
+      isIncapacitated: serializer.fromJson<bool>(json['isIncapacitated']),
+      isInvisible: serializer.fromJson<bool>(json['isInvisible']),
+      isParalyzed: serializer.fromJson<bool>(json['isParalyzed']),
+      isPetrified: serializer.fromJson<bool>(json['isPetrified']),
+      isPoisoned: serializer.fromJson<bool>(json['isPoisoned']),
+      isProne: serializer.fromJson<bool>(json['isProne']),
+      isRestrained: serializer.fromJson<bool>(json['isRestrained']),
+      isStunned: serializer.fromJson<bool>(json['isStunned']),
+      isUnconscious: serializer.fromJson<bool>(json['isUnconscious']),
+      isTurn: serializer.fromJson<bool>(json['isTurn']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'encounterId': serializer.toJson<int>(encounterId),
+      'playerId': serializer.toJson<int>(playerId),
+      'initiative': serializer.toJson<int>(initiative),
+      'quantity': serializer.toJson<int>(quantity),
+      'currentHitpoints': serializer.toJson<int>(currentHitpoints),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'isBlinded': serializer.toJson<bool>(isBlinded),
+      'isCharmed': serializer.toJson<bool>(isCharmed),
+      'isDeafened': serializer.toJson<bool>(isDeafened),
+      'exhaustionLevel': serializer.toJson<int>(exhaustionLevel),
+      'isFrightened': serializer.toJson<bool>(isFrightened),
+      'isGrappled': serializer.toJson<bool>(isGrappled),
+      'isIncapacitated': serializer.toJson<bool>(isIncapacitated),
+      'isInvisible': serializer.toJson<bool>(isInvisible),
+      'isParalyzed': serializer.toJson<bool>(isParalyzed),
+      'isPetrified': serializer.toJson<bool>(isPetrified),
+      'isPoisoned': serializer.toJson<bool>(isPoisoned),
+      'isProne': serializer.toJson<bool>(isProne),
+      'isRestrained': serializer.toJson<bool>(isRestrained),
+      'isStunned': serializer.toJson<bool>(isStunned),
+      'isUnconscious': serializer.toJson<bool>(isUnconscious),
+      'isTurn': serializer.toJson<bool>(isTurn),
+    };
+  }
+
+  EncounterPlayersRow copyWith({
+    int? id,
+    int? encounterId,
+    int? playerId,
+    int? initiative,
+    int? quantity,
+    int? currentHitpoints,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    bool? isBlinded,
+    bool? isCharmed,
+    bool? isDeafened,
+    int? exhaustionLevel,
+    bool? isFrightened,
+    bool? isGrappled,
+    bool? isIncapacitated,
+    bool? isInvisible,
+    bool? isParalyzed,
+    bool? isPetrified,
+    bool? isPoisoned,
+    bool? isProne,
+    bool? isRestrained,
+    bool? isStunned,
+    bool? isUnconscious,
+    bool? isTurn,
+  }) => EncounterPlayersRow(
+    id: id ?? this.id,
+    encounterId: encounterId ?? this.encounterId,
+    playerId: playerId ?? this.playerId,
+    initiative: initiative ?? this.initiative,
+    quantity: quantity ?? this.quantity,
+    currentHitpoints: currentHitpoints ?? this.currentHitpoints,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    isBlinded: isBlinded ?? this.isBlinded,
+    isCharmed: isCharmed ?? this.isCharmed,
+    isDeafened: isDeafened ?? this.isDeafened,
+    exhaustionLevel: exhaustionLevel ?? this.exhaustionLevel,
+    isFrightened: isFrightened ?? this.isFrightened,
+    isGrappled: isGrappled ?? this.isGrappled,
+    isIncapacitated: isIncapacitated ?? this.isIncapacitated,
+    isInvisible: isInvisible ?? this.isInvisible,
+    isParalyzed: isParalyzed ?? this.isParalyzed,
+    isPetrified: isPetrified ?? this.isPetrified,
+    isPoisoned: isPoisoned ?? this.isPoisoned,
+    isProne: isProne ?? this.isProne,
+    isRestrained: isRestrained ?? this.isRestrained,
+    isStunned: isStunned ?? this.isStunned,
+    isUnconscious: isUnconscious ?? this.isUnconscious,
+    isTurn: isTurn ?? this.isTurn,
+  );
+  EncounterPlayersRow copyWithCompanion(EncounterPlayersCompanion data) {
+    return EncounterPlayersRow(
+      id: data.id.present ? data.id.value : this.id,
+      encounterId: data.encounterId.present
+          ? data.encounterId.value
+          : this.encounterId,
+      playerId: data.playerId.present ? data.playerId.value : this.playerId,
+      initiative: data.initiative.present
+          ? data.initiative.value
+          : this.initiative,
+      quantity: data.quantity.present ? data.quantity.value : this.quantity,
+      currentHitpoints: data.currentHitpoints.present
+          ? data.currentHitpoints.value
+          : this.currentHitpoints,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      isBlinded: data.isBlinded.present ? data.isBlinded.value : this.isBlinded,
+      isCharmed: data.isCharmed.present ? data.isCharmed.value : this.isCharmed,
+      isDeafened: data.isDeafened.present
+          ? data.isDeafened.value
+          : this.isDeafened,
+      exhaustionLevel: data.exhaustionLevel.present
+          ? data.exhaustionLevel.value
+          : this.exhaustionLevel,
+      isFrightened: data.isFrightened.present
+          ? data.isFrightened.value
+          : this.isFrightened,
+      isGrappled: data.isGrappled.present
+          ? data.isGrappled.value
+          : this.isGrappled,
+      isIncapacitated: data.isIncapacitated.present
+          ? data.isIncapacitated.value
+          : this.isIncapacitated,
+      isInvisible: data.isInvisible.present
+          ? data.isInvisible.value
+          : this.isInvisible,
+      isParalyzed: data.isParalyzed.present
+          ? data.isParalyzed.value
+          : this.isParalyzed,
+      isPetrified: data.isPetrified.present
+          ? data.isPetrified.value
+          : this.isPetrified,
+      isPoisoned: data.isPoisoned.present
+          ? data.isPoisoned.value
+          : this.isPoisoned,
+      isProne: data.isProne.present ? data.isProne.value : this.isProne,
+      isRestrained: data.isRestrained.present
+          ? data.isRestrained.value
+          : this.isRestrained,
+      isStunned: data.isStunned.present ? data.isStunned.value : this.isStunned,
+      isUnconscious: data.isUnconscious.present
+          ? data.isUnconscious.value
+          : this.isUnconscious,
+      isTurn: data.isTurn.present ? data.isTurn.value : this.isTurn,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('EncounterPlayersRow(')
+          ..write('id: $id, ')
+          ..write('encounterId: $encounterId, ')
+          ..write('playerId: $playerId, ')
+          ..write('initiative: $initiative, ')
+          ..write('quantity: $quantity, ')
+          ..write('currentHitpoints: $currentHitpoints, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('isBlinded: $isBlinded, ')
+          ..write('isCharmed: $isCharmed, ')
+          ..write('isDeafened: $isDeafened, ')
+          ..write('exhaustionLevel: $exhaustionLevel, ')
+          ..write('isFrightened: $isFrightened, ')
+          ..write('isGrappled: $isGrappled, ')
+          ..write('isIncapacitated: $isIncapacitated, ')
+          ..write('isInvisible: $isInvisible, ')
+          ..write('isParalyzed: $isParalyzed, ')
+          ..write('isPetrified: $isPetrified, ')
+          ..write('isPoisoned: $isPoisoned, ')
+          ..write('isProne: $isProne, ')
+          ..write('isRestrained: $isRestrained, ')
+          ..write('isStunned: $isStunned, ')
+          ..write('isUnconscious: $isUnconscious, ')
+          ..write('isTurn: $isTurn')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hashAll([
+    id,
+    encounterId,
+    playerId,
+    initiative,
+    quantity,
+    currentHitpoints,
+    createdAt,
+    updatedAt,
+    isBlinded,
+    isCharmed,
+    isDeafened,
+    exhaustionLevel,
+    isFrightened,
+    isGrappled,
+    isIncapacitated,
+    isInvisible,
+    isParalyzed,
+    isPetrified,
+    isPoisoned,
+    isProne,
+    isRestrained,
+    isStunned,
+    isUnconscious,
+    isTurn,
+  ]);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is EncounterPlayersRow &&
+          other.id == this.id &&
+          other.encounterId == this.encounterId &&
+          other.playerId == this.playerId &&
+          other.initiative == this.initiative &&
+          other.quantity == this.quantity &&
+          other.currentHitpoints == this.currentHitpoints &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.isBlinded == this.isBlinded &&
+          other.isCharmed == this.isCharmed &&
+          other.isDeafened == this.isDeafened &&
+          other.exhaustionLevel == this.exhaustionLevel &&
+          other.isFrightened == this.isFrightened &&
+          other.isGrappled == this.isGrappled &&
+          other.isIncapacitated == this.isIncapacitated &&
+          other.isInvisible == this.isInvisible &&
+          other.isParalyzed == this.isParalyzed &&
+          other.isPetrified == this.isPetrified &&
+          other.isPoisoned == this.isPoisoned &&
+          other.isProne == this.isProne &&
+          other.isRestrained == this.isRestrained &&
+          other.isStunned == this.isStunned &&
+          other.isUnconscious == this.isUnconscious &&
+          other.isTurn == this.isTurn);
+}
+
+class EncounterPlayersCompanion extends UpdateCompanion<EncounterPlayersRow> {
+  final Value<int> id;
+  final Value<int> encounterId;
+  final Value<int> playerId;
+  final Value<int> initiative;
+  final Value<int> quantity;
+  final Value<int> currentHitpoints;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<bool> isBlinded;
+  final Value<bool> isCharmed;
+  final Value<bool> isDeafened;
+  final Value<int> exhaustionLevel;
+  final Value<bool> isFrightened;
+  final Value<bool> isGrappled;
+  final Value<bool> isIncapacitated;
+  final Value<bool> isInvisible;
+  final Value<bool> isParalyzed;
+  final Value<bool> isPetrified;
+  final Value<bool> isPoisoned;
+  final Value<bool> isProne;
+  final Value<bool> isRestrained;
+  final Value<bool> isStunned;
+  final Value<bool> isUnconscious;
+  final Value<bool> isTurn;
+  const EncounterPlayersCompanion({
+    this.id = const Value.absent(),
+    this.encounterId = const Value.absent(),
+    this.playerId = const Value.absent(),
+    this.initiative = const Value.absent(),
+    this.quantity = const Value.absent(),
+    this.currentHitpoints = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.isBlinded = const Value.absent(),
+    this.isCharmed = const Value.absent(),
+    this.isDeafened = const Value.absent(),
+    this.exhaustionLevel = const Value.absent(),
+    this.isFrightened = const Value.absent(),
+    this.isGrappled = const Value.absent(),
+    this.isIncapacitated = const Value.absent(),
+    this.isInvisible = const Value.absent(),
+    this.isParalyzed = const Value.absent(),
+    this.isPetrified = const Value.absent(),
+    this.isPoisoned = const Value.absent(),
+    this.isProne = const Value.absent(),
+    this.isRestrained = const Value.absent(),
+    this.isStunned = const Value.absent(),
+    this.isUnconscious = const Value.absent(),
+    this.isTurn = const Value.absent(),
+  });
+  EncounterPlayersCompanion.insert({
+    this.id = const Value.absent(),
+    required int encounterId,
+    required int playerId,
+    required int initiative,
+    required int quantity,
+    this.currentHitpoints = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.isBlinded = const Value.absent(),
+    this.isCharmed = const Value.absent(),
+    this.isDeafened = const Value.absent(),
+    this.exhaustionLevel = const Value.absent(),
+    this.isFrightened = const Value.absent(),
+    this.isGrappled = const Value.absent(),
+    this.isIncapacitated = const Value.absent(),
+    this.isInvisible = const Value.absent(),
+    this.isParalyzed = const Value.absent(),
+    this.isPetrified = const Value.absent(),
+    this.isPoisoned = const Value.absent(),
+    this.isProne = const Value.absent(),
+    this.isRestrained = const Value.absent(),
+    this.isStunned = const Value.absent(),
+    this.isUnconscious = const Value.absent(),
+    this.isTurn = const Value.absent(),
+  }) : encounterId = Value(encounterId),
+       playerId = Value(playerId),
+       initiative = Value(initiative),
+       quantity = Value(quantity);
+  static Insertable<EncounterPlayersRow> custom({
+    Expression<int>? id,
+    Expression<int>? encounterId,
+    Expression<int>? playerId,
+    Expression<int>? initiative,
+    Expression<int>? quantity,
+    Expression<int>? currentHitpoints,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<bool>? isBlinded,
+    Expression<bool>? isCharmed,
+    Expression<bool>? isDeafened,
+    Expression<int>? exhaustionLevel,
+    Expression<bool>? isFrightened,
+    Expression<bool>? isGrappled,
+    Expression<bool>? isIncapacitated,
+    Expression<bool>? isInvisible,
+    Expression<bool>? isParalyzed,
+    Expression<bool>? isPetrified,
+    Expression<bool>? isPoisoned,
+    Expression<bool>? isProne,
+    Expression<bool>? isRestrained,
+    Expression<bool>? isStunned,
+    Expression<bool>? isUnconscious,
+    Expression<bool>? isTurn,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (encounterId != null) 'encounter_id': encounterId,
+      if (playerId != null) 'player_id': playerId,
+      if (initiative != null) 'initiative': initiative,
+      if (quantity != null) 'quantity': quantity,
+      if (currentHitpoints != null) 'current_hitpoints': currentHitpoints,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (isBlinded != null) 'is_blinded': isBlinded,
+      if (isCharmed != null) 'is_charmed': isCharmed,
+      if (isDeafened != null) 'is_deafened': isDeafened,
+      if (exhaustionLevel != null) 'exhaustion_level': exhaustionLevel,
+      if (isFrightened != null) 'is_frightened': isFrightened,
+      if (isGrappled != null) 'is_grappled': isGrappled,
+      if (isIncapacitated != null) 'is_incapacitated': isIncapacitated,
+      if (isInvisible != null) 'is_invisible': isInvisible,
+      if (isParalyzed != null) 'is_paralyzed': isParalyzed,
+      if (isPetrified != null) 'is_petrified': isPetrified,
+      if (isPoisoned != null) 'is_poisoned': isPoisoned,
+      if (isProne != null) 'is_prone': isProne,
+      if (isRestrained != null) 'is_restrained': isRestrained,
+      if (isStunned != null) 'is_stunned': isStunned,
+      if (isUnconscious != null) 'is_unconscious': isUnconscious,
+      if (isTurn != null) 'is_turn': isTurn,
+    });
+  }
+
+  EncounterPlayersCompanion copyWith({
+    Value<int>? id,
+    Value<int>? encounterId,
+    Value<int>? playerId,
+    Value<int>? initiative,
+    Value<int>? quantity,
+    Value<int>? currentHitpoints,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<bool>? isBlinded,
+    Value<bool>? isCharmed,
+    Value<bool>? isDeafened,
+    Value<int>? exhaustionLevel,
+    Value<bool>? isFrightened,
+    Value<bool>? isGrappled,
+    Value<bool>? isIncapacitated,
+    Value<bool>? isInvisible,
+    Value<bool>? isParalyzed,
+    Value<bool>? isPetrified,
+    Value<bool>? isPoisoned,
+    Value<bool>? isProne,
+    Value<bool>? isRestrained,
+    Value<bool>? isStunned,
+    Value<bool>? isUnconscious,
+    Value<bool>? isTurn,
+  }) {
+    return EncounterPlayersCompanion(
+      id: id ?? this.id,
+      encounterId: encounterId ?? this.encounterId,
+      playerId: playerId ?? this.playerId,
+      initiative: initiative ?? this.initiative,
+      quantity: quantity ?? this.quantity,
+      currentHitpoints: currentHitpoints ?? this.currentHitpoints,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      isBlinded: isBlinded ?? this.isBlinded,
+      isCharmed: isCharmed ?? this.isCharmed,
+      isDeafened: isDeafened ?? this.isDeafened,
+      exhaustionLevel: exhaustionLevel ?? this.exhaustionLevel,
+      isFrightened: isFrightened ?? this.isFrightened,
+      isGrappled: isGrappled ?? this.isGrappled,
+      isIncapacitated: isIncapacitated ?? this.isIncapacitated,
+      isInvisible: isInvisible ?? this.isInvisible,
+      isParalyzed: isParalyzed ?? this.isParalyzed,
+      isPetrified: isPetrified ?? this.isPetrified,
+      isPoisoned: isPoisoned ?? this.isPoisoned,
+      isProne: isProne ?? this.isProne,
+      isRestrained: isRestrained ?? this.isRestrained,
+      isStunned: isStunned ?? this.isStunned,
+      isUnconscious: isUnconscious ?? this.isUnconscious,
+      isTurn: isTurn ?? this.isTurn,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (encounterId.present) {
+      map['encounter_id'] = Variable<int>(encounterId.value);
+    }
+    if (playerId.present) {
+      map['player_id'] = Variable<int>(playerId.value);
+    }
+    if (initiative.present) {
+      map['initiative'] = Variable<int>(initiative.value);
+    }
+    if (quantity.present) {
+      map['quantity'] = Variable<int>(quantity.value);
+    }
+    if (currentHitpoints.present) {
+      map['current_hitpoints'] = Variable<int>(currentHitpoints.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (isBlinded.present) {
+      map['is_blinded'] = Variable<bool>(isBlinded.value);
+    }
+    if (isCharmed.present) {
+      map['is_charmed'] = Variable<bool>(isCharmed.value);
+    }
+    if (isDeafened.present) {
+      map['is_deafened'] = Variable<bool>(isDeafened.value);
+    }
+    if (exhaustionLevel.present) {
+      map['exhaustion_level'] = Variable<int>(exhaustionLevel.value);
+    }
+    if (isFrightened.present) {
+      map['is_frightened'] = Variable<bool>(isFrightened.value);
+    }
+    if (isGrappled.present) {
+      map['is_grappled'] = Variable<bool>(isGrappled.value);
+    }
+    if (isIncapacitated.present) {
+      map['is_incapacitated'] = Variable<bool>(isIncapacitated.value);
+    }
+    if (isInvisible.present) {
+      map['is_invisible'] = Variable<bool>(isInvisible.value);
+    }
+    if (isParalyzed.present) {
+      map['is_paralyzed'] = Variable<bool>(isParalyzed.value);
+    }
+    if (isPetrified.present) {
+      map['is_petrified'] = Variable<bool>(isPetrified.value);
+    }
+    if (isPoisoned.present) {
+      map['is_poisoned'] = Variable<bool>(isPoisoned.value);
+    }
+    if (isProne.present) {
+      map['is_prone'] = Variable<bool>(isProne.value);
+    }
+    if (isRestrained.present) {
+      map['is_restrained'] = Variable<bool>(isRestrained.value);
+    }
+    if (isStunned.present) {
+      map['is_stunned'] = Variable<bool>(isStunned.value);
+    }
+    if (isUnconscious.present) {
+      map['is_unconscious'] = Variable<bool>(isUnconscious.value);
+    }
+    if (isTurn.present) {
+      map['is_turn'] = Variable<bool>(isTurn.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('EncounterPlayersCompanion(')
+          ..write('id: $id, ')
+          ..write('encounterId: $encounterId, ')
+          ..write('playerId: $playerId, ')
+          ..write('initiative: $initiative, ')
+          ..write('quantity: $quantity, ')
+          ..write('currentHitpoints: $currentHitpoints, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('isBlinded: $isBlinded, ')
+          ..write('isCharmed: $isCharmed, ')
+          ..write('isDeafened: $isDeafened, ')
+          ..write('exhaustionLevel: $exhaustionLevel, ')
+          ..write('isFrightened: $isFrightened, ')
+          ..write('isGrappled: $isGrappled, ')
+          ..write('isIncapacitated: $isIncapacitated, ')
+          ..write('isInvisible: $isInvisible, ')
+          ..write('isParalyzed: $isParalyzed, ')
+          ..write('isPetrified: $isPetrified, ')
+          ..write('isPoisoned: $isPoisoned, ')
+          ..write('isProne: $isProne, ')
+          ..write('isRestrained: $isRestrained, ')
+          ..write('isStunned: $isStunned, ')
+          ..write('isUnconscious: $isUnconscious, ')
+          ..write('isTurn: $isTurn')
           ..write(')'))
         .toString();
   }
@@ -6462,10 +9823,16 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $PlayersTable players = $PlayersTable(this);
+  late final $EncountersTable encounters = $EncountersTable(this);
   late final $LegendaryGroupsTable legendaryGroups = $LegendaryGroupsTable(
     this,
   );
   late final $CreaturesTable creatures = $CreaturesTable(this);
+  late final $EncounterCreaturesTable encounterCreatures =
+      $EncounterCreaturesTable(this);
+  late final $EncounterPlayersTable encounterPlayers = $EncounterPlayersTable(
+    this,
+  );
   late final $NotesTable notes = $NotesTable(this);
   late final $CreatureActionsTable creatureActions = $CreatureActionsTable(
     this,
@@ -6483,6 +9850,34 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $CreatureEnvironmentsTable(this);
   late final $LegendaryGroupEntriesTable legendaryGroupEntries =
       $LegendaryGroupEntriesTable(this);
+  late final Index idxPlayerName = Index(
+    'idx_player_name',
+    'CREATE INDEX idx_player_name ON players (p_name)',
+  );
+  late final Index idxEncounterName = Index(
+    'idx_encounter_name',
+    'CREATE INDEX idx_encounter_name ON encounters (name)',
+  );
+  late final Index idxEncounterUpdatedAt = Index(
+    'idx_encounter_updated_at',
+    'CREATE INDEX idx_encounter_updated_at ON encounters (updated_at)',
+  );
+  late final Index idxEncounterCreatureEncounterInitiative = Index(
+    'idx_encounter_creature_encounter_initiative',
+    'CREATE INDEX idx_encounter_creature_encounter_initiative ON encounter_creatures (encounter_id, initiative)',
+  );
+  late final Index idxEncounterCreatureCreature = Index(
+    'idx_encounter_creature_creature',
+    'CREATE INDEX idx_encounter_creature_creature ON encounter_creatures (creature_id)',
+  );
+  late final Index idxEncounterPlayerEncounterInitiative = Index(
+    'idx_encounter_player_encounter_initiative',
+    'CREATE INDEX idx_encounter_player_encounter_initiative ON encounter_players (encounter_id, initiative)',
+  );
+  late final Index idxEncounterPlayerPlayer = Index(
+    'idx_encounter_player_player',
+    'CREATE INDEX idx_encounter_player_player ON encounter_players (player_id)',
+  );
   late final Index idxNoteCreature = Index(
     'idx_note_creature',
     'CREATE INDEX idx_note_creature ON notes (creature_id)',
@@ -6529,8 +9924,11 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
     players,
+    encounters,
     legendaryGroups,
     creatures,
+    encounterCreatures,
+    encounterPlayers,
     notes,
     creatureActions,
     creatureTraits,
@@ -6542,6 +9940,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     creatureLanguages,
     creatureEnvironments,
     legendaryGroupEntries,
+    idxPlayerName,
+    idxEncounterName,
+    idxEncounterUpdatedAt,
+    idxEncounterCreatureEncounterInitiative,
+    idxEncounterCreatureCreature,
+    idxEncounterPlayerEncounterInitiative,
+    idxEncounterPlayerPlayer,
     idxNoteCreature,
     idxCreatureNameSource,
     idxCreatureCr,
@@ -6561,6 +9966,34 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('creatures', kind: UpdateKind.update)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'encounters',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('encounter_creatures', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'creatures',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('encounter_creatures', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'encounters',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('encounter_players', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'players',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('encounter_players', kind: UpdateKind.delete)],
     ),
     WritePropagation(
       on: TableUpdateQuery.onTableName(
@@ -6650,7 +10083,9 @@ typedef $$PlayersTableCreateCompanionBuilder =
       Value<int?> pLevel,
       Value<int?> pHitPoints,
       Value<int?> pArmorClass,
+      Value<int?> pPassivePerception,
       Value<String?> pOriginalCampaign,
+      Value<String?> pNotes,
     });
 typedef $$PlayersTableUpdateCompanionBuilder =
     PlayersCompanion Function({
@@ -6660,8 +10095,35 @@ typedef $$PlayersTableUpdateCompanionBuilder =
       Value<int?> pLevel,
       Value<int?> pHitPoints,
       Value<int?> pArmorClass,
+      Value<int?> pPassivePerception,
       Value<String?> pOriginalCampaign,
+      Value<String?> pNotes,
     });
+
+final class $$PlayersTableReferences
+    extends BaseReferences<_$AppDatabase, $PlayersTable, PlayerRow> {
+  $$PlayersTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$EncounterPlayersTable, List<EncounterPlayersRow>>
+  _encounterPlayersRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.encounterPlayers,
+    aliasName: 'players__p_id__encounter_players__player_id',
+  );
+
+  $$EncounterPlayersTableProcessedTableManager get encounterPlayersRefs {
+    final manager = $$EncounterPlayersTableTableManager(
+      $_db,
+      $_db.encounterPlayers,
+    ).filter((f) => f.playerId.pId.sqlEquals($_itemColumn<int>('p_id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _encounterPlayersRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
 
 class $$PlayersTableFilterComposer
     extends Composer<_$AppDatabase, $PlayersTable> {
@@ -6702,10 +10164,45 @@ class $$PlayersTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<int> get pPassivePerception => $composableBuilder(
+    column: $table.pPassivePerception,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<String> get pOriginalCampaign => $composableBuilder(
     column: $table.pOriginalCampaign,
     builder: (column) => ColumnFilters(column),
   );
+
+  ColumnFilters<String> get pNotes => $composableBuilder(
+    column: $table.pNotes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  Expression<bool> encounterPlayersRefs(
+    Expression<bool> Function($$EncounterPlayersTableFilterComposer f) f,
+  ) {
+    final $$EncounterPlayersTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.pId,
+      referencedTable: $db.encounterPlayers,
+      getReferencedColumn: (t) => t.playerId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$EncounterPlayersTableFilterComposer(
+            $db: $db,
+            $table: $db.encounterPlayers,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$PlayersTableOrderingComposer
@@ -6747,8 +10244,18 @@ class $$PlayersTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get pPassivePerception => $composableBuilder(
+    column: $table.pPassivePerception,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get pOriginalCampaign => $composableBuilder(
     column: $table.pOriginalCampaign,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get pNotes => $composableBuilder(
+    column: $table.pNotes,
     builder: (column) => ColumnOrderings(column),
   );
 }
@@ -6784,10 +10291,43 @@ class $$PlayersTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<int> get pPassivePerception => $composableBuilder(
+    column: $table.pPassivePerception,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<String> get pOriginalCampaign => $composableBuilder(
     column: $table.pOriginalCampaign,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get pNotes =>
+      $composableBuilder(column: $table.pNotes, builder: (column) => column);
+
+  Expression<T> encounterPlayersRefs<T extends Object>(
+    Expression<T> Function($$EncounterPlayersTableAnnotationComposer a) f,
+  ) {
+    final $$EncounterPlayersTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.pId,
+      referencedTable: $db.encounterPlayers,
+      getReferencedColumn: (t) => t.playerId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$EncounterPlayersTableAnnotationComposer(
+            $db: $db,
+            $table: $db.encounterPlayers,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$PlayersTableTableManager
@@ -6795,15 +10335,15 @@ class $$PlayersTableTableManager
         RootTableManager<
           _$AppDatabase,
           $PlayersTable,
-          Player,
+          PlayerRow,
           $$PlayersTableFilterComposer,
           $$PlayersTableOrderingComposer,
           $$PlayersTableAnnotationComposer,
           $$PlayersTableCreateCompanionBuilder,
           $$PlayersTableUpdateCompanionBuilder,
-          (Player, BaseReferences<_$AppDatabase, $PlayersTable, Player>),
-          Player,
-          PrefetchHooks Function()
+          (PlayerRow, $$PlayersTableReferences),
+          PlayerRow,
+          PrefetchHooks Function({bool encounterPlayersRefs})
         > {
   $$PlayersTableTableManager(_$AppDatabase db, $PlayersTable table)
     : super(
@@ -6824,7 +10364,9 @@ class $$PlayersTableTableManager
                 Value<int?> pLevel = const Value.absent(),
                 Value<int?> pHitPoints = const Value.absent(),
                 Value<int?> pArmorClass = const Value.absent(),
+                Value<int?> pPassivePerception = const Value.absent(),
                 Value<String?> pOriginalCampaign = const Value.absent(),
+                Value<String?> pNotes = const Value.absent(),
               }) => PlayersCompanion(
                 pId: pId,
                 pName: pName,
@@ -6832,7 +10374,9 @@ class $$PlayersTableTableManager
                 pLevel: pLevel,
                 pHitPoints: pHitPoints,
                 pArmorClass: pArmorClass,
+                pPassivePerception: pPassivePerception,
                 pOriginalCampaign: pOriginalCampaign,
+                pNotes: pNotes,
               ),
           createCompanionCallback:
               ({
@@ -6842,7 +10386,9 @@ class $$PlayersTableTableManager
                 Value<int?> pLevel = const Value.absent(),
                 Value<int?> pHitPoints = const Value.absent(),
                 Value<int?> pArmorClass = const Value.absent(),
+                Value<int?> pPassivePerception = const Value.absent(),
                 Value<String?> pOriginalCampaign = const Value.absent(),
+                Value<String?> pNotes = const Value.absent(),
               }) => PlayersCompanion.insert(
                 pId: pId,
                 pName: pName,
@@ -6850,12 +10396,50 @@ class $$PlayersTableTableManager
                 pLevel: pLevel,
                 pHitPoints: pHitPoints,
                 pArmorClass: pArmorClass,
+                pPassivePerception: pPassivePerception,
                 pOriginalCampaign: pOriginalCampaign,
+                pNotes: pNotes,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$PlayersTable, PlayerRow>(table),
+                  $$PlayersTableReferences(db, table, e),
+                ),
+              )
               .toList(),
-          prefetchHooksCallback: null,
+          prefetchHooksCallback: ({encounterPlayersRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (encounterPlayersRefs) db.encounterPlayers,
+              ],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (encounterPlayersRefs)
+                    await $_getPrefetchedDataByColumns<
+                      PlayerRow,
+                      $PlayersTable,
+                      EncounterPlayersRow,
+                      $EncounterPlayersTable
+                    >(
+                      currentTable: table,
+                      referencedTable: $$PlayersTableReferences
+                          ._encounterPlayersRefsTable(db),
+                      managerFromTypedResult: (p0) => $$PlayersTableReferences(
+                        db,
+                        table,
+                        p0,
+                      ).encounterPlayersRefs,
+                      currentColumn: 'p_id',
+                      referencedColumn: 'player_id',
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
         ),
       );
 }
@@ -6864,15 +10448,479 @@ typedef $$PlayersTableProcessedTableManager =
     ProcessedTableManager<
       _$AppDatabase,
       $PlayersTable,
-      Player,
+      PlayerRow,
       $$PlayersTableFilterComposer,
       $$PlayersTableOrderingComposer,
       $$PlayersTableAnnotationComposer,
       $$PlayersTableCreateCompanionBuilder,
       $$PlayersTableUpdateCompanionBuilder,
-      (Player, BaseReferences<_$AppDatabase, $PlayersTable, Player>),
-      Player,
-      PrefetchHooks Function()
+      (PlayerRow, $$PlayersTableReferences),
+      PlayerRow,
+      PrefetchHooks Function({bool encounterPlayersRefs})
+    >;
+typedef $$EncountersTableCreateCompanionBuilder =
+    EncountersCompanion Function({
+      Value<int> id,
+      required String name,
+      required String notes,
+      Value<int?> totalXp,
+      Value<int?> adjustedXp,
+      Value<bool> hasStarted,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+    });
+typedef $$EncountersTableUpdateCompanionBuilder =
+    EncountersCompanion Function({
+      Value<int> id,
+      Value<String> name,
+      Value<String> notes,
+      Value<int?> totalXp,
+      Value<int?> adjustedXp,
+      Value<bool> hasStarted,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+    });
+
+final class $$EncountersTableReferences
+    extends BaseReferences<_$AppDatabase, $EncountersTable, EncounterRow> {
+  $$EncountersTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<
+    $EncounterCreaturesTable,
+    List<EncounterCreaturesRow>
+  >
+  _encounterCreaturesRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.encounterCreatures,
+        aliasName: 'encounters__id__encounter_creatures__encounter_id',
+      );
+
+  $$EncounterCreaturesTableProcessedTableManager get encounterCreaturesRefs {
+    final manager = $$EncounterCreaturesTableTableManager(
+      $_db,
+      $_db.encounterCreatures,
+    ).filter((f) => f.encounterId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _encounterCreaturesRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$EncounterPlayersTable, List<EncounterPlayersRow>>
+  _encounterPlayersRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.encounterPlayers,
+    aliasName: 'encounters__id__encounter_players__encounter_id',
+  );
+
+  $$EncounterPlayersTableProcessedTableManager get encounterPlayersRefs {
+    final manager = $$EncounterPlayersTableTableManager(
+      $_db,
+      $_db.encounterPlayers,
+    ).filter((f) => f.encounterId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _encounterPlayersRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$EncountersTableFilterComposer
+    extends Composer<_$AppDatabase, $EncountersTable> {
+  $$EncountersTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get totalXp => $composableBuilder(
+    column: $table.totalXp,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get adjustedXp => $composableBuilder(
+    column: $table.adjustedXp,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get hasStarted => $composableBuilder(
+    column: $table.hasStarted,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  Expression<bool> encounterCreaturesRefs(
+    Expression<bool> Function($$EncounterCreaturesTableFilterComposer f) f,
+  ) {
+    final $$EncounterCreaturesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.encounterCreatures,
+      getReferencedColumn: (t) => t.encounterId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$EncounterCreaturesTableFilterComposer(
+            $db: $db,
+            $table: $db.encounterCreatures,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> encounterPlayersRefs(
+    Expression<bool> Function($$EncounterPlayersTableFilterComposer f) f,
+  ) {
+    final $$EncounterPlayersTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.encounterPlayers,
+      getReferencedColumn: (t) => t.encounterId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$EncounterPlayersTableFilterComposer(
+            $db: $db,
+            $table: $db.encounterPlayers,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$EncountersTableOrderingComposer
+    extends Composer<_$AppDatabase, $EncountersTable> {
+  $$EncountersTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get totalXp => $composableBuilder(
+    column: $table.totalXp,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get adjustedXp => $composableBuilder(
+    column: $table.adjustedXp,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get hasStarted => $composableBuilder(
+    column: $table.hasStarted,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$EncountersTableAnnotationComposer
+    extends Composer<_$AppDatabase, $EncountersTable> {
+  $$EncountersTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get notes =>
+      $composableBuilder(column: $table.notes, builder: (column) => column);
+
+  GeneratedColumn<int> get totalXp =>
+      $composableBuilder(column: $table.totalXp, builder: (column) => column);
+
+  GeneratedColumn<int> get adjustedXp => $composableBuilder(
+    column: $table.adjustedXp,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get hasStarted => $composableBuilder(
+    column: $table.hasStarted,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  Expression<T> encounterCreaturesRefs<T extends Object>(
+    Expression<T> Function($$EncounterCreaturesTableAnnotationComposer a) f,
+  ) {
+    final $$EncounterCreaturesTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.encounterCreatures,
+          getReferencedColumn: (t) => t.encounterId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$EncounterCreaturesTableAnnotationComposer(
+                $db: $db,
+                $table: $db.encounterCreatures,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<T> encounterPlayersRefs<T extends Object>(
+    Expression<T> Function($$EncounterPlayersTableAnnotationComposer a) f,
+  ) {
+    final $$EncounterPlayersTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.encounterPlayers,
+      getReferencedColumn: (t) => t.encounterId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$EncounterPlayersTableAnnotationComposer(
+            $db: $db,
+            $table: $db.encounterPlayers,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$EncountersTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $EncountersTable,
+          EncounterRow,
+          $$EncountersTableFilterComposer,
+          $$EncountersTableOrderingComposer,
+          $$EncountersTableAnnotationComposer,
+          $$EncountersTableCreateCompanionBuilder,
+          $$EncountersTableUpdateCompanionBuilder,
+          (EncounterRow, $$EncountersTableReferences),
+          EncounterRow,
+          PrefetchHooks Function({
+            bool encounterCreaturesRefs,
+            bool encounterPlayersRefs,
+          })
+        > {
+  $$EncountersTableTableManager(_$AppDatabase db, $EncountersTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$EncountersTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$EncountersTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$EncountersTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String> notes = const Value.absent(),
+                Value<int?> totalXp = const Value.absent(),
+                Value<int?> adjustedXp = const Value.absent(),
+                Value<bool> hasStarted = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+              }) => EncountersCompanion(
+                id: id,
+                name: name,
+                notes: notes,
+                totalXp: totalXp,
+                adjustedXp: adjustedXp,
+                hasStarted: hasStarted,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String name,
+                required String notes,
+                Value<int?> totalXp = const Value.absent(),
+                Value<int?> adjustedXp = const Value.absent(),
+                Value<bool> hasStarted = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+              }) => EncountersCompanion.insert(
+                id: id,
+                name: name,
+                notes: notes,
+                totalXp: totalXp,
+                adjustedXp: adjustedXp,
+                hasStarted: hasStarted,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$EncountersTable, EncounterRow>(table),
+                  $$EncountersTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({encounterCreaturesRefs = false, encounterPlayersRefs = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (encounterCreaturesRefs) db.encounterCreatures,
+                    if (encounterPlayersRefs) db.encounterPlayers,
+                  ],
+                  addJoins: null,
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (encounterCreaturesRefs)
+                        await $_getPrefetchedDataByColumns<
+                          EncounterRow,
+                          $EncountersTable,
+                          EncounterCreaturesRow,
+                          $EncounterCreaturesTable
+                        >(
+                          currentTable: table,
+                          referencedTable: $$EncountersTableReferences
+                              ._encounterCreaturesRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$EncountersTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).encounterCreaturesRefs,
+                          currentColumn: 'id',
+                          referencedColumn: 'encounter_id',
+                          typedResults: items,
+                        ),
+                      if (encounterPlayersRefs)
+                        await $_getPrefetchedDataByColumns<
+                          EncounterRow,
+                          $EncountersTable,
+                          EncounterPlayersRow,
+                          $EncounterPlayersTable
+                        >(
+                          currentTable: table,
+                          referencedTable: $$EncountersTableReferences
+                              ._encounterPlayersRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$EncountersTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).encounterPlayersRefs,
+                          currentColumn: 'id',
+                          referencedColumn: 'encounter_id',
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$EncountersTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $EncountersTable,
+      EncounterRow,
+      $$EncountersTableFilterComposer,
+      $$EncountersTableOrderingComposer,
+      $$EncountersTableAnnotationComposer,
+      $$EncountersTableCreateCompanionBuilder,
+      $$EncountersTableUpdateCompanionBuilder,
+      (EncounterRow, $$EncountersTableReferences),
+      EncounterRow,
+      PrefetchHooks Function({
+        bool encounterCreaturesRefs,
+        bool encounterPlayersRefs,
+      })
     >;
 typedef $$LegendaryGroupsTableCreateCompanionBuilder =
     LegendaryGroupsCompanion Function({
@@ -7188,7 +11236,7 @@ class $$LegendaryGroupsTableTableManager
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable(table),
+                  e.readTable<$LegendaryGroupsTable, LegendaryGroupRow>(table),
                   $$LegendaryGroupsTableReferences(db, table, e),
                 ),
               )
@@ -7205,10 +11253,11 @@ class $$LegendaryGroupsTableTableManager
                   getPrefetchedDataCallback: (items) async {
                     return [
                       if (creaturesRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           LegendaryGroupRow,
                           $LegendaryGroupsTable,
-                          CreatureRow
+                          CreatureRow,
+                          $CreaturesTable
                         >(
                           currentTable: table,
                           referencedTable: $$LegendaryGroupsTableReferences
@@ -7219,17 +11268,16 @@ class $$LegendaryGroupsTableTableManager
                                 table,
                                 p0,
                               ).creaturesRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.legendaryGroupId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'legendary_group_id',
                           typedResults: items,
                         ),
                       if (legendaryGroupEntriesRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           LegendaryGroupRow,
                           $LegendaryGroupsTable,
-                          LegendaryGroupEntryRow
+                          LegendaryGroupEntryRow,
+                          $LegendaryGroupEntriesTable
                         >(
                           currentTable: table,
                           referencedTable: $$LegendaryGroupsTableReferences
@@ -7240,10 +11288,8 @@ class $$LegendaryGroupsTableTableManager
                                 table,
                                 p0,
                               ).legendaryGroupEntriesRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.groupId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'group_id',
                           typedResults: items,
                         ),
                     ];
@@ -7308,6 +11354,8 @@ typedef $$CreaturesTableCreateCompanionBuilder =
       Value<String?> damageImmunities,
       Value<String?> conditionImmunities,
       Value<int?> legendaryGroupId,
+      Value<String?> legendaryGroupName,
+      Value<String?> legendaryGroupSource,
     });
 typedef $$CreaturesTableUpdateCompanionBuilder =
     CreaturesCompanion Function({
@@ -7346,6 +11394,8 @@ typedef $$CreaturesTableUpdateCompanionBuilder =
       Value<String?> damageImmunities,
       Value<String?> conditionImmunities,
       Value<int?> legendaryGroupId,
+      Value<String?> legendaryGroupName,
+      Value<String?> legendaryGroupSource,
     });
 
 final class $$CreaturesTableReferences
@@ -7367,6 +11417,30 @@ final class $$CreaturesTableReferences
     if (item == null) return manager;
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $EncounterCreaturesTable,
+    List<EncounterCreaturesRow>
+  >
+  _encounterCreaturesRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.encounterCreatures,
+        aliasName: 'creatures__id__encounter_creatures__creature_id',
+      );
+
+  $$EncounterCreaturesTableProcessedTableManager get encounterCreaturesRefs {
+    final manager = $$EncounterCreaturesTableTableManager(
+      $_db,
+      $_db.encounterCreatures,
+    ).filter((f) => f.creatureId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _encounterCreaturesRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
     );
   }
 
@@ -7732,6 +11806,16 @@ class $$CreaturesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get legendaryGroupName => $composableBuilder(
+    column: $table.legendaryGroupName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get legendaryGroupSource => $composableBuilder(
+    column: $table.legendaryGroupSource,
+    builder: (column) => ColumnFilters(column),
+  );
+
   $$LegendaryGroupsTableFilterComposer get legendaryGroupId {
     final $$LegendaryGroupsTableFilterComposer composer = $composerBuilder(
       composer: this,
@@ -7753,6 +11837,31 @@ class $$CreaturesTableFilterComposer
           ),
     );
     return composer;
+  }
+
+  Expression<bool> encounterCreaturesRefs(
+    Expression<bool> Function($$EncounterCreaturesTableFilterComposer f) f,
+  ) {
+    final $$EncounterCreaturesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.encounterCreatures,
+      getReferencedColumn: (t) => t.creatureId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$EncounterCreaturesTableFilterComposer(
+            $db: $db,
+            $table: $db.encounterCreatures,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
   }
 
   Expression<bool> notesRefs(
@@ -8161,6 +12270,16 @@ class $$CreaturesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get legendaryGroupName => $composableBuilder(
+    column: $table.legendaryGroupName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get legendaryGroupSource => $composableBuilder(
+    column: $table.legendaryGroupSource,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$LegendaryGroupsTableOrderingComposer get legendaryGroupId {
     final $$LegendaryGroupsTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -8330,6 +12449,16 @@ class $$CreaturesTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get legendaryGroupName => $composableBuilder(
+    column: $table.legendaryGroupName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get legendaryGroupSource => $composableBuilder(
+    column: $table.legendaryGroupSource,
+    builder: (column) => column,
+  );
+
   $$LegendaryGroupsTableAnnotationComposer get legendaryGroupId {
     final $$LegendaryGroupsTableAnnotationComposer composer = $composerBuilder(
       composer: this,
@@ -8351,6 +12480,32 @@ class $$CreaturesTableAnnotationComposer
           ),
     );
     return composer;
+  }
+
+  Expression<T> encounterCreaturesRefs<T extends Object>(
+    Expression<T> Function($$EncounterCreaturesTableAnnotationComposer a) f,
+  ) {
+    final $$EncounterCreaturesTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.encounterCreatures,
+          getReferencedColumn: (t) => t.creatureId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$EncounterCreaturesTableAnnotationComposer(
+                $db: $db,
+                $table: $db.encounterCreatures,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
   }
 
   Expression<T> notesRefs<T extends Object>(
@@ -8597,6 +12752,7 @@ class $$CreaturesTableTableManager
           CreatureRow,
           PrefetchHooks Function({
             bool legendaryGroupId,
+            bool encounterCreaturesRefs,
             bool notesRefs,
             bool creatureActionsRefs,
             bool creatureTraitsRefs,
@@ -8656,6 +12812,8 @@ class $$CreaturesTableTableManager
                 Value<String?> damageImmunities = const Value.absent(),
                 Value<String?> conditionImmunities = const Value.absent(),
                 Value<int?> legendaryGroupId = const Value.absent(),
+                Value<String?> legendaryGroupName = const Value.absent(),
+                Value<String?> legendaryGroupSource = const Value.absent(),
               }) => CreaturesCompanion(
                 id: id,
                 name: name,
@@ -8692,6 +12850,8 @@ class $$CreaturesTableTableManager
                 damageImmunities: damageImmunities,
                 conditionImmunities: conditionImmunities,
                 legendaryGroupId: legendaryGroupId,
+                legendaryGroupName: legendaryGroupName,
+                legendaryGroupSource: legendaryGroupSource,
               ),
           createCompanionCallback:
               ({
@@ -8730,6 +12890,8 @@ class $$CreaturesTableTableManager
                 Value<String?> damageImmunities = const Value.absent(),
                 Value<String?> conditionImmunities = const Value.absent(),
                 Value<int?> legendaryGroupId = const Value.absent(),
+                Value<String?> legendaryGroupName = const Value.absent(),
+                Value<String?> legendaryGroupSource = const Value.absent(),
               }) => CreaturesCompanion.insert(
                 id: id,
                 name: name,
@@ -8766,11 +12928,13 @@ class $$CreaturesTableTableManager
                 damageImmunities: damageImmunities,
                 conditionImmunities: conditionImmunities,
                 legendaryGroupId: legendaryGroupId,
+                legendaryGroupName: legendaryGroupName,
+                legendaryGroupSource: legendaryGroupSource,
               ),
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable(table),
+                  e.readTable<$CreaturesTable, CreatureRow>(table),
                   $$CreaturesTableReferences(db, table, e),
                 ),
               )
@@ -8778,6 +12942,7 @@ class $$CreaturesTableTableManager
           prefetchHooksCallback:
               ({
                 legendaryGroupId = false,
+                encounterCreaturesRefs = false,
                 notesRefs = false,
                 creatureActionsRefs = false,
                 creatureTraitsRefs = false,
@@ -8791,6 +12956,7 @@ class $$CreaturesTableTableManager
                 return PrefetchHooks(
                   db: db,
                   explicitlyWatchedTables: [
+                    if (encounterCreaturesRefs) db.encounterCreatures,
                     if (notesRefs) db.notes,
                     if (creatureActionsRefs) db.creatureActions,
                     if (creatureTraitsRefs) db.creatureTraits,
@@ -8835,11 +13001,32 @@ class $$CreaturesTableTableManager
                       },
                   getPrefetchedDataCallback: (items) async {
                     return [
-                      if (notesRefs)
-                        await $_getPrefetchedData<
+                      if (encounterCreaturesRefs)
+                        await $_getPrefetchedDataByColumns<
                           CreatureRow,
                           $CreaturesTable,
-                          NoteRow
+                          EncounterCreaturesRow,
+                          $EncounterCreaturesTable
+                        >(
+                          currentTable: table,
+                          referencedTable: $$CreaturesTableReferences
+                              ._encounterCreaturesRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$CreaturesTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).encounterCreaturesRefs,
+                          currentColumn: 'id',
+                          referencedColumn: 'creature_id',
+                          typedResults: items,
+                        ),
+                      if (notesRefs)
+                        await $_getPrefetchedDataByColumns<
+                          CreatureRow,
+                          $CreaturesTable,
+                          NoteRow,
+                          $NotesTable
                         >(
                           currentTable: table,
                           referencedTable: $$CreaturesTableReferences
@@ -8850,17 +13037,16 @@ class $$CreaturesTableTableManager
                                 table,
                                 p0,
                               ).notesRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.creatureId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'creature_id',
                           typedResults: items,
                         ),
                       if (creatureActionsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           CreatureRow,
                           $CreaturesTable,
-                          CreatureActionRow
+                          CreatureActionRow,
+                          $CreatureActionsTable
                         >(
                           currentTable: table,
                           referencedTable: $$CreaturesTableReferences
@@ -8871,17 +13057,16 @@ class $$CreaturesTableTableManager
                                 table,
                                 p0,
                               ).creatureActionsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.creatureId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'creature_id',
                           typedResults: items,
                         ),
                       if (creatureTraitsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           CreatureRow,
                           $CreaturesTable,
-                          CreatureTraitRow
+                          CreatureTraitRow,
+                          $CreatureTraitsTable
                         >(
                           currentTable: table,
                           referencedTable: $$CreaturesTableReferences
@@ -8892,17 +13077,16 @@ class $$CreaturesTableTableManager
                                 table,
                                 p0,
                               ).creatureTraitsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.creatureId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'creature_id',
                           typedResults: items,
                         ),
                       if (creatureSpellcastingsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           CreatureRow,
                           $CreaturesTable,
-                          CreatureSpellcastingRow
+                          CreatureSpellcastingRow,
+                          $CreatureSpellcastingsTable
                         >(
                           currentTable: table,
                           referencedTable: $$CreaturesTableReferences
@@ -8913,17 +13097,16 @@ class $$CreaturesTableTableManager
                                 table,
                                 p0,
                               ).creatureSpellcastingsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.creatureId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'creature_id',
                           typedResults: items,
                         ),
                       if (creatureSavesRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           CreatureRow,
                           $CreaturesTable,
-                          CreatureSaveRow
+                          CreatureSaveRow,
+                          $CreatureSavesTable
                         >(
                           currentTable: table,
                           referencedTable: $$CreaturesTableReferences
@@ -8934,17 +13117,16 @@ class $$CreaturesTableTableManager
                                 table,
                                 p0,
                               ).creatureSavesRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.creatureId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'creature_id',
                           typedResults: items,
                         ),
                       if (creatureSkillsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           CreatureRow,
                           $CreaturesTable,
-                          CreatureSkillRow
+                          CreatureSkillRow,
+                          $CreatureSkillsTable
                         >(
                           currentTable: table,
                           referencedTable: $$CreaturesTableReferences
@@ -8955,17 +13137,16 @@ class $$CreaturesTableTableManager
                                 table,
                                 p0,
                               ).creatureSkillsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.creatureId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'creature_id',
                           typedResults: items,
                         ),
                       if (creatureSensesRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           CreatureRow,
                           $CreaturesTable,
-                          CreatureSenseRow
+                          CreatureSenseRow,
+                          $CreatureSensesTable
                         >(
                           currentTable: table,
                           referencedTable: $$CreaturesTableReferences
@@ -8976,17 +13157,16 @@ class $$CreaturesTableTableManager
                                 table,
                                 p0,
                               ).creatureSensesRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.creatureId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'creature_id',
                           typedResults: items,
                         ),
                       if (creatureLanguagesRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           CreatureRow,
                           $CreaturesTable,
-                          CreatureLanguageRow
+                          CreatureLanguageRow,
+                          $CreatureLanguagesTable
                         >(
                           currentTable: table,
                           referencedTable: $$CreaturesTableReferences
@@ -8997,17 +13177,16 @@ class $$CreaturesTableTableManager
                                 table,
                                 p0,
                               ).creatureLanguagesRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.creatureId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'creature_id',
                           typedResults: items,
                         ),
                       if (creatureEnvironmentsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           CreatureRow,
                           $CreaturesTable,
-                          CreatureEnvironmentRow
+                          CreatureEnvironmentRow,
+                          $CreatureEnvironmentsTable
                         >(
                           currentTable: table,
                           referencedTable: $$CreaturesTableReferences
@@ -9018,10 +13197,8 @@ class $$CreaturesTableTableManager
                                 table,
                                 p0,
                               ).creatureEnvironmentsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.creatureId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'creature_id',
                           typedResults: items,
                         ),
                     ];
@@ -9046,6 +13223,7 @@ typedef $$CreaturesTableProcessedTableManager =
       CreatureRow,
       PrefetchHooks Function({
         bool legendaryGroupId,
+        bool encounterCreaturesRefs,
         bool notesRefs,
         bool creatureActionsRefs,
         bool creatureTraitsRefs,
@@ -9056,6 +13234,1592 @@ typedef $$CreaturesTableProcessedTableManager =
         bool creatureLanguagesRefs,
         bool creatureEnvironmentsRefs,
       })
+    >;
+typedef $$EncounterCreaturesTableCreateCompanionBuilder =
+    EncounterCreaturesCompanion Function({
+      Value<int> id,
+      required int encounterId,
+      required int creatureId,
+      required int initiative,
+      required int currentHitpoints,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<bool> isBlinded,
+      Value<bool> isCharmed,
+      Value<bool> isDeafened,
+      Value<int> exhaustionLevel,
+      Value<bool> isFrightened,
+      Value<bool> isGrappled,
+      Value<bool> isIncapacitated,
+      Value<bool> isInvisible,
+      Value<bool> isParalyzed,
+      Value<bool> isPetrified,
+      Value<bool> isPoisoned,
+      Value<bool> isProne,
+      Value<bool> isRestrained,
+      Value<bool> isStunned,
+      Value<bool> isUnconscious,
+      Value<bool> isTurn,
+    });
+typedef $$EncounterCreaturesTableUpdateCompanionBuilder =
+    EncounterCreaturesCompanion Function({
+      Value<int> id,
+      Value<int> encounterId,
+      Value<int> creatureId,
+      Value<int> initiative,
+      Value<int> currentHitpoints,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<bool> isBlinded,
+      Value<bool> isCharmed,
+      Value<bool> isDeafened,
+      Value<int> exhaustionLevel,
+      Value<bool> isFrightened,
+      Value<bool> isGrappled,
+      Value<bool> isIncapacitated,
+      Value<bool> isInvisible,
+      Value<bool> isParalyzed,
+      Value<bool> isPetrified,
+      Value<bool> isPoisoned,
+      Value<bool> isProne,
+      Value<bool> isRestrained,
+      Value<bool> isStunned,
+      Value<bool> isUnconscious,
+      Value<bool> isTurn,
+    });
+
+final class $$EncounterCreaturesTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $EncounterCreaturesTable,
+          EncounterCreaturesRow
+        > {
+  $$EncounterCreaturesTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $EncountersTable _encounterIdTable(_$AppDatabase db) => db.encounters
+      .createAlias('encounter_creatures__encounter_id__encounters__id');
+
+  $$EncountersTableProcessedTableManager get encounterId {
+    final $_column = $_itemColumn<int>('encounter_id')!;
+
+    final manager = $$EncountersTableTableManager(
+      $_db,
+      $_db.encounters,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_encounterIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $CreaturesTable _creatureIdTable(_$AppDatabase db) => db.creatures
+      .createAlias('encounter_creatures__creature_id__creatures__id');
+
+  $$CreaturesTableProcessedTableManager get creatureId {
+    final $_column = $_itemColumn<int>('creature_id')!;
+
+    final manager = $$CreaturesTableTableManager(
+      $_db,
+      $_db.creatures,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_creatureIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$EncounterCreaturesTableFilterComposer
+    extends Composer<_$AppDatabase, $EncounterCreaturesTable> {
+  $$EncounterCreaturesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get initiative => $composableBuilder(
+    column: $table.initiative,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get currentHitpoints => $composableBuilder(
+    column: $table.currentHitpoints,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isBlinded => $composableBuilder(
+    column: $table.isBlinded,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isCharmed => $composableBuilder(
+    column: $table.isCharmed,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isDeafened => $composableBuilder(
+    column: $table.isDeafened,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get exhaustionLevel => $composableBuilder(
+    column: $table.exhaustionLevel,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isFrightened => $composableBuilder(
+    column: $table.isFrightened,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isGrappled => $composableBuilder(
+    column: $table.isGrappled,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isIncapacitated => $composableBuilder(
+    column: $table.isIncapacitated,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isInvisible => $composableBuilder(
+    column: $table.isInvisible,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isParalyzed => $composableBuilder(
+    column: $table.isParalyzed,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isPetrified => $composableBuilder(
+    column: $table.isPetrified,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isPoisoned => $composableBuilder(
+    column: $table.isPoisoned,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isProne => $composableBuilder(
+    column: $table.isProne,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isRestrained => $composableBuilder(
+    column: $table.isRestrained,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isStunned => $composableBuilder(
+    column: $table.isStunned,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isUnconscious => $composableBuilder(
+    column: $table.isUnconscious,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isTurn => $composableBuilder(
+    column: $table.isTurn,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$EncountersTableFilterComposer get encounterId {
+    final $$EncountersTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.encounterId,
+      referencedTable: $db.encounters,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$EncountersTableFilterComposer(
+            $db: $db,
+            $table: $db.encounters,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$CreaturesTableFilterComposer get creatureId {
+    final $$CreaturesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.creatureId,
+      referencedTable: $db.creatures,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CreaturesTableFilterComposer(
+            $db: $db,
+            $table: $db.creatures,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$EncounterCreaturesTableOrderingComposer
+    extends Composer<_$AppDatabase, $EncounterCreaturesTable> {
+  $$EncounterCreaturesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get initiative => $composableBuilder(
+    column: $table.initiative,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get currentHitpoints => $composableBuilder(
+    column: $table.currentHitpoints,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isBlinded => $composableBuilder(
+    column: $table.isBlinded,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isCharmed => $composableBuilder(
+    column: $table.isCharmed,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isDeafened => $composableBuilder(
+    column: $table.isDeafened,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get exhaustionLevel => $composableBuilder(
+    column: $table.exhaustionLevel,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isFrightened => $composableBuilder(
+    column: $table.isFrightened,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isGrappled => $composableBuilder(
+    column: $table.isGrappled,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isIncapacitated => $composableBuilder(
+    column: $table.isIncapacitated,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isInvisible => $composableBuilder(
+    column: $table.isInvisible,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isParalyzed => $composableBuilder(
+    column: $table.isParalyzed,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isPetrified => $composableBuilder(
+    column: $table.isPetrified,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isPoisoned => $composableBuilder(
+    column: $table.isPoisoned,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isProne => $composableBuilder(
+    column: $table.isProne,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isRestrained => $composableBuilder(
+    column: $table.isRestrained,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isStunned => $composableBuilder(
+    column: $table.isStunned,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isUnconscious => $composableBuilder(
+    column: $table.isUnconscious,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isTurn => $composableBuilder(
+    column: $table.isTurn,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$EncountersTableOrderingComposer get encounterId {
+    final $$EncountersTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.encounterId,
+      referencedTable: $db.encounters,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$EncountersTableOrderingComposer(
+            $db: $db,
+            $table: $db.encounters,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$CreaturesTableOrderingComposer get creatureId {
+    final $$CreaturesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.creatureId,
+      referencedTable: $db.creatures,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CreaturesTableOrderingComposer(
+            $db: $db,
+            $table: $db.creatures,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$EncounterCreaturesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $EncounterCreaturesTable> {
+  $$EncounterCreaturesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get initiative => $composableBuilder(
+    column: $table.initiative,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get currentHitpoints => $composableBuilder(
+    column: $table.currentHitpoints,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get isBlinded =>
+      $composableBuilder(column: $table.isBlinded, builder: (column) => column);
+
+  GeneratedColumn<bool> get isCharmed =>
+      $composableBuilder(column: $table.isCharmed, builder: (column) => column);
+
+  GeneratedColumn<bool> get isDeafened => $composableBuilder(
+    column: $table.isDeafened,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get exhaustionLevel => $composableBuilder(
+    column: $table.exhaustionLevel,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isFrightened => $composableBuilder(
+    column: $table.isFrightened,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isGrappled => $composableBuilder(
+    column: $table.isGrappled,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isIncapacitated => $composableBuilder(
+    column: $table.isIncapacitated,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isInvisible => $composableBuilder(
+    column: $table.isInvisible,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isParalyzed => $composableBuilder(
+    column: $table.isParalyzed,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isPetrified => $composableBuilder(
+    column: $table.isPetrified,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isPoisoned => $composableBuilder(
+    column: $table.isPoisoned,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isProne =>
+      $composableBuilder(column: $table.isProne, builder: (column) => column);
+
+  GeneratedColumn<bool> get isRestrained => $composableBuilder(
+    column: $table.isRestrained,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isStunned =>
+      $composableBuilder(column: $table.isStunned, builder: (column) => column);
+
+  GeneratedColumn<bool> get isUnconscious => $composableBuilder(
+    column: $table.isUnconscious,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isTurn =>
+      $composableBuilder(column: $table.isTurn, builder: (column) => column);
+
+  $$EncountersTableAnnotationComposer get encounterId {
+    final $$EncountersTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.encounterId,
+      referencedTable: $db.encounters,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$EncountersTableAnnotationComposer(
+            $db: $db,
+            $table: $db.encounters,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$CreaturesTableAnnotationComposer get creatureId {
+    final $$CreaturesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.creatureId,
+      referencedTable: $db.creatures,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CreaturesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.creatures,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$EncounterCreaturesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $EncounterCreaturesTable,
+          EncounterCreaturesRow,
+          $$EncounterCreaturesTableFilterComposer,
+          $$EncounterCreaturesTableOrderingComposer,
+          $$EncounterCreaturesTableAnnotationComposer,
+          $$EncounterCreaturesTableCreateCompanionBuilder,
+          $$EncounterCreaturesTableUpdateCompanionBuilder,
+          (EncounterCreaturesRow, $$EncounterCreaturesTableReferences),
+          EncounterCreaturesRow,
+          PrefetchHooks Function({bool encounterId, bool creatureId})
+        > {
+  $$EncounterCreaturesTableTableManager(
+    _$AppDatabase db,
+    $EncounterCreaturesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$EncounterCreaturesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$EncounterCreaturesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$EncounterCreaturesTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> encounterId = const Value.absent(),
+                Value<int> creatureId = const Value.absent(),
+                Value<int> initiative = const Value.absent(),
+                Value<int> currentHitpoints = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<bool> isBlinded = const Value.absent(),
+                Value<bool> isCharmed = const Value.absent(),
+                Value<bool> isDeafened = const Value.absent(),
+                Value<int> exhaustionLevel = const Value.absent(),
+                Value<bool> isFrightened = const Value.absent(),
+                Value<bool> isGrappled = const Value.absent(),
+                Value<bool> isIncapacitated = const Value.absent(),
+                Value<bool> isInvisible = const Value.absent(),
+                Value<bool> isParalyzed = const Value.absent(),
+                Value<bool> isPetrified = const Value.absent(),
+                Value<bool> isPoisoned = const Value.absent(),
+                Value<bool> isProne = const Value.absent(),
+                Value<bool> isRestrained = const Value.absent(),
+                Value<bool> isStunned = const Value.absent(),
+                Value<bool> isUnconscious = const Value.absent(),
+                Value<bool> isTurn = const Value.absent(),
+              }) => EncounterCreaturesCompanion(
+                id: id,
+                encounterId: encounterId,
+                creatureId: creatureId,
+                initiative: initiative,
+                currentHitpoints: currentHitpoints,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                isBlinded: isBlinded,
+                isCharmed: isCharmed,
+                isDeafened: isDeafened,
+                exhaustionLevel: exhaustionLevel,
+                isFrightened: isFrightened,
+                isGrappled: isGrappled,
+                isIncapacitated: isIncapacitated,
+                isInvisible: isInvisible,
+                isParalyzed: isParalyzed,
+                isPetrified: isPetrified,
+                isPoisoned: isPoisoned,
+                isProne: isProne,
+                isRestrained: isRestrained,
+                isStunned: isStunned,
+                isUnconscious: isUnconscious,
+                isTurn: isTurn,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int encounterId,
+                required int creatureId,
+                required int initiative,
+                required int currentHitpoints,
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<bool> isBlinded = const Value.absent(),
+                Value<bool> isCharmed = const Value.absent(),
+                Value<bool> isDeafened = const Value.absent(),
+                Value<int> exhaustionLevel = const Value.absent(),
+                Value<bool> isFrightened = const Value.absent(),
+                Value<bool> isGrappled = const Value.absent(),
+                Value<bool> isIncapacitated = const Value.absent(),
+                Value<bool> isInvisible = const Value.absent(),
+                Value<bool> isParalyzed = const Value.absent(),
+                Value<bool> isPetrified = const Value.absent(),
+                Value<bool> isPoisoned = const Value.absent(),
+                Value<bool> isProne = const Value.absent(),
+                Value<bool> isRestrained = const Value.absent(),
+                Value<bool> isStunned = const Value.absent(),
+                Value<bool> isUnconscious = const Value.absent(),
+                Value<bool> isTurn = const Value.absent(),
+              }) => EncounterCreaturesCompanion.insert(
+                id: id,
+                encounterId: encounterId,
+                creatureId: creatureId,
+                initiative: initiative,
+                currentHitpoints: currentHitpoints,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                isBlinded: isBlinded,
+                isCharmed: isCharmed,
+                isDeafened: isDeafened,
+                exhaustionLevel: exhaustionLevel,
+                isFrightened: isFrightened,
+                isGrappled: isGrappled,
+                isIncapacitated: isIncapacitated,
+                isInvisible: isInvisible,
+                isParalyzed: isParalyzed,
+                isPetrified: isPetrified,
+                isPoisoned: isPoisoned,
+                isProne: isProne,
+                isRestrained: isRestrained,
+                isStunned: isStunned,
+                isUnconscious: isUnconscious,
+                isTurn: isTurn,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$EncounterCreaturesTable, EncounterCreaturesRow>(
+                    table,
+                  ),
+                  $$EncounterCreaturesTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({encounterId = false, creatureId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (encounterId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.encounterId,
+                                referencedTable:
+                                    $$EncounterCreaturesTableReferences
+                                        ._encounterIdTable(db),
+                                referencedColumn:
+                                    $$EncounterCreaturesTableReferences
+                                        ._encounterIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+                    if (creatureId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.creatureId,
+                                referencedTable:
+                                    $$EncounterCreaturesTableReferences
+                                        ._creatureIdTable(db),
+                                referencedColumn:
+                                    $$EncounterCreaturesTableReferences
+                                        ._creatureIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$EncounterCreaturesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $EncounterCreaturesTable,
+      EncounterCreaturesRow,
+      $$EncounterCreaturesTableFilterComposer,
+      $$EncounterCreaturesTableOrderingComposer,
+      $$EncounterCreaturesTableAnnotationComposer,
+      $$EncounterCreaturesTableCreateCompanionBuilder,
+      $$EncounterCreaturesTableUpdateCompanionBuilder,
+      (EncounterCreaturesRow, $$EncounterCreaturesTableReferences),
+      EncounterCreaturesRow,
+      PrefetchHooks Function({bool encounterId, bool creatureId})
+    >;
+typedef $$EncounterPlayersTableCreateCompanionBuilder =
+    EncounterPlayersCompanion Function({
+      Value<int> id,
+      required int encounterId,
+      required int playerId,
+      required int initiative,
+      required int quantity,
+      Value<int> currentHitpoints,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<bool> isBlinded,
+      Value<bool> isCharmed,
+      Value<bool> isDeafened,
+      Value<int> exhaustionLevel,
+      Value<bool> isFrightened,
+      Value<bool> isGrappled,
+      Value<bool> isIncapacitated,
+      Value<bool> isInvisible,
+      Value<bool> isParalyzed,
+      Value<bool> isPetrified,
+      Value<bool> isPoisoned,
+      Value<bool> isProne,
+      Value<bool> isRestrained,
+      Value<bool> isStunned,
+      Value<bool> isUnconscious,
+      Value<bool> isTurn,
+    });
+typedef $$EncounterPlayersTableUpdateCompanionBuilder =
+    EncounterPlayersCompanion Function({
+      Value<int> id,
+      Value<int> encounterId,
+      Value<int> playerId,
+      Value<int> initiative,
+      Value<int> quantity,
+      Value<int> currentHitpoints,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<bool> isBlinded,
+      Value<bool> isCharmed,
+      Value<bool> isDeafened,
+      Value<int> exhaustionLevel,
+      Value<bool> isFrightened,
+      Value<bool> isGrappled,
+      Value<bool> isIncapacitated,
+      Value<bool> isInvisible,
+      Value<bool> isParalyzed,
+      Value<bool> isPetrified,
+      Value<bool> isPoisoned,
+      Value<bool> isProne,
+      Value<bool> isRestrained,
+      Value<bool> isStunned,
+      Value<bool> isUnconscious,
+      Value<bool> isTurn,
+    });
+
+final class $$EncounterPlayersTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $EncounterPlayersTable,
+          EncounterPlayersRow
+        > {
+  $$EncounterPlayersTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $EncountersTable _encounterIdTable(_$AppDatabase db) => db.encounters
+      .createAlias('encounter_players__encounter_id__encounters__id');
+
+  $$EncountersTableProcessedTableManager get encounterId {
+    final $_column = $_itemColumn<int>('encounter_id')!;
+
+    final manager = $$EncountersTableTableManager(
+      $_db,
+      $_db.encounters,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_encounterIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $PlayersTable _playerIdTable(_$AppDatabase db) =>
+      db.players.createAlias('encounter_players__player_id__players__p_id');
+
+  $$PlayersTableProcessedTableManager get playerId {
+    final $_column = $_itemColumn<int>('player_id')!;
+
+    final manager = $$PlayersTableTableManager(
+      $_db,
+      $_db.players,
+    ).filter((f) => f.pId.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_playerIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$EncounterPlayersTableFilterComposer
+    extends Composer<_$AppDatabase, $EncounterPlayersTable> {
+  $$EncounterPlayersTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get initiative => $composableBuilder(
+    column: $table.initiative,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get quantity => $composableBuilder(
+    column: $table.quantity,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get currentHitpoints => $composableBuilder(
+    column: $table.currentHitpoints,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isBlinded => $composableBuilder(
+    column: $table.isBlinded,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isCharmed => $composableBuilder(
+    column: $table.isCharmed,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isDeafened => $composableBuilder(
+    column: $table.isDeafened,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get exhaustionLevel => $composableBuilder(
+    column: $table.exhaustionLevel,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isFrightened => $composableBuilder(
+    column: $table.isFrightened,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isGrappled => $composableBuilder(
+    column: $table.isGrappled,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isIncapacitated => $composableBuilder(
+    column: $table.isIncapacitated,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isInvisible => $composableBuilder(
+    column: $table.isInvisible,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isParalyzed => $composableBuilder(
+    column: $table.isParalyzed,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isPetrified => $composableBuilder(
+    column: $table.isPetrified,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isPoisoned => $composableBuilder(
+    column: $table.isPoisoned,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isProne => $composableBuilder(
+    column: $table.isProne,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isRestrained => $composableBuilder(
+    column: $table.isRestrained,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isStunned => $composableBuilder(
+    column: $table.isStunned,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isUnconscious => $composableBuilder(
+    column: $table.isUnconscious,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isTurn => $composableBuilder(
+    column: $table.isTurn,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$EncountersTableFilterComposer get encounterId {
+    final $$EncountersTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.encounterId,
+      referencedTable: $db.encounters,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$EncountersTableFilterComposer(
+            $db: $db,
+            $table: $db.encounters,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$PlayersTableFilterComposer get playerId {
+    final $$PlayersTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.playerId,
+      referencedTable: $db.players,
+      getReferencedColumn: (t) => t.pId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PlayersTableFilterComposer(
+            $db: $db,
+            $table: $db.players,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$EncounterPlayersTableOrderingComposer
+    extends Composer<_$AppDatabase, $EncounterPlayersTable> {
+  $$EncounterPlayersTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get initiative => $composableBuilder(
+    column: $table.initiative,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get quantity => $composableBuilder(
+    column: $table.quantity,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get currentHitpoints => $composableBuilder(
+    column: $table.currentHitpoints,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isBlinded => $composableBuilder(
+    column: $table.isBlinded,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isCharmed => $composableBuilder(
+    column: $table.isCharmed,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isDeafened => $composableBuilder(
+    column: $table.isDeafened,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get exhaustionLevel => $composableBuilder(
+    column: $table.exhaustionLevel,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isFrightened => $composableBuilder(
+    column: $table.isFrightened,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isGrappled => $composableBuilder(
+    column: $table.isGrappled,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isIncapacitated => $composableBuilder(
+    column: $table.isIncapacitated,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isInvisible => $composableBuilder(
+    column: $table.isInvisible,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isParalyzed => $composableBuilder(
+    column: $table.isParalyzed,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isPetrified => $composableBuilder(
+    column: $table.isPetrified,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isPoisoned => $composableBuilder(
+    column: $table.isPoisoned,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isProne => $composableBuilder(
+    column: $table.isProne,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isRestrained => $composableBuilder(
+    column: $table.isRestrained,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isStunned => $composableBuilder(
+    column: $table.isStunned,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isUnconscious => $composableBuilder(
+    column: $table.isUnconscious,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isTurn => $composableBuilder(
+    column: $table.isTurn,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$EncountersTableOrderingComposer get encounterId {
+    final $$EncountersTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.encounterId,
+      referencedTable: $db.encounters,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$EncountersTableOrderingComposer(
+            $db: $db,
+            $table: $db.encounters,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$PlayersTableOrderingComposer get playerId {
+    final $$PlayersTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.playerId,
+      referencedTable: $db.players,
+      getReferencedColumn: (t) => t.pId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PlayersTableOrderingComposer(
+            $db: $db,
+            $table: $db.players,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$EncounterPlayersTableAnnotationComposer
+    extends Composer<_$AppDatabase, $EncounterPlayersTable> {
+  $$EncounterPlayersTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get initiative => $composableBuilder(
+    column: $table.initiative,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get quantity =>
+      $composableBuilder(column: $table.quantity, builder: (column) => column);
+
+  GeneratedColumn<int> get currentHitpoints => $composableBuilder(
+    column: $table.currentHitpoints,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get isBlinded =>
+      $composableBuilder(column: $table.isBlinded, builder: (column) => column);
+
+  GeneratedColumn<bool> get isCharmed =>
+      $composableBuilder(column: $table.isCharmed, builder: (column) => column);
+
+  GeneratedColumn<bool> get isDeafened => $composableBuilder(
+    column: $table.isDeafened,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get exhaustionLevel => $composableBuilder(
+    column: $table.exhaustionLevel,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isFrightened => $composableBuilder(
+    column: $table.isFrightened,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isGrappled => $composableBuilder(
+    column: $table.isGrappled,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isIncapacitated => $composableBuilder(
+    column: $table.isIncapacitated,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isInvisible => $composableBuilder(
+    column: $table.isInvisible,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isParalyzed => $composableBuilder(
+    column: $table.isParalyzed,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isPetrified => $composableBuilder(
+    column: $table.isPetrified,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isPoisoned => $composableBuilder(
+    column: $table.isPoisoned,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isProne =>
+      $composableBuilder(column: $table.isProne, builder: (column) => column);
+
+  GeneratedColumn<bool> get isRestrained => $composableBuilder(
+    column: $table.isRestrained,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isStunned =>
+      $composableBuilder(column: $table.isStunned, builder: (column) => column);
+
+  GeneratedColumn<bool> get isUnconscious => $composableBuilder(
+    column: $table.isUnconscious,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isTurn =>
+      $composableBuilder(column: $table.isTurn, builder: (column) => column);
+
+  $$EncountersTableAnnotationComposer get encounterId {
+    final $$EncountersTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.encounterId,
+      referencedTable: $db.encounters,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$EncountersTableAnnotationComposer(
+            $db: $db,
+            $table: $db.encounters,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$PlayersTableAnnotationComposer get playerId {
+    final $$PlayersTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.playerId,
+      referencedTable: $db.players,
+      getReferencedColumn: (t) => t.pId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PlayersTableAnnotationComposer(
+            $db: $db,
+            $table: $db.players,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$EncounterPlayersTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $EncounterPlayersTable,
+          EncounterPlayersRow,
+          $$EncounterPlayersTableFilterComposer,
+          $$EncounterPlayersTableOrderingComposer,
+          $$EncounterPlayersTableAnnotationComposer,
+          $$EncounterPlayersTableCreateCompanionBuilder,
+          $$EncounterPlayersTableUpdateCompanionBuilder,
+          (EncounterPlayersRow, $$EncounterPlayersTableReferences),
+          EncounterPlayersRow,
+          PrefetchHooks Function({bool encounterId, bool playerId})
+        > {
+  $$EncounterPlayersTableTableManager(
+    _$AppDatabase db,
+    $EncounterPlayersTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$EncounterPlayersTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$EncounterPlayersTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$EncounterPlayersTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> encounterId = const Value.absent(),
+                Value<int> playerId = const Value.absent(),
+                Value<int> initiative = const Value.absent(),
+                Value<int> quantity = const Value.absent(),
+                Value<int> currentHitpoints = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<bool> isBlinded = const Value.absent(),
+                Value<bool> isCharmed = const Value.absent(),
+                Value<bool> isDeafened = const Value.absent(),
+                Value<int> exhaustionLevel = const Value.absent(),
+                Value<bool> isFrightened = const Value.absent(),
+                Value<bool> isGrappled = const Value.absent(),
+                Value<bool> isIncapacitated = const Value.absent(),
+                Value<bool> isInvisible = const Value.absent(),
+                Value<bool> isParalyzed = const Value.absent(),
+                Value<bool> isPetrified = const Value.absent(),
+                Value<bool> isPoisoned = const Value.absent(),
+                Value<bool> isProne = const Value.absent(),
+                Value<bool> isRestrained = const Value.absent(),
+                Value<bool> isStunned = const Value.absent(),
+                Value<bool> isUnconscious = const Value.absent(),
+                Value<bool> isTurn = const Value.absent(),
+              }) => EncounterPlayersCompanion(
+                id: id,
+                encounterId: encounterId,
+                playerId: playerId,
+                initiative: initiative,
+                quantity: quantity,
+                currentHitpoints: currentHitpoints,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                isBlinded: isBlinded,
+                isCharmed: isCharmed,
+                isDeafened: isDeafened,
+                exhaustionLevel: exhaustionLevel,
+                isFrightened: isFrightened,
+                isGrappled: isGrappled,
+                isIncapacitated: isIncapacitated,
+                isInvisible: isInvisible,
+                isParalyzed: isParalyzed,
+                isPetrified: isPetrified,
+                isPoisoned: isPoisoned,
+                isProne: isProne,
+                isRestrained: isRestrained,
+                isStunned: isStunned,
+                isUnconscious: isUnconscious,
+                isTurn: isTurn,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int encounterId,
+                required int playerId,
+                required int initiative,
+                required int quantity,
+                Value<int> currentHitpoints = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<bool> isBlinded = const Value.absent(),
+                Value<bool> isCharmed = const Value.absent(),
+                Value<bool> isDeafened = const Value.absent(),
+                Value<int> exhaustionLevel = const Value.absent(),
+                Value<bool> isFrightened = const Value.absent(),
+                Value<bool> isGrappled = const Value.absent(),
+                Value<bool> isIncapacitated = const Value.absent(),
+                Value<bool> isInvisible = const Value.absent(),
+                Value<bool> isParalyzed = const Value.absent(),
+                Value<bool> isPetrified = const Value.absent(),
+                Value<bool> isPoisoned = const Value.absent(),
+                Value<bool> isProne = const Value.absent(),
+                Value<bool> isRestrained = const Value.absent(),
+                Value<bool> isStunned = const Value.absent(),
+                Value<bool> isUnconscious = const Value.absent(),
+                Value<bool> isTurn = const Value.absent(),
+              }) => EncounterPlayersCompanion.insert(
+                id: id,
+                encounterId: encounterId,
+                playerId: playerId,
+                initiative: initiative,
+                quantity: quantity,
+                currentHitpoints: currentHitpoints,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                isBlinded: isBlinded,
+                isCharmed: isCharmed,
+                isDeafened: isDeafened,
+                exhaustionLevel: exhaustionLevel,
+                isFrightened: isFrightened,
+                isGrappled: isGrappled,
+                isIncapacitated: isIncapacitated,
+                isInvisible: isInvisible,
+                isParalyzed: isParalyzed,
+                isPetrified: isPetrified,
+                isPoisoned: isPoisoned,
+                isProne: isProne,
+                isRestrained: isRestrained,
+                isStunned: isStunned,
+                isUnconscious: isUnconscious,
+                isTurn: isTurn,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$EncounterPlayersTable, EncounterPlayersRow>(
+                    table,
+                  ),
+                  $$EncounterPlayersTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({encounterId = false, playerId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (encounterId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.encounterId,
+                                referencedTable:
+                                    $$EncounterPlayersTableReferences
+                                        ._encounterIdTable(db),
+                                referencedColumn:
+                                    $$EncounterPlayersTableReferences
+                                        ._encounterIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+                    if (playerId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.playerId,
+                                referencedTable:
+                                    $$EncounterPlayersTableReferences
+                                        ._playerIdTable(db),
+                                referencedColumn:
+                                    $$EncounterPlayersTableReferences
+                                        ._playerIdTable(db)
+                                        .pId,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$EncounterPlayersTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $EncounterPlayersTable,
+      EncounterPlayersRow,
+      $$EncounterPlayersTableFilterComposer,
+      $$EncounterPlayersTableOrderingComposer,
+      $$EncounterPlayersTableAnnotationComposer,
+      $$EncounterPlayersTableCreateCompanionBuilder,
+      $$EncounterPlayersTableUpdateCompanionBuilder,
+      (EncounterPlayersRow, $$EncounterPlayersTableReferences),
+      EncounterPlayersRow,
+      PrefetchHooks Function({bool encounterId, bool playerId})
     >;
 typedef $$NotesTableCreateCompanionBuilder =
     NotesCompanion Function({
@@ -9302,8 +15066,10 @@ class $$NotesTableTableManager
               ),
           withReferenceMapper: (p0) => p0
               .map(
-                (e) =>
-                    (e.readTable(table), $$NotesTableReferences(db, table, e)),
+                (e) => (
+                  e.readTable<$NotesTable, NoteRow>(table),
+                  $$NotesTableReferences(db, table, e),
+                ),
               )
               .toList(),
           prefetchHooksCallback: ({creatureId = false}) {
@@ -9644,7 +15410,7 @@ class $$CreatureActionsTableTableManager
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable(table),
+                  e.readTable<$CreatureActionsTable, CreatureActionRow>(table),
                   $$CreatureActionsTableReferences(db, table, e),
                 ),
               )
@@ -9966,7 +15732,7 @@ class $$CreatureTraitsTableTableManager
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable(table),
+                  e.readTable<$CreatureTraitsTable, CreatureTraitRow>(table),
                   $$CreatureTraitsTableReferences(db, table, e),
                 ),
               )
@@ -10429,7 +16195,10 @@ class $$CreatureSpellcastingsTableTableManager
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable(table),
+                  e.readTable<
+                    $CreatureSpellcastingsTable,
+                    CreatureSpellcastingRow
+                  >(table),
                   $$CreatureSpellcastingsTableReferences(db, table, e),
                 ),
               )
@@ -10478,10 +16247,11 @@ class $$CreatureSpellcastingsTableTableManager
                   getPrefetchedDataCallback: (items) async {
                     return [
                       if (creatureSpellsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           CreatureSpellcastingRow,
                           $CreatureSpellcastingsTable,
-                          CreatureSpellRow
+                          CreatureSpellRow,
+                          $CreatureSpellsTable
                         >(
                           currentTable: table,
                           referencedTable:
@@ -10493,10 +16263,8 @@ class $$CreatureSpellcastingsTableTableManager
                                 table,
                                 p0,
                               ).creatureSpellsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.spellcastingId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'spellcasting_id',
                           typedResults: items,
                         ),
                     ];
@@ -10820,7 +16588,7 @@ class $$CreatureSpellsTableTableManager
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable(table),
+                  e.readTable<$CreatureSpellsTable, CreatureSpellRow>(table),
                   $$CreatureSpellsTableReferences(db, table, e),
                 ),
               )
@@ -11105,7 +16873,7 @@ class $$CreatureSavesTableTableManager
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable(table),
+                  e.readTable<$CreatureSavesTable, CreatureSaveRow>(table),
                   $$CreatureSavesTableReferences(db, table, e),
                 ),
               )
@@ -11391,7 +17159,7 @@ class $$CreatureSkillsTableTableManager
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable(table),
+                  e.readTable<$CreatureSkillsTable, CreatureSkillRow>(table),
                   $$CreatureSkillsTableReferences(db, table, e),
                 ),
               )
@@ -11659,7 +17427,7 @@ class $$CreatureSensesTableTableManager
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable(table),
+                  e.readTable<$CreatureSensesTable, CreatureSenseRow>(table),
                   $$CreatureSensesTableReferences(db, table, e),
                 ),
               )
@@ -11934,7 +17702,9 @@ class $$CreatureLanguagesTableTableManager
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable(table),
+                  e.readTable<$CreatureLanguagesTable, CreatureLanguageRow>(
+                    table,
+                  ),
                   $$CreatureLanguagesTableReferences(db, table, e),
                 ),
               )
@@ -12215,7 +17985,10 @@ class $$CreatureEnvironmentsTableTableManager
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable(table),
+                  e.readTable<
+                    $CreatureEnvironmentsTable,
+                    CreatureEnvironmentRow
+                  >(table),
                   $$CreatureEnvironmentsTableReferences(db, table, e),
                 ),
               )
@@ -12587,7 +18360,10 @@ class $$LegendaryGroupEntriesTableTableManager
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable(table),
+                  e.readTable<
+                    $LegendaryGroupEntriesTable,
+                    LegendaryGroupEntryRow
+                  >(table),
                   $$LegendaryGroupEntriesTableReferences(db, table, e),
                 ),
               )
@@ -12659,10 +18435,16 @@ class $AppDatabaseManager {
   $AppDatabaseManager(this._db);
   $$PlayersTableTableManager get players =>
       $$PlayersTableTableManager(_db, _db.players);
+  $$EncountersTableTableManager get encounters =>
+      $$EncountersTableTableManager(_db, _db.encounters);
   $$LegendaryGroupsTableTableManager get legendaryGroups =>
       $$LegendaryGroupsTableTableManager(_db, _db.legendaryGroups);
   $$CreaturesTableTableManager get creatures =>
       $$CreaturesTableTableManager(_db, _db.creatures);
+  $$EncounterCreaturesTableTableManager get encounterCreatures =>
+      $$EncounterCreaturesTableTableManager(_db, _db.encounterCreatures);
+  $$EncounterPlayersTableTableManager get encounterPlayers =>
+      $$EncounterPlayersTableTableManager(_db, _db.encounterPlayers);
   $$NotesTableTableManager get notes =>
       $$NotesTableTableManager(_db, _db.notes);
   $$CreatureActionsTableTableManager get creatureActions =>

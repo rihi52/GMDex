@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.0+1
+version: 1.0.0+5
 
 environment:
   sdk: ^3.12.0
@@ -37,13 +37,17 @@ dependencies:
   sqlite3_flutter_libs: ^0.6.0+eol
   path_provider: ^2.1.5
   path: ^1.9.0
+  desktop_multi_window: ^0.3.0
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   google_fonts: ^8.1.0
+  file_picker: ^13.3.0
+  shared_preferences: ^2.5.6
 
 dev_dependencies:
+  flutter_launcher_icons: ^0.14.3
   drift_dev: ^2.34.0  
   build_runner: ^2.15.0
   flutter_test:
@@ -59,6 +63,26 @@ dev_dependencies:
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
+flutter_launcher_icons:
+  image_path: "assets/icon/app_icon.png"
+  android: true
+  # adaptive_icon_background: "#000000"   # a color, or an image path
+  # adaptive_icon_foreground: "assets/icon/app_icon_foreground.png"
+  # ios: true
+  # remove_alpha_ios: true
+  # web:
+  #   generate: true
+  #   image_path: "assets/icon/icon.png"
+  #   background_color: "#000000"
+  #   theme_color: "#000000"
+  windows:
+    generate: true
+    image_path: "assets/icon/app_icon.png"
+    icon_size: 256   # allowed range is 48 to 256
+  # macos:
+  #   generate: true
+  #   image_path: "assets/icon/icon.png"
+
 # The following section is specific to Flutter packages.
 flutter:
 
@@ -69,11 +93,10 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/mm.json
-    - assets/legendarygroups.json
-    - assets/bestiary-mm.json
-    - assets/bestiary-srd.json
     - assets/bestiary-srd-filtered.json
+    - assets/google_fonts/
+    - assets/images/GMDex.png
+    - assets/images/GMDex_wide.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

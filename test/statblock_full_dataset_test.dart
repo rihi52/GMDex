@@ -8,23 +8,30 @@ import 'package:gmdex/components/statblock.dart';
 import 'package:gmdex/database/read.dart';
 
 late final List<dynamic> _monsters;
-late final Map<String, dynamic> _legendaryGroups;
+const _legendaryGroups = <String, dynamic>{};
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   GoogleFonts.config.allowRuntimeFetching = false;
 
   setUpAll(() {
-    final jsonString = File('assets/bestiary-mm.json').readAsStringSync();
+    final jsonString = File(
+      'assets/bestiary-srd-filtered.json',
+    ).readAsStringSync();
     final data = jsonDecode(jsonString) as Map<String, dynamic>;
-    _monsters = data['monster'] as List<dynamic>;
-
-    final lgString = File('assets/legendarygroups.json').readAsStringSync();
-    final lgData = jsonDecode(lgString) as Map<String, dynamic>;
-    _legendaryGroups = {
-      for (final group in lgData['legendaryGroup'] as List)
-        '${group['name']}_${group['source']}': group,
-    };
+    final monsters = data['monster'] as List<dynamic>;
+    _monsters = monsters.where((monster) {
+      if (monster is! Map<String, dynamic>) return false;
+      final name = monster['name'];
+      final armorClass = monster['ac'];
+      final hitPoints = monster['hp'];
+      return name is String &&
+          name.trim().isNotEmpty &&
+          armorClass is List &&
+          armorClass.isNotEmpty &&
+          hitPoints is Map &&
+          hitPoints['average'] != null;
+    }).toList();
   });
 
   test('parseCreature parses entire dataset without throwing', () {

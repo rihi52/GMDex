@@ -1,8 +1,14 @@
+// Read-only creature stat-block presentation and its reusable text sections.
+//
+// The widget adapts ability-score layout to its available width and renders
+// optional actions, traits, spells, and legendary effects when present.
 import 'package:flutter/material.dart';
 import 'package:gmdex/models/creature.dart';
 import 'package:gmdex/components/creature_calculations.dart';
+import 'package:gmdex/components/responsive_layout.dart';
 import 'package:gmdex/theme/apptheme.dart';
 
+/// Displays the full stat block for [creature], if it has loaded.
 class CreatureStatBlock extends StatelessWidget {
   final Creature? creature;
   final VoidCallback? onEditPressed;
@@ -40,7 +46,10 @@ class CreatureStatBlock extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final compact = constraints.maxWidth < 500;
+        final compact = ResponsiveLayout.isNarrow(
+          constraints.maxWidth,
+          breakpoint: ResponsiveBreakpoints.compactContent,
+        );
 
         if (!compact) {
           return Row(
@@ -82,377 +91,405 @@ class CreatureStatBlock extends StatelessWidget {
     final double topButtonWidth = 110;
     if (creature == null) return const Text("Loading...");
 
-    return SingleChildScrollView(
-      child: Container(
-        decoration: BoxDecoration(
-          color: AppColors.cardSelected,
-          borderRadius: BorderRadius.circular(AppSpacing.cornerRadiusMedium),
-        ),
-        padding: EdgeInsets.all(AppSpacing.spacingSmall),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                SizedBox(
-                  width: topButtonWidth,
-                  child: ElevatedButton(
-                    onPressed: onEditPressed,
-                    child: Text(
-                      'Edit',
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ),
-                ),
-                SizedBox(
-                  width: topButtonWidth,
-                  child: ElevatedButton(
-                    onPressed: onCopyPressed,
-                    child: Text(
-                      'Copy',
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ),
-                ),
-                SizedBox(
-                  width: topButtonWidth,
-                  child: ElevatedButton(
-                    onPressed: onDeletePressed,
-                    child: Text(
-                      'Delete',
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ),
-                ),
-                if (onNotesPressed != null)
+    return SelectionArea(
+      child: SingleChildScrollView(
+        child: Container(
+          decoration: BoxDecoration(
+            color: AppColors.cardSelected,
+            borderRadius: BorderRadius.circular(AppSpacing.cornerRadiusMedium),
+          ),
+          padding: EdgeInsets.all(AppSpacing.spacingSmall),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Wrap(
+                spacing: AppSpacing.spacingMedium,
+                runSpacing: AppSpacing.spacingMedium,
+                children: [
                   SizedBox(
                     width: topButtonWidth,
                     child: ElevatedButton(
-                      onPressed: onNotesPressed,
+                      onPressed: onEditPressed,
                       child: Text(
-                        'Notes',
-                        style: Theme.of(context).textTheme.bodySmall,
+                        'Edit',
+                        style: Theme.of(context).textTheme.bodyLarge,
                       ),
                     ),
                   ),
-              ],
-            ),
-            Container(
-              padding: const EdgeInsets.only(
-                bottom: AppSpacing.spacingSmall,
-                top: AppSpacing.spacingSmall,
-              ),
-              decoration: BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(color: AppColors.primary, width: 1),
-                ),
-              ),
-              child: creature == null
-                  ? const Text("Loading...")
-                  : Text(
-                      creature!.name,
-                      style: Theme.of(context).textTheme.titleLarge,
+                  SizedBox(
+                    width: topButtonWidth,
+                    child: ElevatedButton(
+                      onPressed: onCopyPressed,
+                      child: Text(
+                        'Copy',
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
                     ),
-            ),
-            StatblockSection(
-              child: Row(
-                children: [
-                  StatblockSmallText(data: '${creature!.size} '),
-                  StatblockSmallText(data: '${creature!.type}, '),
-                  StatblockSmallText(data: creature?.alignment ?? ''),
+                  ),
+                  SizedBox(
+                    width: topButtonWidth,
+                    child: ElevatedButton(
+                      onPressed: onDeletePressed,
+                      child: Text(
+                        'Delete',
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
+                    ),
+                  ),
+                  if (onNotesPressed != null)
+                    SizedBox(
+                      width: topButtonWidth,
+                      child: ElevatedButton(
+                        onPressed: onNotesPressed,
+                        child: Text(
+                          'Notes',
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        ),
+                      ),
+                    ),
                 ],
               ),
-            ),
-            StatblockSection(
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        'Armor Class:  ',
-                        style: Theme.of(context).textTheme.titleSmall,
-                      ),
-                      StatblockSmallText(
-                        data:
-                            '${creature!.armorClass.ac.toString()}, ${creature!.armorClass.type}',
-                      ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Text(
-                        'Hit Points:  ',
-                        style: Theme.of(context).textTheme.titleSmall,
-                      ),
-                      StatblockSmallText(data: '${creature!.hitPoints}'),
-                      StatblockSmallText(
-                        data: '(${creature!.hitPointFormula})',
-                      ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Text(
-                        'Speed: ',
-                        style: Theme.of(context).textTheme.titleSmall,
-                      ),
-                      Expanded(
-                        child: StatblockSmallText(
-                          data: [
-                            if ((creature!.speed.walk ?? 0) > 0)
-                              '${creature!.speed.walk} ft.',
-                            if ((creature!.speed.fly ?? 0) > 0)
-                              'fly ${creature!.speed.fly} ft.',
-                            if ((creature!.speed.climb ?? 0) > 0)
-                              'climb ${creature!.speed.climb} ft.',
-                            if ((creature!.speed.swim ?? 0) > 0)
-                              'swim ${creature!.speed.swim} ft.',
-                            if ((creature!.speed.burrow ?? 0) > 0)
-                              'burrow ${creature!.speed.burrow} ft.',
-                          ].join(', '),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            StatblockSection(child: _abilityScores(context)),
-            StatblockSection(
-              child: Column(
-                children: [
-                  if (creature!.savingThrows.strength != null ||
-                      creature!.savingThrows.dexterity != null ||
-                      creature!.savingThrows.constitution != null ||
-                      creature!.savingThrows.intelligence != null ||
-                      creature!.savingThrows.wisdom != null ||
-                      creature!.savingThrows.charisma != null)
-                    Row(
-                      children: [
-                        Text(
-                          'Saving Throws: ',
-                          style: Theme.of(context).textTheme.titleSmall,
-                        ),
-                        StatblockSmallText(
-                          data: [
-                            if (creature!.savingThrows.strength != null)
-                              'Str ${creature!.savingThrows.strength! >= 0 ? '+' : ''}${creature!.savingThrows.strength}',
-                            if (creature!.savingThrows.dexterity != null)
-                              'Dex ${creature!.savingThrows.dexterity! >= 0 ? '+' : ''}${creature!.savingThrows.dexterity}',
-                            if (creature!.savingThrows.constitution != null)
-                              'Con ${creature!.savingThrows.constitution! >= 0 ? '+' : ''}${creature!.savingThrows.constitution}',
-                            if (creature!.savingThrows.intelligence != null)
-                              'Int ${creature!.savingThrows.intelligence! >= 0 ? '+' : ''}${creature!.savingThrows.intelligence}',
-                            if (creature!.savingThrows.wisdom != null)
-                              'Wis ${creature!.savingThrows.wisdom! >= 0 ? '+' : ''}${creature!.savingThrows.wisdom}',
-                            if (creature!.savingThrows.charisma != null)
-                              'Cha ${creature!.savingThrows.charisma! >= 0 ? '+' : ''}${creature!.savingThrows.charisma}',
-                          ].join(', '),
-                        ),
-                      ],
-                    ),
-                  Row(
-                    children: [
-                      Text(
-                        'Skills: ',
-                        style: Theme.of(context).textTheme.titleSmall,
-                      ),
-                      StatblockSmallText(
-                        data: [
-                          if (creature!.skills?.acrobatics != null)
-                            'Acrobatics ${creature!.skills?.acrobatics!}',
-                          if (creature!.skills?.animalHandling != null)
-                            'Animal Handling ${creature!.skills?.animalHandling!}',
-                          if (creature!.skills?.arcana != null)
-                            'Arcana ${creature!.skills?.arcana!}',
-                          if (creature!.skills?.athletics != null)
-                            'Athletics ${creature!.skills?.athletics!}',
-                          if (creature!.skills?.deception != null)
-                            'Deception ${creature!.skills?.deception!}',
-                          if (creature!.skills?.history != null)
-                            'History ${creature!.skills?.history!}',
-                          if (creature!.skills?.insight != null)
-                            'Insight ${creature!.skills?.insight!}',
-                          if (creature!.skills?.intimidation != null)
-                            'Intimidation ${creature!.skills?.intimidation!}',
-                          if (creature!.skills?.investigation != null)
-                            'Investigation ${creature!.skills?.investigation!}',
-                          if (creature!.skills?.medicine != null)
-                            'Medicine ${creature!.skills?.medicine!}',
-                          if (creature!.skills?.nature != null)
-                            'Nature ${creature!.skills?.nature!}',
-                          if (creature!.skills?.perception != null)
-                            'Perception ${creature!.skills?.perception!}',
-                          if (creature!.skills?.performance != null)
-                            'Performance ${creature!.skills?.performance!}',
-                          if (creature!.skills?.religion != null)
-                            'Religion ${creature!.skills?.religion!}',
-                          if (creature!.skills?.sleightOfHand != null)
-                            'Sleight of Hand ${creature!.skills?.sleightOfHand!}',
-                          if (creature!.skills?.stealth != null)
-                            'Stealth ${creature!.skills?.stealth!}',
-                          if (creature!.skills?.survival != null)
-                            'Survival ${creature!.skills?.survival!}',
-                        ].join(', '),
-                      ),
-                    ],
-                  ),
-                  if (creature?.senses != null && creature?.senses != '')
-                    Row(
-                      children: [
-                        Text(
-                          'Senses: ',
-                          style: Theme.of(context).textTheme.titleSmall,
-                        ),
-                        if (creature?.senses != null && creature?.senses != '')
-                          StatblockSmallText(data: creature!.senses!),
-                      ],
-                    ),
-                  Row(
-                    children: [
-                      Text(
-                        'Languages: ',
-                        style: Theme.of(context).textTheme.titleSmall,
-                      ),
-                      if (creature!.languages != null)
-                        StatblockSmallText(data: creature!.languages!),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Text(
-                        'Challenge: ',
-                        style: Theme.of(context).textTheme.titleSmall,
-                      ),
-                      StatblockSmallText(data: '${creature!.challengeRating}'),
-                      StatblockSmallText(
-                        data:
-                            '   Prof Bonus: +${creature?.proficiencyBonus?.toInt() ?? proficiencyBonusCalc(tryParseFraction(creature!.challengeRating.cr) ?? 2)}',
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            if (creature!.traits != null)
-              ...creature!.traits!.map(
-                (trait) => Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      trait.name,
-                      style: Theme.of(context).textTheme.titleSmall,
-                    ),
-                    StatblockSmallText(data: trait.description),
-                    const SizedBox(height: AppSpacing.spacingMedium),
-                  ],
-                ),
-              ),
-            /* Add spellcasting */
-            if (creature!.spellCasting != null) // if creature has spells
               Container(
                 padding: const EdgeInsets.only(
                   bottom: AppSpacing.spacingSmall,
                   top: AppSpacing.spacingSmall,
                 ),
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(color: AppColors.primary, width: 1),
+                  ),
+                ),
+                child: creature == null
+                    ? const Text("Loading...")
+                    : Text(
+                        creature!.name,
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+              ),
+              StatblockSection(
+              child: SizedBox( width: double.infinity, child: Wrap(
+                    children: [
+                      StatblockSmallText(data: '${creature!.size} '),
+                      StatblockSmallText(data: '${creature!.type}, '),
+                      StatblockSmallText(data: creature?.alignment ?? ''),
+                    ],
+              ),),
+              ),
+              StatblockSection(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    /* innate spell casting */
-                    if (creature!.spellCasting!.innateSpell != null) ...[
-                      Text(
-                        'Innate Spellcasting',
-                        style: Theme.of(context).textTheme.titleSmall,
-                      ),
-                      StatblockSmallText(
-                        data: creature!.spellCasting!.headerEntries,
-                      ),
-                      ...creature!.spellCasting!.innateSpell!.entries.map(
-                        (entry) => Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            StatblockSmallText(
-                              data: '${innateSpellLevelNames[entry.key]}: ',
-                            ),
-                            Expanded(
-                              child: Text(
-                                entry.value.join(', '),
-                                style: Theme.of(context).textTheme.labelSmall,
-                                softWrap: true,
-                                overflow: TextOverflow.visible,
-                              ),
-                            ),
-                          ],
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Armor Class:  ',
+                          style: Theme.of(context).textTheme.titleSmall,
                         ),
-                      ),
-                    ],
-                    if (creature!.spellCasting!.spells != null &&
-                        creature!.spellCasting!.innateSpell != null)
-                      const SizedBox(height: AppSpacing.spacingMedium),
-                    if (creature!.spellCasting!.spells != null) ...[
-                      // if creature is regular spellcaster
-                      Text(
-                        'Spellcasting',
-                        style: Theme.of(context).textTheme.titleSmall,
-                      ),
+                        Expanded(
+                        child:
                       StatblockSmallText(
-                        data: creature!.spellCasting!.headerEntries,
-                      ),
-                      const SizedBox(height: AppSpacing.spacingSmall),
-                      // Each level is one Text.rich so the spell list wraps
-                      // under the label when the screen is narrow.
-                      ...creature!.spellCasting!.spells!.entries.map(
-                        (entry) => Padding(
-                          padding: const EdgeInsets.only(
-                            bottom: AppSpacing.spacingSmall,
-                          ),
-                          child: Text.rich(
-                            TextSpan(
-                              style: Theme.of(context).textTheme.labelSmall,
-                              children: [
-                                TextSpan(
-                                  // key is the spell level, reads from const.
-                                  // Cantrips (0) are "at will", other levels show slots.
-                                  text:
-                                      '${spellLevelNames[entry.key] ?? "${entry.key}th level"}${entry.key == 0 ? ' (at will): ' : ' (${entry.value.slots} slots): '}',
-                                ),
-                                TextSpan(text: entry.value.spells.join(', ')),
-                              ],
-                            ),
+                            data:
+                                '${creature!.armorClass.ac.toString()}, ${creature!.armorClass.type}',
                           ),
                         ),
-                      ),
-                      const SizedBox(height: AppSpacing.spacingSmall),
-                      if (creature!.spellCasting!.footerEntries != null)
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Text(
+                          'Hit Points:  ',
+                          style: Theme.of(context).textTheme.titleSmall,
+                        ),
+                        StatblockSmallText(data: '${creature!.hitPoints}'),
                         StatblockSmallText(
-                          data: '${creature!.spellCasting!.footerEntries}',
+                          data: '(${creature!.hitPointFormula})',
                         ),
-                    ],
+                      ],
+                    ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Speed: ',
+                          style: Theme.of(context).textTheme.titleSmall,
+                        ),
+                        Expanded(
+                          child: StatblockSmallText(
+                            data: [
+                              if ((creature!.speed.walk ?? 0) > 0)
+                                '${creature!.speed.walk} ft.',
+                              if ((creature!.speed.fly ?? 0) > 0)
+                                'fly ${creature!.speed.fly} ft.',
+                              if ((creature!.speed.climb ?? 0) > 0)
+                                'climb ${creature!.speed.climb} ft.',
+                              if ((creature!.speed.swim ?? 0) > 0)
+                                'swim ${creature!.speed.swim} ft.',
+                              if ((creature!.speed.burrow ?? 0) > 0)
+                                'burrow ${creature!.speed.burrow} ft.',
+                            ].join(', '),
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
-            if (creature?.actions != null)
-              ...buildActionSections(context, creature!.actions!),
-            if (creature!.regionalEffect != null)
+              StatblockSection(child: _abilityScores(context)),
               StatblockSection(
-                child: Text(
-                  'Regional Effects',
-                  style: Theme.of(context).textTheme.titleMedium,
+                child: Column(
+                  children: [
+                    if (creature!.savingThrows.strength != null ||
+                        creature!.savingThrows.dexterity != null ||
+                        creature!.savingThrows.constitution != null ||
+                        creature!.savingThrows.intelligence != null ||
+                        creature!.savingThrows.wisdom != null ||
+                        creature!.savingThrows.charisma != null)
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Saving Throws: ',
+                            style: Theme.of(context).textTheme.titleSmall,
+                          ),
+                          Expanded(
+                            child: StatblockSmallText(
+                              data: [
+                                if (creature!.savingThrows.strength != null)
+                                  'Str ${creature!.savingThrows.strength! >= 0 ? '+' : ''}${creature!.savingThrows.strength}',
+                                if (creature!.savingThrows.dexterity != null)
+                                  'Dex ${creature!.savingThrows.dexterity! >= 0 ? '+' : ''}${creature!.savingThrows.dexterity}',
+                                if (creature!.savingThrows.constitution != null)
+                                  'Con ${creature!.savingThrows.constitution! >= 0 ? '+' : ''}${creature!.savingThrows.constitution}',
+                                if (creature!.savingThrows.intelligence != null)
+                                  'Int ${creature!.savingThrows.intelligence! >= 0 ? '+' : ''}${creature!.savingThrows.intelligence}',
+                                if (creature!.savingThrows.wisdom != null)
+                                  'Wis ${creature!.savingThrows.wisdom! >= 0 ? '+' : ''}${creature!.savingThrows.wisdom}',
+                                if (creature!.savingThrows.charisma != null)
+                                  'Cha ${creature!.savingThrows.charisma! >= 0 ? '+' : ''}${creature!.savingThrows.charisma}',
+                              ].join(', '),
+                            ),
+                          ),
+                        ],
+                      ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Skills: ',
+                          style: Theme.of(context).textTheme.titleSmall,
+                        ),
+                        Expanded(
+                          child: StatblockSmallText(
+                            data: [
+                              if (creature!.skills?.acrobatics != null)
+                                'Acrobatics ${creature!.skills?.acrobatics!}',
+                              if (creature!.skills?.animalHandling != null)
+                                'Animal Handling ${creature!.skills?.animalHandling!}',
+                              if (creature!.skills?.arcana != null)
+                                'Arcana ${creature!.skills?.arcana!}',
+                              if (creature!.skills?.athletics != null)
+                                'Athletics ${creature!.skills?.athletics!}',
+                              if (creature!.skills?.deception != null)
+                                'Deception ${creature!.skills?.deception!}',
+                              if (creature!.skills?.history != null)
+                                'History ${creature!.skills?.history!}',
+                              if (creature!.skills?.insight != null)
+                                'Insight ${creature!.skills?.insight!}',
+                              if (creature!.skills?.intimidation != null)
+                                'Intimidation ${creature!.skills?.intimidation!}',
+                              if (creature!.skills?.investigation != null)
+                                'Investigation ${creature!.skills?.investigation!}',
+                              if (creature!.skills?.medicine != null)
+                                'Medicine ${creature!.skills?.medicine!}',
+                              if (creature!.skills?.nature != null)
+                                'Nature ${creature!.skills?.nature!}',
+                              if (creature!.skills?.perception != null)
+                                'Perception ${creature!.skills?.perception!}',
+                              if (creature!.skills?.performance != null)
+                                'Performance ${creature!.skills?.performance!}',
+                              if (creature!.skills?.religion != null)
+                                'Religion ${creature!.skills?.religion!}',
+                              if (creature!.skills?.sleightOfHand != null)
+                                'Sleight of Hand ${creature!.skills?.sleightOfHand!}',
+                              if (creature!.skills?.stealth != null)
+                                'Stealth ${creature!.skills?.stealth!}',
+                              if (creature!.skills?.survival != null)
+                                'Survival ${creature!.skills?.survival!}',
+                            ].join(', '),
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (creature?.senses != null && creature?.senses != '')
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Senses: ',
+                            style: Theme.of(context).textTheme.titleSmall,
+                          ),
+                        if (creature?.senses != null && creature?.senses != '')
+                            Expanded(
+                            child: StatblockSmallText(data: creature!.senses!),
+                            ),
+                        ],
+                      ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Languages: ',
+                          style: Theme.of(context).textTheme.titleSmall,
+                        ),
+                        Expanded(
+                          child: creature!.languages != null
+                              ? StatblockSmallText(data: creature!.languages!)
+                              : const SizedBox.shrink(),
+                        ),
+                      ],
+                    ),
+                  SizedBox(width: double.infinity, child:
+                  Wrap(
+                        //crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Challenge: ',
+                            style: Theme.of(context).textTheme.titleSmall,
+                          ),
+                      StatblockSmallText(data: '${creature!.challengeRating}'),
+                          Text(
+                            '   Prof Bonus: ',
+                            style: Theme.of(context).textTheme.titleSmall,
+                          ),
+                          StatblockSmallText(
+                            data:
+                                '+${creature?.proficiencyBonus?.toInt() ?? proficiencyBonusCalc(tryParseFraction(creature!.challengeRating.cr) ?? 2)}',
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            if (creature!.regionalEffect != null) ...[
-              StatblockSmallText(data: creature!.regionalEffect!.blurb),
-              SizedBox(height: AppSpacing.spacingSmall),
-              ...creature!.regionalEffect!.bulletPoints.map(
-                (point) => StatblockSmallText(data: '• $point\n'),
-              ),
-              if (creature!.regionalEffect!.blurbEnd != null)
-                StatblockSmallText(data: creature!.regionalEffect!.blurbEnd!),
+              if (creature!.traits != null)
+                ...creature!.traits!.map(
+                  (trait) => Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        trait.name,
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                      StatblockSmallText(data: trait.description),
+                      const SizedBox(height: AppSpacing.spacingMedium),
+                    ],
+                  ),
+                ),
+              /* Add spellcasting */
+              if (creature!.spellCasting != null) // if creature has spells
+                Container(
+                  padding: const EdgeInsets.only(
+                    bottom: AppSpacing.spacingSmall,
+                    top: AppSpacing.spacingSmall,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      /* innate spell casting */
+                      if (creature!.spellCasting!.innateSpell != null) ...[
+                        Text(
+                          'Innate Spellcasting',
+                          style: Theme.of(context).textTheme.titleSmall,
+                        ),
+                        StatblockSmallText(
+                          data: creature!.spellCasting!.headerEntries,
+                        ),
+                        ...creature!.spellCasting!.innateSpell!.entries.map(
+                          (entry) => Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              StatblockSmallText(
+                                data: '${innateSpellLevelNames[entry.key]}: ',
+                              ),
+                              Expanded(
+                                child: Text(
+                                  entry.value.join(', '),
+                                  style: Theme.of(context).textTheme.labelSmall,
+                                  softWrap: true,
+                                  overflow: TextOverflow.visible,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                      if (creature!.spellCasting!.spells != null &&
+                          creature!.spellCasting!.innateSpell != null)
+                        const SizedBox(height: AppSpacing.spacingMedium),
+                      if (creature!.spellCasting!.spells != null) ...[
+                        // if creature is regular spellcaster
+                        Text(
+                          'Spellcasting',
+                          style: Theme.of(context).textTheme.titleSmall,
+                        ),
+                        StatblockSmallText(
+                          data: creature!.spellCasting!.headerEntries,
+                        ),
+                        const SizedBox(height: AppSpacing.spacingSmall),
+                        // Each level is one Text.rich so the spell list wraps
+                        // under the label when the screen is narrow.
+                        ...creature!.spellCasting!.spells!.entries.map(
+                          (entry) => Padding(
+                            padding: const EdgeInsets.only(
+                              bottom: AppSpacing.spacingSmall,
+                            ),
+                            child: Text.rich(
+                              TextSpan(
+                                style: Theme.of(context).textTheme.labelSmall,
+                                children: [
+                                  TextSpan(
+                                    // key is the spell level, reads from const.
+                                    // Cantrips (0) are "at will", other levels show slots.
+                                    text:
+                                        '${spellLevelNames[entry.key] ?? "${entry.key}th level"}${entry.key == 0 ? ' (at will): ' : ' (${entry.value.slots} slots): '}',
+                                  ),
+                                  TextSpan(text: entry.value.spells.join(', ')),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.spacingSmall),
+                        if (creature!.spellCasting!.footerEntries != null)
+                          StatblockSmallText(
+                            data: '${creature!.spellCasting!.footerEntries}',
+                          ),
+                      ],
+                    ],
+                  ),
+                ),
+              if (creature?.actions != null)
+                ...buildActionSections(context, creature!.actions!),
+              if (creature!.regionalEffect != null)
+                StatblockSection(
+                  child: Text(
+                    'Regional Effects',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                ),
+              if (creature!.regionalEffect != null) ...[
+                StatblockSmallText(data: creature!.regionalEffect!.blurb),
+                SizedBox(height: AppSpacing.spacingSmall),
+                ...creature!.regionalEffect!.bulletPoints.map(
+                  (point) => StatblockSmallText(data: '• $point\n'),
+                ),
+                if (creature!.regionalEffect!.blurbEnd != null)
+                  StatblockSmallText(data: creature!.regionalEffect!.blurbEnd!),
+              ],
+              /* NEXT CHILD GOES HERE */
+              SizedBox(height: AppSpacing.spacingLarge),
             ],
-            /* NEXT CHILD GOES HERE */
-            SizedBox(height: AppSpacing.spacingLarge),
-          ],
+          ),
         ),
       ),
     );
@@ -461,6 +498,7 @@ class CreatureStatBlock extends StatelessWidget {
 
 // /* Helper Functions */
 
+/// Groups creature actions into the sections displayed in the stat block.
 List<Widget> buildActionSections(
   BuildContext context,
   List<CreatureAction> actions,
@@ -508,6 +546,7 @@ List<Widget> buildActionSections(
 /// Statblock Components
 /// ***************
 
+/// Applies the shared spacing and divider treatment to a stat-block section.
 class StatblockSection extends StatelessWidget {
   const StatblockSection({super.key, required this.child});
 
@@ -528,6 +567,7 @@ class StatblockSection extends StatelessWidget {
   }
 }
 
+/// Renders compact body text using the stat-block typography.
 class StatblockSmallText extends StatelessWidget {
   const StatblockSmallText({super.key, required this.data, this.alignment});
 
@@ -544,6 +584,7 @@ class StatblockSmallText extends StatelessWidget {
   }
 }
 
+/// Separates adjacent stat-block columns with the theme's vertical rule.
 class StatblockVerticalDivider extends StatelessWidget {
   const StatblockVerticalDivider({super.key, required this.height});
 

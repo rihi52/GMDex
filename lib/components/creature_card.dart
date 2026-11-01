@@ -1,3 +1,7 @@
+// Compact selectable creature row used in creature and encounter browsers.
+//
+// Selection and tap behavior are provided by the parent so this card can be
+// reused in different browsing flows without owning navigation state.
 import 'package:flutter/material.dart';
 import 'package:gmdex/theme/apptheme.dart';
 

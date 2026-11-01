@@ -1,3 +1,7 @@
+/// Domain models for creature stat blocks and their nested rules data.
+///
+/// These immutable types are shared by JSON/database mappers and the creature
+/// browse, editor, and encounter interfaces.
 class Creature {
   final String name;
   final String? size;
@@ -84,6 +88,7 @@ const crToXp = {
   '30': '155,000',
 };
 
+/// Spell list and slot information for one spellcasting level.
 class SpellLevel {
   final int? slots;
   final List<String> spells;
@@ -104,6 +109,7 @@ const spellLevelNames = {
   9: '9th level',
 };
 
+/// Display labels for innate-spell frequency keys found in bestiary data.
 const innateSpellLevelNames = {
   'will': 'At will',
   '1': '1/day',
@@ -118,6 +124,7 @@ const innateSpellLevelNames = {
   '9e': '9/day',
 };
 
+/// A creature's prepared and/or innate spellcasting data.
 class CreatureSpellcasting {
   final String name;
   final String headerEntries;
@@ -137,6 +144,7 @@ class CreatureSpellcasting {
   });
 }
 
+/// Armor class total together with its descriptive source.
 class CreatureArmorClass {
   final int ac;
   final String type;
@@ -146,6 +154,7 @@ class CreatureArmorClass {
   const CreatureArmorClass({required this.ac, required this.type});
 }
 
+/// Challenge rating plus optional lair/coven adjustments and XP overrides.
 class CreatureCR {
   final String cr;
   final String? lair;
@@ -168,7 +177,9 @@ class CreatureCR {
   }
 }
 
+/// Creature movement rates and any associated condition.
 class CreatureSpeed {
+  /// Movement modes, in feet, plus any descriptive speed condition.
   final int? walk;
   final int? fly;
   final int? climb;
@@ -186,7 +197,9 @@ class CreatureSpeed {
   });
 }
 
+/// The six ability scores and their modifiers.
 class CreatureAbilityScores {
+  /// Six ability scores with their already-computed modifiers.
   final int strength;
   final int strengthModifier;
   final int dexterity;
@@ -216,7 +229,9 @@ class CreatureAbilityScores {
   });
 }
 
+/// Saving-throw bonuses and proficiency flags for each ability.
 class CreatureSavingThrows {
+  /// Saving-throw bonuses and proficiency flags for each ability.
   final int? strength;
   final bool? isStrProf;
   final int? dexterity;

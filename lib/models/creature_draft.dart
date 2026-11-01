@@ -1,3 +1,8 @@
+// Mutable editing representation of a creature stat block.
+//
+// Drafts preserve partially entered form values that are not valid in the
+// immutable domain model yet. toCreature assembles nested draft sections
+// into the model after the editor has collected its fields.
 import 'package:gmdex/models/creature.dart';
 
 class CreatureDraft {
@@ -23,6 +28,7 @@ class CreatureDraft {
 
   int? id;
 
+  /// Converts nested form values into the immutable creature model.
   Creature toCreature() {
     return Creature(
       id: id,
@@ -182,6 +188,7 @@ class CreatureDraft {
   });
 }
 
+/// Editable spell slot count and spell names for one level.
 class SpellLevelDraft {
   int? slots;
   List<String>? spells;
@@ -189,6 +196,7 @@ class SpellLevelDraft {
   SpellLevelDraft({this.slots, this.spells});
 }
 
+/// Mutable prepared/innate spellcasting data used by the editor.
 class CreatureSpellcastingDraft {
   String name;
   String headerEntries;
@@ -208,6 +216,7 @@ class CreatureSpellcastingDraft {
   });
 }
 
+/// Editable armor-class total and source text.
 class CreatureArmorClassDraft {
   int? ac;
   String type;
@@ -215,6 +224,7 @@ class CreatureArmorClassDraft {
   CreatureArmorClassDraft({this.ac, this.type = ''});
 }
 
+/// Editable challenge rating and optional encounter adjustments.
 class CreatureCRDraft {
   String cr;
   String? lair;
@@ -237,6 +247,7 @@ class CreatureCRDraft {
   }
 }
 
+/// Mutable movement values and their optional condition.
 class CreatureSpeedDraft {
   int? walk;
   int? fly;
@@ -255,6 +266,7 @@ class CreatureSpeedDraft {
   });
 }
 
+/// Editable ability scores and their corresponding modifiers.
 class CreatureAbilityScoresDraft {
   int strength;
   int strengthModifier;
@@ -285,6 +297,7 @@ class CreatureAbilityScoresDraft {
   });
 }
 
+/// Editable saving-throw values and proficiency selections.
 class CreatureSavingThrowsDraft {
   int? strength;
   bool isStrProf = false;
@@ -316,6 +329,7 @@ class CreatureSavingThrowsDraft {
   });
 }
 
+/// Editable skill values and proficiency selections.
 class CreatureSkillsDraft {
   String? athletics;
   bool? isAthleticsProf;
@@ -394,6 +408,7 @@ class CreatureSkillsDraft {
   });
 }
 
+/// One editable action with its action category.
 class CreatureActionDraft {
   String name;
   String description;
@@ -406,6 +421,7 @@ class CreatureActionDraft {
   });
 }
 
+/// One named passive trait and its descriptive text.
 class CreatureTraitDraft {
   String name;
   String description;
@@ -413,6 +429,7 @@ class CreatureTraitDraft {
   CreatureTraitDraft({this.name = '', this.description = ''});
 }
 
+/// Editable legendary-group regional effects shown in the stat block.
 class CreatureRegionalEffectDraft {
   String blurb;
   List<String>? bulletPoints;

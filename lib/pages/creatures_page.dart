@@ -1,3 +1,7 @@
+// Creature browsing, bestiary import, notes, and stat-block editing workflows.
+//
+// The parent owns browse/create navigation; the browser handles search and
+// selection, while mapper/writer helpers translate between models and Drift.
 import 'package:flutter/material.dart';
 import 'dart:math' show min;
 import 'package:drift/drift.dart' show CustomExpression, OrderingTerm;
@@ -6,12 +10,16 @@ import 'package:gmdex/theme/apptheme.dart';
 import 'package:gmdex/components/creature_card.dart';
 import 'package:gmdex/components/statblock.dart';
 import 'package:gmdex/components/statblock_edit.dart';
-import 'package:gmdex/components/notes.dart';
+import 'package:gmdex/components/notes_drawer.dart';
+import 'package:gmdex/components/navigation_sidebar.dart';
+import 'package:gmdex/components/responsive_layout.dart';
 import 'package:gmdex/database/database.dart' hide CreatureSkills;
 import 'package:gmdex/database/creature_mapper.dart';
-import 'package:gmdex/main.dart';
 import 'package:gmdex/database/creature_writer.dart';
+import 'package:gmdex/database/notes_writer.dart';
+import 'package:gmdex/database/database_initialize.dart';
 
+/// Creature browsing, bestiary import, notes, and stat-block editing workflows.
 class CreaturesPage extends StatefulWidget {
   const CreaturesPage({super.key});
 
@@ -20,134 +28,84 @@ class CreaturesPage extends StatefulWidget {
 }
 
 class _CreaturesPageState extends State<CreaturesPage> {
-  static const double _breakpoint = 700;
   int _selectedIndex = 0;
   Creature? _creatureToCopy;
   bool _isEditing = false;
-
-  static const _titles = ['Browse', 'Create'];
+  final _browseKey = GlobalKey<_BrowseCreatureWidgetState>();
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final isWide = constraints.maxWidth >= _breakpoint;
-
-        if (isWide) {
-          return Scaffold(
-            body: Row(
-              children: [
-                Container(
-                  width: 175,
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 16,
-                    horizontal: 16,
-                  ),
-                  decoration: const BoxDecoration(
-                    border: Border(
-                      right: BorderSide(color: AppColors.primary, width: 1),
-                    ),
-                  ),
-                  child: _navItems(inDrawer: false),
-                ),
-                Expanded(child: _buildContent()),
-              ],
-            ),
-          );
-        }
-
-        return Scaffold(
-          appBar: AppBar(
-            // The hamburger icon is added automatically because a drawer exists
-            title: Text(_titles[_selectedIndex]),
-          ),
-          drawer: Drawer(
-            child: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: _navItems(inDrawer: true),
-              ),
-            ),
-          ),
-          body: _buildContent(),
-        );
-      },
-    );
-  }
-
-  Widget _navItems({required bool inDrawer}) {
-    // In the drawer, close it after a selection.
-    void closeDrawerIfNeeded() {
-      if (inDrawer) Navigator.of(context).pop();
-    }
-
-    ShapeBorder shapeFor(int index) => RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(8),
-      side: BorderSide(
-        color: _selectedIndex == index
-            ? AppColors.hoverGrey
-            : Colors.transparent,
-        width: 1,
-      ),
-    );
-
-    Widget navTitle(String title, bool selected) => Text(
-      title,
-      style: selected
-          ? const TextStyle(
-              shadows: [
-                Shadow(color: AppColors.appBlack, offset: Offset(-1, -1)),
-                Shadow(color: AppColors.appBlack, offset: Offset(0, -1)),
-                Shadow(color: AppColors.appBlack, offset: Offset(1, -1)),
-                Shadow(color: AppColors.appBlack, offset: Offset(-1, 0)),
-                Shadow(color: AppColors.appBlack, offset: Offset(1, 0)),
-                Shadow(color: AppColors.appBlack, offset: Offset(-1, 1)),
-                Shadow(color: AppColors.appBlack, offset: Offset(0, 1)),
-                Shadow(color: AppColors.appBlack, offset: Offset(1, 1)),
-              ],
-            )
+    return ResponsiveNavigationScaffold(
+      title: 'Bestiary',
+      addTooltip: 'Create creature',
+      onAddPressed: _selectedIndex == 0
+          ? () {
+              setState(() {
+                _creatureToCopy = null;
+                _isEditing = false;
+                _selectedIndex = 1;
+              });
+            }
           : null,
-    );
-
-    return Column(
-      spacing: 8,
-      children: [
-        ListTile(
-          selected: false,
-          title: const Text('Return'),
+      onSettingsReturned: _refreshAfterSettings,
+      items: [
+        NavigationSidebarItem(
+          title: 'Home',
           onTap: () {
             setState(() {
               _creatureToCopy = null;
               _isEditing = false;
             });
-            closeDrawerIfNeeded(); // closes the drawer
-            Navigator.of(context).pop(); // leaves the page
+            Navigator.of(
+              context,
+            ).pushNamedAndRemoveUntil('/home', (route) => false);
           },
         ),
-        ListTile(
+        NavigationSidebarItem(
+          title: 'Browse',
           selected: _selectedIndex == 0,
-          title: navTitle('Browse', _selectedIndex == 0),
-          shape: shapeFor(0),
           onTap: () {
             setState(() {
               _selectedIndex = 0;
               _creatureToCopy = null;
               _isEditing = false;
             });
-            closeDrawerIfNeeded();
           },
         ),
-        ListTile(
+        NavigationSidebarItem(
+          title: 'Create',
           selected: _selectedIndex == 1,
-          title: navTitle('Create', _selectedIndex == 1),
-          shape: shapeFor(1),
+          onTap: () => setState(() => _selectedIndex = 1),
+          showDividerAfter: true,
+        ),
+        NavigationSidebarItem(
+          title: 'Encounters',
           onTap: () {
-            setState(() => _selectedIndex = 1);
-            closeDrawerIfNeeded();
+            Navigator.pushNamed(context, '/encounters');
+          },
+        ),
+        NavigationSidebarItem(
+          title: 'Players',
+          onTap: () {
+            Navigator.pushNamed(context, '/players');
           },
         ),
       ],
+      body: _buildContent(),
     );
+  }
+
+  Future<void> _refreshAfterSettings() async {
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await _browseKey.currentState?._loadData();
+    } catch (error) {
+      if (mounted) {
+        messenger.showSnackBar(
+          SnackBar(content: Text('Could not refresh creatures: $error')),
+        );
+      }
+    }
   }
 
   Widget _buildContent() {
@@ -165,6 +123,7 @@ class _CreaturesPageState extends State<CreaturesPage> {
       case 0:
       default:
         return BrowseCreatureWidget(
+          key: _browseKey,
           onCopy: (creature) {
             setState(() {
               _creatureToCopy = creature;
@@ -184,6 +143,7 @@ class _CreaturesPageState extends State<CreaturesPage> {
   }
 }
 
+/// Searches and selects creatures, exposing details and edit actions.
 class BrowseCreatureWidget extends StatefulWidget {
   const BrowseCreatureWidget({super.key, this.onCopy, this.onEdit});
 
@@ -195,7 +155,6 @@ class BrowseCreatureWidget extends StatefulWidget {
 }
 
 class _BrowseCreatureWidgetState extends State<BrowseCreatureWidget> {
-  static const double _breakpoint = 900;
   final _scaffoldKey = GlobalKey<ScaffoldState>();
 
   List<CreatureRow> _allCreatures = [];
@@ -230,9 +189,15 @@ class _BrowseCreatureWidgetState extends State<BrowseCreatureWidget> {
               (c) => OrderingTerm.asc(CustomExpression<String>('LOWER(name)')),
             ]))
             .get();
+    final selectedId = _selectedId;
+    final selectedCreature = selectedId == null
+        ? null
+        : await loadCreature(database, selectedId);
     if (!mounted) return;
     setState(() {
       _allCreatures = rows;
+      _selectedCreature = selectedCreature;
+      if (selectedCreature == null) _selectedId = null;
       _resetStaleFilters();
     });
   }
@@ -263,6 +228,53 @@ class _BrowseCreatureWidgetState extends State<BrowseCreatureWidget> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) _scaffoldKey.currentState?.openEndDrawer();
       });
+    }
+  }
+
+  Future<void> _saveNotesSection(String notes) async {
+    final creature = _selectedCreature;
+    final id = _selectedId;
+    if (creature == null || id == null) return;
+
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await saveNotes(database, creature, existingId: id, notes: notes);
+    } catch (error) {
+      if (mounted) {
+        messenger.showSnackBar(
+          SnackBar(content: Text('Could not save notes: $error')),
+        );
+      }
+      return;
+    }
+
+    try {
+      final updatedCreature = await loadCreature(database, id);
+      if (!mounted || _selectedId != id) return;
+      if (updatedCreature == null) {
+        messenger.showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Notes were saved, but the creature could not be reloaded.',
+            ),
+          ),
+        );
+        return;
+      }
+      setState(() => _selectedCreature = updatedCreature);
+      messenger.showSnackBar(
+        SnackBar(content: Text('Saved notes for ${creature.name}.')),
+      );
+    } catch (error) {
+      if (mounted) {
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(
+              'Notes were saved, but could not be reloaded: $error',
+            ),
+          ),
+        );
+      }
     }
   }
 
@@ -579,7 +591,10 @@ class _BrowseCreatureWidgetState extends State<BrowseCreatureWidget> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final isWide = constraints.maxWidth >= _breakpoint;
+        final isWide = ResponsiveLayout.isWide(
+          constraints.maxWidth,
+          breakpoint: ResponsiveBreakpoints.browseDetails,
+        );
 
         final creatureList = ListView.builder(
           padding: const EdgeInsets.only(right: AppSpacing.spacingMedium),
@@ -670,23 +685,31 @@ class _BrowseCreatureWidgetState extends State<BrowseCreatureWidget> {
               ? null
               : isWide
               ? NotesDrawer(
-                  creature: _selectedCreature!,
-                  initialValue: _selectedCreature!.notes,
+                  key: ValueKey(
+                    '${_selectedCreature!.id}:${_selectedCreature!.notes}',
+                  ),
+                  initialValue: _selectedCreature!.notes ?? '',
                   maxWidth: min(constraints.maxWidth - 50, 500),
-                  onSaved: () {},
+                  onSaved: _saveNotesSection,
                 )
-              : NestedDrawer(
-                  creature: _selectedCreature!,
-                  initialValue: _selectedCreature!.notes,
+              : NotesPageViewDrawer(
+                  key: ValueKey(
+                    '${_selectedCreature!.id}:${_selectedCreature!.notes}',
+                  ),
+                  detailsLabel: 'Statblock',
+                  details: CreatureStatBlock(
+                    creature: _selectedCreature!,
+                    onEditPressed: widget.onEdit == null
+                        ? null
+                        : () => widget.onEdit!(_selectedCreature!),
+                    onCopyPressed: widget.onCopy == null
+                        ? null
+                        : () => widget.onCopy!(_selectedCreature!),
+                    onDeletePressed: _confirmDeleteSelectedCreature,
+                  ),
+                  initialValue: _selectedCreature!.notes ?? '',
                   maxWidth: min(constraints.maxWidth - 50, 500),
-                  onEditPressed: widget.onEdit == null
-                      ? null
-                      : () => widget.onEdit!(_selectedCreature!),
-                  onCopyPressed: widget.onCopy == null
-                      ? null
-                      : () => widget.onCopy!(_selectedCreature!),
-                  onDeletePressed: _confirmDeleteSelectedCreature,
-                  onSaved: () {},
+                  onSaved: _saveNotesSection,
                 ),
           body: Padding(
             padding: const EdgeInsets.all(16),
@@ -712,6 +735,7 @@ class _BrowseCreatureWidgetState extends State<BrowseCreatureWidget> {
   }
 }
 
+/// Hosts the stat-block editor for creating, copying, or editing creatures.
 class CreateCreatureWidget extends StatefulWidget {
   const CreateCreatureWidget({
     super.key,

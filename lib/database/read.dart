@@ -1,22 +1,21 @@
+// Legacy JSON bestiary loading and conversion helpers.
+//
+// New imports should use the normalized importer; these parsing functions
+// remain useful for turning bundled bestiary-format entries into domain data.
 import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:gmdex/models/creature.dart';
 import 'package:gmdex/components/creature_calculations.dart';
 
+/// Loads the bundled monster JSON document.
 Future<dynamic> loadMonsters() async {
-  final jsonString = await rootBundle.loadString('assets/bestiary-mm.json');
+  final jsonString = await rootBundle.loadString(
+    'assets/bestiary-srd-filtered.json',
+  );
   return jsonDecode(jsonString);
 }
 
-Future<Map<String, dynamic>> loadLegendaryGroups() async {
-  final jsonString = await rootBundle.loadString('assets/legendarygroups.json');
-  final data = jsonDecode(jsonString);
-  return {
-    for (final group in data['legendaryGroup'] as List)
-      '${group['name']}_${group['source']}': group,
-  };
-}
-
+/// Abbreviations in the source data mapped to their display names.
 const sizeNames = {
   'T': 'Tiny',
   'S': 'Small',
@@ -26,6 +25,7 @@ const sizeNames = {
   'G': 'Gargantuan',
 };
 
+/// Alignment abbreviations mapped to the words shown in the UI.
 const alignmentNames = {
   'L': 'Lawful',
   'N': 'Neutral',
@@ -36,6 +36,7 @@ const alignmentNames = {
   'A': 'Any',
 };
 
+/// Converts one source-format monster map into the app's creature model.
 Creature parseCreature(
   Map<String, dynamic> data,
   Map<String, dynamic> legendaryGroups,
@@ -47,10 +48,16 @@ Creature parseCreature(
   final group = lgRef != null
       ? legendaryGroups['${lgRef['name']}_${lgRef['source']}']
       : null;
+  final rawSize = data['size'];
+  final size = rawSize is List && rawSize.isNotEmpty
+      ? rawSize.first.toString()
+      : rawSize is String && rawSize.isNotEmpty
+      ? rawSize
+      : 'Unknown';
 
   return Creature(
     name: data['name'],
-    size: sizeNames[data['size'][0]] ?? data['size'][0],
+    size: sizeNames[size] ?? size,
     type: data['type'] is String
         ? data['type']
         : (data['type']?['type'] ?? 'Unknown'),
