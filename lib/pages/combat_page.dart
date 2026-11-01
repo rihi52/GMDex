@@ -17,6 +17,7 @@ import 'package:gmdex/pages/combat_run_page.dart';
 import 'package:gmdex/components/difficulty_calculator.dart';
 import 'package:gmdex/components/creature_calculations.dart'
     show tryParseFraction;
+import 'package:gmdex/models/creature.dart' show crToXp;
 import 'package:gmdex/models/difficulty_calculator_ruleset.dart';
 
 /// Starts a new encounter or edits/copies the supplied saved encounter.
@@ -41,6 +42,11 @@ class _EncounterBuildPageState extends State<EncounterBuildPage> {
   int? _selectedId; // creature id, so the highlight survives filtering
   String? playerSearchTerm;
   String? creatureSearchTerm;
+  String _typeFilter = '';
+  String _sizeFilter = '';
+  String _sourceFilter = '';
+  String _crMin = '';
+  String _crMax = '';
   late Encounter currentEncounter;
 
   double searchBarWidth = 275;
@@ -87,7 +93,228 @@ class _EncounterBuildPageState extends State<EncounterBuildPage> {
     setState(() {
       _allPlayers = playerRows;
       _allCreatures = creatureRows;
+      _resetStaleCreatureFilters();
     });
+  }
+
+  int get _activeCreatureFilterCount =>
+      [
+        _typeFilter,
+        _sizeFilter,
+        _sourceFilter,
+      ].where((filter) => filter.isNotEmpty).length +
+      (_crMin.isNotEmpty || _crMax.isNotEmpty ? 1 : 0);
+
+  String _baseType(String? raw) =>
+      (raw ?? '').split('(').first.trim().toLowerCase();
+
+  String _capitalize(String value) =>
+      value.isEmpty ? value : value[0].toUpperCase() + value.substring(1);
+
+  double? _crValue(String? cr) {
+    if (cr == null || cr.isEmpty) return null;
+    if (cr.contains('/')) {
+      final parts = cr.split('/');
+      if (parts.length != 2) return null;
+      final numerator = double.tryParse(parts[0]);
+      final denominator = double.tryParse(parts[1]);
+      if (numerator == null || denominator == null || denominator == 0) {
+        return null;
+      }
+      return numerator / denominator;
+    }
+    return double.tryParse(cr);
+  }
+
+  List<String> get _creatureTypes {
+    final types = <String>{};
+    for (final creature in _allCreatures) {
+      final type = _baseType(creature.type);
+      if (type.isNotEmpty) types.add(type);
+    }
+    return types.toList()..sort();
+  }
+
+  List<String> get _creatureSizes {
+    const order = ['tiny', 'small', 'medium', 'large', 'huge', 'gargantuan'];
+    final sizes = _allCreatures
+        .map((creature) => (creature.size ?? '').toLowerCase())
+        .toSet();
+    return order.where(sizes.contains).toList();
+  }
+
+  List<String> get _creatureSources =>
+      _allCreatures
+          .map((creature) => creature.source)
+          .whereType<String>()
+          .where((source) => source.isNotEmpty)
+          .toSet()
+          .toList()
+        ..sort();
+
+  List<String> get _challengeRatings => crToXp.keys.toList();
+
+  void _resetStaleCreatureFilters() {
+    if (_typeFilter.isNotEmpty && !_creatureTypes.contains(_typeFilter)) {
+      _typeFilter = '';
+    }
+    if (_sizeFilter.isNotEmpty && !_creatureSizes.contains(_sizeFilter)) {
+      _sizeFilter = '';
+    }
+    if (_sourceFilter.isNotEmpty && !_creatureSources.contains(_sourceFilter)) {
+      _sourceFilter = '';
+    }
+  }
+
+  Future<void> _showCreatureFilterDialog() async {
+    var type = _typeFilter;
+    var size = _sizeFilter;
+    var source = _sourceFilter;
+    var crMin = _crMin;
+    var crMax = _crMax;
+
+    final applied = await showDialog<bool>(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setLocal) => AlertDialog(
+          titleTextStyle: Theme.of(context).textTheme.labelMedium,
+          title: const Text('Creature Filters'),
+          content: SizedBox(
+            width: 320,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _creatureFilterDropdown(
+                    'Type',
+                    type,
+                    _creatureTypes,
+                    (value) => setLocal(() => type = value),
+                    labelFor: _capitalize,
+                  ),
+                  _creatureFilterDropdown(
+                    'Size',
+                    size,
+                    _creatureSizes,
+                    (value) => setLocal(() => size = value),
+                    labelFor: _capitalize,
+                  ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _creatureFilterDropdown(
+                          'Min CR',
+                          crMin,
+                          _challengeRatings,
+                          (value) => setLocal(() => crMin = value),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _creatureFilterDropdown(
+                          'Max CR',
+                          crMax,
+                          _challengeRatings,
+                          (value) => setLocal(() => crMax = value),
+                        ),
+                      ),
+                    ],
+                  ),
+                  _creatureFilterDropdown(
+                    'Source',
+                    source,
+                    _creatureSources,
+                    (value) => setLocal(() => source = value),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelMedium,
+              ),
+              onPressed: () => setLocal(() {
+                type = '';
+                size = '';
+                source = '';
+                crMin = '';
+                crMax = '';
+              }),
+              child: const Text('Clear'),
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelMedium,
+              ),
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelMedium,
+              ),
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Apply'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (applied != true || !mounted) return;
+    final minValue = _crValue(crMin);
+    final maxValue = _crValue(crMax);
+    if (minValue != null && maxValue != null && minValue > maxValue) {
+      final oldMin = crMin;
+      crMin = crMax;
+      crMax = oldMin;
+    }
+    setState(() {
+      _typeFilter = type;
+      _sizeFilter = size;
+      _sourceFilter = source;
+      _crMin = crMin;
+      _crMax = crMax;
+    });
+  }
+
+  Widget _creatureFilterDropdown(
+    String label,
+    String value,
+    List<String> options,
+    ValueChanged<String> onChanged, {
+    String Function(String)? labelFor,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: DropdownButtonFormField<String>(
+        key: ValueKey('$label|$value'),
+        initialValue: value,
+        isExpanded: true,
+        style: Theme.of(context).textTheme.bodyMedium,
+        decoration: InputDecoration(
+          labelText: label,
+          border: const OutlineInputBorder(),
+        ),
+        items: [
+          DropdownMenuItem(
+            value: '',
+            child: Text('All', style: Theme.of(context).textTheme.bodyMedium),
+          ),
+          for (final option in options)
+            DropdownMenuItem(
+              value: option,
+              child: Text(
+                labelFor == null ? option : labelFor(option),
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            ),
+        ],
+        onChanged: (value) => onChanged(value ?? ''),
+      ),
+    );
   }
 
   List<int> get _partyLevels => [
@@ -222,10 +449,35 @@ class _EncounterBuildPageState extends State<EncounterBuildPage> {
 
   List<CreatureRow> get _visibleCreatures {
     final term = creatureSearchTerm?.toLowerCase() ?? '';
-    if (term.isEmpty) return _allCreatures;
-    return _allCreatures
-        .where((c) => c.name.toLowerCase().contains(term))
-        .toList();
+    final minCr = _crValue(_crMin);
+    final maxCr = _crValue(_crMax);
+
+    return _allCreatures.where((creature) {
+      final matchesName =
+          term.isEmpty || creature.name.toLowerCase().contains(term);
+      final matchesType =
+          _typeFilter.isEmpty || _baseType(creature.type) == _typeFilter;
+      final matchesSize =
+          _sizeFilter.isEmpty ||
+          (creature.size ?? '').toLowerCase() == _sizeFilter;
+      final matchesSource =
+          _sourceFilter.isEmpty || creature.source == _sourceFilter;
+
+      var matchesCr = true;
+      if (minCr != null || maxCr != null) {
+        final cr = _crValue(creature.challengeRating);
+        matchesCr =
+            cr != null &&
+            (minCr == null || cr >= minCr) &&
+            (maxCr == null || cr <= maxCr);
+      }
+
+      return matchesName &&
+          matchesType &&
+          matchesSize &&
+          matchesSource &&
+          matchesCr;
+    }).toList();
   }
 
   List<PlayerRow> get _visiblePlayers =>
@@ -323,8 +575,10 @@ class _EncounterBuildPageState extends State<EncounterBuildPage> {
         final combatant = currentEncounter.combatants[index];
         return BuildCombatantCard(
           key: ObjectKey(combatant),
+          isCreature: !combatant.isPlayer,
           combatant: combatant,
           onQuantityChanged: (_) => setState(() {}),
+          onMaskedChanged: (_) => setState(() {}),
           onDelete: () =>
               setState(() => currentEncounter.combatants.remove(combatant)),
         );
@@ -352,23 +606,54 @@ class _EncounterBuildPageState extends State<EncounterBuildPage> {
     SearchController searchController,
     ValueChanged<String> onChanged,
     List<Widget> Function() suggestions,
+    bool isCreatures,
   ) {
     return SizedBox(
       height: 40,
       width: searchBarWidth,
-      child: SearchAnchor(
-        searchController: searchController,
-        builder: (BuildContext context, SearchController controller) {
-          return SearchBar(
-            controller: controller,
-            hintText: hint,
-            onChanged: onChanged,
-          );
-        },
-        suggestionsBuilder:
-            (BuildContext context, SearchController controller) {
-              return suggestions();
-            },
+      child: Row(
+        children: [
+          Expanded(
+            child: SearchAnchor(
+              searchController: searchController,
+              builder: (BuildContext context, SearchController controller) {
+                return SearchBar(
+                  controller: controller,
+                  hintText: hint,
+                  onChanged: onChanged,
+                  constraints: const BoxConstraints(
+                    minWidth: 0,
+                    minHeight: 40,
+                    maxHeight: 40,
+                  ),
+                );
+              },
+              suggestionsBuilder:
+                  (BuildContext context, SearchController controller) {
+                    return suggestions();
+                  },
+            ),
+          ),
+          if (isCreatures)
+            SizedBox(
+              width: 40,
+              height: 40,
+              child: IconButton(
+                onPressed: _showCreatureFilterDialog,
+                tooltip: 'Filter creatures',
+                padding: EdgeInsets.zero,
+                visualDensity: VisualDensity.compact,
+                color: _activeCreatureFilterCount == 0
+                    ? null
+                    : Theme.of(context).colorScheme.primary,
+                icon: Badge(
+                  isLabelVisible: _activeCreatureFilterCount > 0,
+                  label: Text('$_activeCreatureFilterCount'),
+                  child: const Icon(Icons.filter_list),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -411,6 +696,7 @@ class _EncounterBuildPageState extends State<EncounterBuildPage> {
                       ),
                     )
                     .toList(),
+                false,
               ),
               _actionButton('Save', _save),
               SizedBox(
@@ -444,6 +730,7 @@ class _EncounterBuildPageState extends State<EncounterBuildPage> {
                       ),
                     )
                     .toList(),
+                true,
               ),
             ],
           ),
@@ -544,6 +831,7 @@ class _EncounterBuildPageState extends State<EncounterBuildPage> {
     required TextEditingController controller,
     required ValueChanged<String> onSearch,
     required Widget list,
+    bool showCreatureFilter = false,
   }) {
     return Drawer(
       width: drawerWidth,
@@ -554,10 +842,35 @@ class _EncounterBuildPageState extends State<EncounterBuildPage> {
               padding: const EdgeInsets.all(AppSpacing.spacingMedium),
               child: SizedBox(
                 height: 40,
-                child: SearchBar(
-                  controller: controller,
-                  hintText: hint,
-                  onChanged: onSearch,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: SearchBar(
+                        controller: controller,
+                        hintText: hint,
+                        onChanged: onSearch,
+                      ),
+                    ),
+                    if (showCreatureFilter)
+                      SizedBox(
+                        width: 40,
+                        height: 40,
+                        child: IconButton(
+                          onPressed: _showCreatureFilterDialog,
+                          tooltip: 'Filter creatures',
+                          padding: EdgeInsets.zero,
+                          visualDensity: VisualDensity.compact,
+                          color: _activeCreatureFilterCount == 0
+                              ? null
+                              : Theme.of(context).colorScheme.primary,
+                          icon: Badge(
+                            isLabelVisible: _activeCreatureFilterCount > 0,
+                            label: Text('$_activeCreatureFilterCount'),
+                            child: const Icon(Icons.filter_list),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ),
             ),
@@ -630,77 +943,86 @@ class _EncounterBuildPageState extends State<EncounterBuildPage> {
           controller: _creatureSearchController,
           onSearch: (value) => setState(() => creatureSearchTerm = value),
           list: _creatureList(listPadding),
+          showCreatureFilter: true,
         ),
-        body: Column(
-          children: [
-            currentEncounter.combatants.isEmpty
-                ? const Expanded(
-                    flex: 6,
-                    child: Center(
-                      child: Text(
-                        'No combatants yet.\nUse the buttons above to add players or creatures.',
-                        textAlign: TextAlign.center,
+        body: SafeArea(
+          top: false,
+          left: false,
+          right: false,
+          child: Column(
+            children: [
+              currentEncounter.combatants.isEmpty
+                  ? const Expanded(
+                      flex: 6,
+                      child: Center(
+                        child: Text(
+                          'No combatants yet.\nUse the buttons above to add players or creatures.',
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    )
+                  : Expanded(flex: 6, child: _encounterList()),
+              Expanded(
+                flex: 2,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    border: BoxBorder.fromLTRB(
+                      left: BorderSide(color: AppColors.primary),
+                      top: BorderSide(color: AppColors.primary),
+                      right: BorderSide(color: AppColors.primary),
+                    ),
+                    color: AppColors.appBlack,
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(AppSpacing.spacingMedium),
+                    ),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(AppSpacing.spacingSmall),
+                    child: _difficultyCalculator(),
+                  ),
+                ),
+              ),
+              Expanded(
+                flex: 2,
+                child: TextFormField(
+                  style: Theme.of(context).textTheme.bodyLarge,
+                  expands: true,
+                  maxLines: null,
+                  textAlignVertical: TextAlignVertical.top,
+                  initialValue: currentEncounter.encounterNotes,
+                  onSaved: _saveEncounterNotes,
+                  decoration: const InputDecoration(
+                    labelText: 'Encounter Notes',
+                    alignLabelWithHint: true,
+                    filled: true,
+                    fillColor: AppColors.appBlack,
+                    floatingLabelStyle: TextStyle(color: AppColors.primary),
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.primary),
+                      borderRadius: BorderRadius.vertical(
+                        bottom: Radius.circular(AppSpacing.spacingMedium),
                       ),
                     ),
-                  )
-                : Expanded(flex: 6, child: _encounterList()),
-            Expanded(
-              flex: 2,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  border: BoxBorder.fromLTRB(
-                    left: BorderSide(color: AppColors.primary),
-                    top: BorderSide(color: AppColors.primary),
-                    right: BorderSide(color: AppColors.primary),
-                  ),
-                  color: AppColors.appBlack,
-                  borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(AppSpacing.spacingMedium),
-                  ),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.spacingSmall),
-                  child: _difficultyCalculator(),
-                ),
-              ),
-            ),
-            Expanded(
-              flex: 2,
-              child: TextFormField(
-                style: Theme.of(context).textTheme.bodyLarge,
-                expands: true,
-                maxLines: null,
-                textAlignVertical: TextAlignVertical.top,
-                initialValue: currentEncounter.encounterNotes,
-                onSaved: _saveEncounterNotes,
-                decoration: const InputDecoration(
-                  labelText: 'Encounter Notes',
-                  alignLabelWithHint: true,
-                  filled: true,
-                  fillColor: AppColors.appBlack,
-                  floatingLabelStyle: TextStyle(color: AppColors.primary),
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide(color: AppColors.primary),
-                    borderRadius: BorderRadius.vertical(
-                      bottom: Radius.circular(AppSpacing.spacingMedium),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.primary),
+                      borderRadius: BorderRadius.vertical(
+                        bottom: Radius.circular(AppSpacing.spacingMedium),
+                      ),
                     ),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: AppColors.primary),
-                    borderRadius: BorderRadius.vertical(
-                      bottom: Radius.circular(AppSpacing.spacingMedium),
-                    ),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: AppColors.primary, width: 2),
-                    borderRadius: BorderRadius.vertical(
-                      bottom: Radius.circular(AppSpacing.spacingMedium),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: AppColors.primary,
+                        width: 2,
+                      ),
+                      borderRadius: BorderRadius.vertical(
+                        bottom: Radius.circular(AppSpacing.spacingMedium),
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

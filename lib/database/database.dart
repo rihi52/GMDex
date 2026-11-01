@@ -72,6 +72,7 @@ class EncounterCreatures extends Table {
   BoolColumn get isUnconscious =>
       boolean().withDefault(const Constant(false))();
   BoolColumn get isTurn => boolean().withDefault(const Constant(false))();
+  BoolColumn get isUnmasked => boolean().withDefault(const Constant(false))();
 }
 
 /// Player instances and their combat state within a saved encounter.
@@ -374,7 +375,7 @@ class AppDatabase extends _$AppDatabase {
   }
 
   @override
-  int get schemaVersion => 13;
+  int get schemaVersion => 14;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -584,6 +585,9 @@ class AppDatabase extends _$AppDatabase {
           WHERE legendary_group_id IS NOT NULL
             AND legendary_group_name IS NULL
         ''');
+      }
+      if (from < 14) {
+        await m.addColumn(encounterCreatures, encounterCreatures.isUnmasked);
       }
     },
     beforeOpen: (details) async {

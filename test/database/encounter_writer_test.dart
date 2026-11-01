@@ -55,6 +55,7 @@ void main() {
           isCharmed: true,
           exhaustionLevel: 3,
           isRestrained: true,
+          isUnmasked: true,
         ),
       ],
     );
@@ -85,6 +86,7 @@ void main() {
       expect(savedCreature.isCharmed, isTrue);
       expect(savedCreature.exhaustionLevel, 3);
       expect(savedCreature.isRestrained, isTrue);
+      expect(savedCreature.isUnmasked, isTrue);
     }
 
     final loaded = await loadEncounter(db, encounterId);
@@ -97,6 +99,7 @@ void main() {
       expect(creature.isCharmed, isTrue);
       expect(creature.exhaustionLevel, 3);
       expect(creature.isRestrained, isTrue);
+      expect(creature.isUnmasked, isTrue);
     }
   });
 

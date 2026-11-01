@@ -43,44 +43,50 @@ class _MyHomePageState extends State<MyHomePage> {
         );
 
         return Scaffold(
-          body: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                if (isNarrow)
-                  Image.asset(
-                    'assets/images/GMDex.png',
-                    width: 250,
-                    height: 250,
-                    fit: BoxFit.contain, // Optional scaling behavior
-                  ),
-                if (!isNarrow)
-                  Image.asset(
-                    'assets/images/GMDex_wide.png',
-                    width: 500,
-                    height: 200,
-                    fit: BoxFit.contain, // Optional scaling behavior
-                  ),
-                // Text('GMDex', style: Theme.of(context).textTheme.headlineLarge),
-                const SizedBox(height: 20),
+          body: SafeArea(
+            top: false,
+            left: false,
+            right: false,
+            bottom: isNarrow,
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  if (isNarrow)
+                    Image.asset(
+                      'assets/images/GMDex.png',
+                      width: 250,
+                      height: 250,
+                      fit: BoxFit.contain, // Optional scaling behavior
+                    ),
+                  if (!isNarrow)
+                    Image.asset(
+                      'assets/images/GMDex_wide.png',
+                      width: 500,
+                      height: 200,
+                      fit: BoxFit.contain, // Optional scaling behavior
+                    ),
+                  // Text('GMDex', style: Theme.of(context).textTheme.headlineLarge),
+                  const SizedBox(height: 20),
 
-                ...List.generate(
-                  buttons.length,
-                  (index) => Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        minimumSize: Size(250, 55),
+                  ...List.generate(
+                    buttons.length,
+                    (index) => Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: Size(250, 55),
+                        ),
+                        onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => pages[index]),
+                        ),
+                        child: Text(buttons[index]),
                       ),
-                      onPressed: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => pages[index]),
-                      ),
-                      child: Text(buttons[index]),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         );

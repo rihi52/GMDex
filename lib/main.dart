@@ -2,11 +2,8 @@
 //
 // Database initialization runs before the widget tree is mounted so pages
 // can safely use the shared database as soon as they are built.
-import 'package:flutter/foundation.dart'
-    show defaultTargetPlatform, kIsWeb, TargetPlatform;
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
-import 'package:window_manager/window_manager.dart';
 import 'package:gmdex/pages/creatures_page.dart';
 import 'package:gmdex/pages/encounters_page.dart';
 import 'package:gmdex/pages/home_page.dart';
@@ -17,6 +14,7 @@ import 'package:gmdex/database/database_initialize.dart';
 import 'package:gmdex/models/difficulty_calculator_ruleset.dart';
 import 'package:gmdex/models/turn_highlight_preference.dart';
 import 'package:gmdex/pages/player_face_combat.dart';
+import 'package:gmdex/platform/multiview_app.dart';
 
 void main(List<String> args) async {
   // Flutter services must be initialized before asynchronous startup work.
@@ -27,13 +25,7 @@ void main(List<String> args) async {
   await loadDifficultyCalculatorRuleset();
   await loadTurnHighlightPreference();
 
-  // The window manager is only supported by the native Windows desktop build.
-  if (!kIsWeb && defaultTargetPlatform == TargetPlatform.windows) {
-    await windowManager.ensureInitialized();
-    await windowManager.setMinimumSize(const Size(1346, 682));
-  }
-
-  runApp(const MyApp());
+  runGmdexApp(home: (_, _) => const MyApp(), fallback: const MyApp());
 }
 
 class MyApp extends StatelessWidget {

@@ -198,6 +198,7 @@ Future<void> _saveCombatants(
                 isStunned: Value(combatant.isStunned),
                 isUnconscious: Value(combatant.isUnconscious),
                 isTurn: Value(isTurn && i == 0),
+                isUnmasked: Value(combatant.isUnmasked),
               ),
             );
       }
@@ -292,6 +293,7 @@ Future<Encounter?> loadEncounter(AppDatabase db, int encounterId) async {
         isStunned: link.isStunned,
         isUnconscious: link.isUnconscious,
         isTurn: link.isTurn,
+        isUnmasked: link.isUnmasked,
       ),
     );
   }

@@ -4,6 +4,7 @@ import 'package:gmdex/components/combatant_card.dart';
 import 'package:gmdex/components/status_button.dart';
 import 'package:gmdex/models/combat.dart';
 import 'package:gmdex/models/turn_highlight_preference.dart';
+import 'package:gmdex/pages/player_face_combat.dart';
 
 void main() {
   testWidgets('status button width follows its label', (tester) async {
@@ -88,6 +89,7 @@ void main() {
   testWidgets('evaluates HP addition and subtraction on submit', (
     tester,
   ) async {
+    var changedCount = 0;
     final combatant = Combatant(
       name: 'Goblin',
       isPlayer: false,
@@ -103,9 +105,11 @@ void main() {
         home: Scaffold(
           body: Form(
             child: RunCombatantCard(
+              isCreature: true,
               combatant: combatant,
               onDelete: () {},
               onInitiativeChanged: (_) {},
+              onCombatantChanged: () => changedCount++,
             ),
           ),
         ),
@@ -116,7 +120,7 @@ void main() {
     expect(find.text('HP '), findsOneWidget);
     expect(
       tester.widget<EditableText>(find.byType(EditableText).last).keyboardType,
-      TextInputType.text,
+      const TextInputType.numberWithOptions(signed: true),
     );
     await tester.enterText(hitPointsField, '30-15');
     await tester.testTextInput.receiveAction(TextInputAction.done);
@@ -125,6 +129,90 @@ void main() {
     final field = tester.widget<TextFormField>(hitPointsField);
     expect(field.controller!.text, '15');
     expect(combatant.currentHitPoints, 15);
+    expect(changedCount, greaterThan(0));
+  });
+
+  testWidgets('runtime condition changes notify the player-facing view', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1400, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final combatant = Combatant(
+      name: 'Goblin',
+      isPlayer: false,
+      currentHitPoints: 30,
+      maxHitPoints: 30,
+      initiative: 10,
+      quantity: 1,
+      creatureId: 1,
+    );
+    void publish() {
+      updatePlayerFacingCombat([
+        PlayerViewRow.fromCombatant(combatant, maskedName: 'Enemy 1'),
+      ]);
+    }
+
+    publish();
+    addTearDown(() => updatePlayerFacingCombat(const []));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Row(
+          children: [
+            SizedBox(
+              width: 700,
+              child: Material(
+                child: SingleChildScrollView(
+                  child: RunCombatantCard(
+                    isCreature: true,
+                    combatant: combatant,
+                    onDelete: () {},
+                    onInitiativeChanged: (_) {},
+                    onCombatantChanged: publish,
+                  ),
+                ),
+              ),
+            ),
+            const Expanded(child: PlayerFacingCombatPage()),
+          ],
+        ),
+      ),
+    );
+
+    expect(find.text('Frightened'), findsNothing);
+    expect(find.text('Enemy 1'), findsOneWidget);
+    await tester.enterText(find.byType(TextFormField).last, '30-18');
+    await tester.pump();
+    expect(combatant.currentHitPoints, 12);
+    expect(find.text('12/30 HP'), findsOneWidget);
+
+    await tester.tap(find.text('Conditions'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(StatusButton, 'Frightened'));
+    await tester.pump();
+
+    expect(combatant.isFrightened, isTrue);
+    expect(find.text('Frightened'), findsNWidgets(2));
+
+    await tester.tap(find.widgetWithText(StatusButton, 'Frightened'));
+    await tester.pump();
+
+    expect(combatant.isFrightened, isFalse);
+    expect(find.text('Frightened'), findsOneWidget);
+
+    await tester.tap(find.byType(Checkbox).last);
+    await tester.pump();
+    expect(combatant.isUnmasked, isTrue);
+    expect(find.text('Goblin'), findsOneWidget);
+    expect(find.text('Enemy 1'), findsNothing);
+
+    await tester.tap(find.byType(Checkbox).last);
+    await tester.pump();
+    expect(combatant.isUnmasked, isFalse);
+    expect(find.text('Enemy 1'), findsOneWidget);
   });
 
   testWidgets('initiative field uses a compact in-field label', (tester) async {
@@ -141,6 +229,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: RunCombatantCard(
+            isCreature: true,
             combatant: combatant,
             onDelete: () {},
             onInitiativeChanged: (_) {},
@@ -169,6 +258,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: RunCombatantCard(
+            isCreature: true,
             combatant: combatant,
             isActiveTurn: true,
             onDelete: () {},
@@ -208,7 +298,11 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: Form(
-            child: BuildCombatantCard(combatant: combatant, onDelete: () {}),
+            child: BuildCombatantCard(
+              isCreature: true,
+              combatant: combatant,
+              onDelete: () {},
+            ),
           ),
         ),
       ),
@@ -234,6 +328,87 @@ void main() {
     expect(combatant.exhaustionLevel, 1);
   });
 
+  testWidgets(
+    'creature is masked by default and can be unmasked in builder',
+    (tester) async {
+      final combatant = Combatant(
+        name: 'Goblin',
+        isPlayer: false,
+        maxHitPoints: 30,
+        initiative: 10,
+        quantity: 1,
+        creatureId: 1,
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: StatefulBuilder(
+              builder: (context, setState) => BuildCombatantCard(
+                isCreature: true,
+                combatant: combatant,
+                onDelete: () {},
+                onMaskedChanged: (_) => setState(() {}),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(tester.widget<Checkbox>(find.byType(Checkbox)).value, isTrue);
+      expect(combatant.isUnmasked, isFalse);
+
+      await tester.tap(find.byType(Checkbox));
+      await tester.pump();
+
+      expect(tester.widget<Checkbox>(find.byType(Checkbox)).value, isFalse);
+      expect(combatant.isUnmasked, isTrue);
+    },
+    variant: TargetPlatformVariant.desktop(),
+  );
+
+  testWidgets(
+    'mask checkboxes are hidden on mobile',
+    (tester) async {
+      final combatant = Combatant(
+        name: 'Goblin',
+        isPlayer: false,
+        maxHitPoints: 30,
+        initiative: 10,
+        quantity: 1,
+        creatureId: 1,
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: BuildCombatantCard(
+              isCreature: true,
+              combatant: combatant,
+              onDelete: () {},
+            ),
+          ),
+        ),
+      );
+      expect(find.byType(Checkbox), findsNothing);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: RunCombatantCard(
+              isCreature: true,
+              combatant: combatant,
+              onDelete: () {},
+              onInitiativeChanged: (_) {},
+            ),
+          ),
+        ),
+      );
+      expect(find.byType(Checkbox), findsNothing);
+    },
+    variant: TargetPlatformVariant.mobile(),
+  );
+
   testWidgets('collapsed conditions tile indicates an active condition', (
     tester,
   ) async {
@@ -249,7 +424,11 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: BuildCombatantCard(combatant: combatant, onDelete: () {}),
+          body: BuildCombatantCard(
+            isCreature: true,
+            combatant: combatant,
+            onDelete: () {},
+          ),
         ),
       ),
     );
@@ -287,6 +466,7 @@ void main() {
         home: Scaffold(
           body: Form(
             child: BuildCombatantCard(
+              isCreature: true,
               combatant: combatant,
               onDelete: () {},
               onQuantityChanged: (quantity) => updatedQuantity = quantity,

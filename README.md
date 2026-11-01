@@ -1,6 +1,10 @@
-# GMDex
+<p align="center">
+<img src="assets/images/GMDex_wide.png" alt="GMDex logo" width="400" hspace="60">
 
-GMDex is a tool to help GM's of Dungeons and Dragons 5th Edition manage their tables. It features a full creature database, preloaded with the SRD, a custom creature creator, a player creator and database, and an encounter builder. Still in progress are the combat tracker and a json importer so you can bring your own monster library to the app. It is built primarily for Windows, but does feature a mobile version, screenshots of that to come. It is completely offline and stores the database locally so you always have access to your data.
+<img src="assets/images/GMDex.png" alt="GMDex logo" width="200">
+</p>
+
+GMDex is a tool to help GM's of Dungeons and Dragons 5th Edition manage their tables. It features a creature database preloaded with the SRD creatures, a custom creature creator, a player creator and database, an encounter builder, a combat tracker, and a json importer so you can bring your own monster library. It is built primarily for Windows, but does feature a mobile version, Linux and Mac to come. It is completely offline and stores the database locally so you always have access to your data. <br><br>
 
 ## Features
 
@@ -8,6 +12,7 @@ GMDex is a tool to help GM's of Dungeons and Dragons 5th Edition manage their ta
   - Condition tracking - all combatants include a Conditions expansion to track all official statuses
   - Active turn highlighter option
   - Bring up creature statblocks and notes mid encounter
+  - Pop out a live player-facing initiative list into a separate desktop window, supported on Windows, Linux, and macOS
   - Track encounter specific notes
   - The encounter place, including current hitpoints, intiative place, and conditions will be saved on Save & Exit in case a session ends mid combat
   - Live edits - edit your encounter in the middle of running it to add/remove combatants
@@ -101,5 +106,20 @@ by the app.
 ![image](https://github.com/rihi52/GMDex/blob/main/assets/playercreator.png)
 
 ## Mobile Screenshots
+
+<table>
+  <tr>
+    <td><img src="assets/mobilehome.png" width="160" alt="Mobile homepage"></td>
+    <td><img src="assets/mobilebestiary.png" width="160" alt="Mobile bestiary"></td>
+    <td><img src="assets/mobilecreaturecreate.png" width="160" alt="Mobile creature creator"></td>
+    <td><img src="assets/mobileplayer.png" width="160" alt="Mobile player page"></td>
+  </tr>
+  <tr>
+    <td><img src="assets/mobileencounter.png" width="160" alt="Mobile encounter builder"></td>
+    <td><img src="assets/mobileencounterdb.png" width="160" alt="Mobile encounter database"></td>
+    <td><img src="assets/mobileruncombat.png" width="160" alt="Mobile combat runner"></td>
+    <td><img src="assets/mobilesettings.png" width="160" alt="Mobile settings"></td>
+  </tr>
+</table>
 
 This work includes material taken from the System Reference Document 5.1 (“SRD 5.1”) by Wizards of the Coast LLC and available at <https://dnd.wizards.com/resources/systems-reference-document>. The SRD 5.1 is licensed under the Creative Commons Attribution 4.0 International License available at <https://creativecommons.org/licenses/by/4.0/legalcode>.

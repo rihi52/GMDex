@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 /// Width thresholds and helpers for selecting compact versus wide layouts.
 ///
 /// Callers pass the width available to their own layout, rather than relying
@@ -15,8 +17,14 @@ class ResponsiveBreakpoints {
 class ResponsiveLayout {
   const ResponsiveLayout._();
 
-  /// Returns whether [availableWidth] reaches the supplied wide-layout cutoff.
+  static bool get isMobilePlatform =>
+      defaultTargetPlatform == TargetPlatform.android ||
+      defaultTargetPlatform == TargetPlatform.fuchsia ||
+      defaultTargetPlatform == TargetPlatform.iOS;
+
+  /// Mobile platforms always use narrow layouts; desktop uses the width cutoff.
   static bool isWide(double availableWidth, {required double breakpoint}) {
+    if (isMobilePlatform) return false;
     return availableWidth >= breakpoint;
   }
 

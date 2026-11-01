@@ -215,7 +215,7 @@ class ResponsiveNavigationScaffold extends StatelessWidget {
                     Expanded(child: body),
                   ],
                 )
-              : body,
+              : SafeArea(top: false, left: false, right: false, child: body),
         );
       },
     );

@@ -8,23 +8,28 @@ import 'package:gmdex/theme/apptheme.dart';
 import 'package:gmdex/models/combat.dart';
 import 'package:gmdex/models/turn_highlight_preference.dart';
 import 'package:gmdex/components/status_button.dart';
+import 'package:gmdex/platform/multiview_support.dart';
 
 /// Participant controls shown while assembling an encounter.
 class BuildCombatantCard extends StatelessWidget {
+  final bool isCreature;
   final bool selected;
   final VoidCallback? onTap;
   final VoidCallback onDelete;
   final ValueChanged<int>? onQuantityChanged;
+  final ValueChanged<bool>? onMaskedChanged;
 
   final Combatant combatant;
 
   const BuildCombatantCard({
     super.key,
+    required this.isCreature,
     required this.combatant,
     this.selected = false,
     this.onTap,
     required this.onDelete,
     this.onQuantityChanged,
+    this.onMaskedChanged,
   });
 
   @override
@@ -34,7 +39,7 @@ class BuildCombatantCard extends StatelessWidget {
       child: ListTile(
         selected: selected,
         onTap: onTap,
-        tileColor: AppColors.cardBackground,
+        tileColor: isCreature ? AppColors.creatureCard : AppColors.playerCard,
         selectedTileColor: AppColors.cardSelected,
         selectedColor: AppColors.accent,
         subtitle: Column(
@@ -129,6 +134,22 @@ class BuildCombatantCard extends StatelessWidget {
                 ),
               ],
             ),
+            if (isCreature && supportsMultiViewPlatform)
+              Row(
+                children: [
+                  Checkbox(
+                    value: !combatant.isUnmasked,
+                    visualDensity: VisualDensity.compact,
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    onChanged: (masked) {
+                      if (masked == null) return;
+                      combatant.isUnmasked = !masked;
+                      onMaskedChanged?.call(masked);
+                    },
+                  ),
+                  const Text('Masked'),
+                ],
+              ),
             _CombatantStatusSection(combatant: combatant),
           ],
         ),
@@ -264,9 +285,10 @@ Widget _combatantStatuses(Combatant combatant, {VoidCallback? onChanged}) {
 
 /// Collapsible list of conditions for one combatant.
 class _CombatantStatusSection extends StatefulWidget {
-  const _CombatantStatusSection({required this.combatant});
+  const _CombatantStatusSection({required this.combatant, this.onChanged});
 
   final Combatant combatant;
+  final VoidCallback? onChanged;
 
   @override
   State<_CombatantStatusSection> createState() =>
@@ -321,7 +343,13 @@ class _CombatantStatusSectionState extends State<_CombatantStatusSection> {
         ],
       ),
       children: [
-        _combatantStatuses(widget.combatant, onChanged: () => setState(() {})),
+        _combatantStatuses(
+          widget.combatant,
+          onChanged: () {
+            setState(() {});
+            widget.onChanged?.call();
+          },
+        ),
       ],
     );
   }
@@ -329,22 +357,26 @@ class _CombatantStatusSectionState extends State<_CombatantStatusSection> {
 
 /// Runtime participant row with hit-point and initiative editing.
 class RunCombatantCard extends StatefulWidget {
+  final bool isCreature;
   final bool selected;
   final bool isActiveTurn;
   final VoidCallback? onTap;
   final VoidCallback onDelete;
   final ValueChanged<int?> onInitiativeChanged;
+  final VoidCallback? onCombatantChanged;
 
   final Combatant combatant;
 
   const RunCombatantCard({
     super.key,
+    required this.isCreature,
     required this.combatant,
     this.selected = false,
     this.isActiveTurn = false,
     this.onTap,
     required this.onDelete,
     required this.onInitiativeChanged,
+    this.onCombatantChanged,
   });
 
   @override
@@ -379,6 +411,7 @@ class _RunCombatantCardState extends State<RunCombatantCard> {
     }
 
     widget.combatant.currentHitPoints = value;
+    widget.onCombatantChanged?.call();
     _hitPointsController.value = TextEditingValue(
       text: value.toString(),
       selection: TextSelection.collapsed(offset: value.toString().length),
@@ -401,15 +434,17 @@ class _RunCombatantCardState extends State<RunCombatantCard> {
           onTap: widget.onTap,
           visualDensity: const VisualDensity(vertical: -1),
           minVerticalPadding: 0,
-          tileColor: AppColors.cardBackground,
+          tileColor: widget.isCreature
+              ? AppColors.creatureCard
+              : AppColors.playerCard,
           selectedTileColor: AppColors.cardSelected,
           selectedColor: AppColors.accent,
           shape: RoundedRectangleBorder(
             side: BorderSide(
               color: highlightEnabled && widget.isActiveTurn
-                  ? Colors.red
+                  ? AppColors.cardHighlight
                   : Colors.transparent,
-              width: 2,
+              width: 4,
             ),
             borderRadius: BorderRadius.circular(12),
           ),
@@ -476,6 +511,33 @@ class _RunCombatantCardState extends State<RunCombatantCard> {
                       ),
                     ),
                   ),
+                  if (widget.isCreature && supportsMultiViewPlatform)
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.spacingMedium,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Checkbox(
+                              value: !widget.combatant.isUnmasked,
+                              visualDensity: VisualDensity.compact,
+                              materialTapTargetSize:
+                                  MaterialTapTargetSize.shrinkWrap,
+                              onChanged: (masked) {
+                                if (masked == null) return;
+                                setState(() {
+                                  widget.combatant.isUnmasked = !masked;
+                                });
+                                widget.onCombatantChanged?.call();
+                              },
+                            ),
+                            const Text('Masked'),
+                          ],
+                        ),
+                      ),
+                    ),
                   Padding(
                     padding: const EdgeInsets.only(
                       right: AppSpacing.spacingMedium,
@@ -487,7 +549,9 @@ class _RunCombatantCardState extends State<RunCombatantCard> {
                         key: _hitPointsFieldKey,
                         controller: _hitPointsController,
                         maxLines: 1,
-                        keyboardType: TextInputType.text,
+                        keyboardType: const TextInputType.numberWithOptions(
+                          signed: true,
+                        ),
                         textInputAction: TextInputAction.done,
                         inputFormatters: [
                           FilteringTextInputFormatter.allow(
@@ -509,11 +573,18 @@ class _RunCombatantCardState extends State<RunCombatantCard> {
                             ? 'Enter a valid HP calculation'
                             : null,
                         onFieldSubmitted: (_) => _normalizeHitPoints(),
+                        onChanged: (value) {
+                          final hitPoints = _evaluateHitPointExpression(value);
+                          if (hitPoints == null) return;
+                          widget.combatant.currentHitPoints = hitPoints;
+                          widget.onCombatantChanged?.call();
+                        },
                         onSaved: (value) {
                           final hitPoints = _evaluateHitPointExpression(value);
                           if (hitPoints != null) {
                             widget.combatant.currentHitPoints = hitPoints;
                             _hitPointsController.text = hitPoints.toString();
+                            widget.onCombatantChanged?.call();
                           }
                         },
                       ),
@@ -526,7 +597,10 @@ class _RunCombatantCardState extends State<RunCombatantCard> {
                 ],
               ),
 
-              _CombatantStatusSection(combatant: widget.combatant),
+              _CombatantStatusSection(
+                combatant: widget.combatant,
+                onChanged: widget.onCombatantChanged,
+              ),
             ],
           ),
         ),

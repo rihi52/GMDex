@@ -2,6 +2,7 @@
 //
 // Combatant hit points, conditions, and turn order are kept in page state and
 // persisted through the encounter writer when the encounter is saved.
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:math' show min;
@@ -22,8 +23,9 @@ import 'package:gmdex/database/player_writer.dart';
 import 'package:gmdex/models/combat.dart';
 import 'package:gmdex/models/creature.dart';
 import 'package:gmdex/models/turn_highlight_preference.dart';
-import 'dart:convert';
 import 'package:gmdex/pages/player_face_combat.dart';
+import 'package:gmdex/platform/player_initiative_window.dart';
+import 'package:gmdex/platform/multiview_support.dart';
 
 /// Runs a new encounter model or a previously loaded encounter.
 class RunCombatPage extends StatefulWidget {
@@ -41,6 +43,7 @@ class _RunCombatPageState extends State<RunCombatPage> {
   final _combatantListViewportKey = GlobalKey();
   final _combatantListScrollController = ScrollController();
   final Map<Combatant, GlobalKey> _combatantKeys = {};
+  final Map<Combatant, int> _enemyNumbers = {};
   late final List<Combatant> _combatants;
   late final TextEditingController _encounterNotesController;
   int? _encounterId;
@@ -51,6 +54,7 @@ class _RunCombatPageState extends State<RunCombatPage> {
   Creature? _selectedCreature;
   PlayerRow? _selectedPlayer;
   Object? _selectionError;
+  int? _playerInitiativeWindowId;
 
   @override
   void initState() {
@@ -62,6 +66,7 @@ class _RunCombatPageState extends State<RunCombatPage> {
 
     // Sort highest initiative first.
     _sortCombatants();
+    _assignEnemyNumbers();
 
     // Restore the explicitly active combatant, if one exists.
     Combatant? activeCombatant;
@@ -102,6 +107,8 @@ class _RunCombatPageState extends State<RunCombatPage> {
 
   @override
   void dispose() {
+    unawaited(_closePlayerInitiativeWindow());
+    updatePlayerFacingCombat(const []);
     HardwareKeyboard.instance.removeHandler(_handleHardwareKey);
     _combatantListScrollController.dispose();
     _encounterNotesController.dispose();
@@ -241,6 +248,82 @@ class _RunCombatPageState extends State<RunCombatPage> {
     for (var index = 0; index < _combatants.length; index++) {
       _combatants[index].isTurn = index == _currentTurnIndex;
     }
+    _publishPlayerFacingCombat();
+  }
+
+  void _publishPlayerFacingCombat() {
+    _assignEnemyNumbers();
+    updatePlayerFacingCombat(
+      _combatants
+          .map(
+            (combatant) => PlayerViewRow.fromCombatant(
+              combatant,
+              maskedName: combatant.isPlayer
+                  ? 'Enemy'
+                  : 'Enemy ${_enemyNumbers[combatant]}',
+            ),
+          )
+          .toList(growable: false),
+    );
+  }
+
+  void _assignEnemyNumbers() {
+    var nextNumber = _enemyNumbers.length + 1;
+    for (final combatant in _combatants) {
+      if (!combatant.isPlayer && !_enemyNumbers.containsKey(combatant)) {
+        _enemyNumbers[combatant] = nextNumber++;
+      }
+    }
+  }
+
+  Future<void> _openPlayerInitiative() async {
+    if (!supportsMultiViewPlatform) {
+      return;
+    }
+
+    try {
+      final windowId = await openOrFocusPlayerInitiativeWindow(
+        context,
+        _playerInitiativeWindowId,
+      );
+      if (windowId == null) return;
+      if (mounted) {
+        _playerInitiativeWindowId = windowId;
+      } else {
+        await closePlayerInitiativeWindow(windowId);
+      }
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not open player initiative: $error')),
+        );
+      }
+    }
+  }
+
+  Future<bool> _closePlayerInitiativeWindow() async {
+    final windowId = _playerInitiativeWindowId;
+    if (windowId == null) return true;
+
+    try {
+      final closed = await closePlayerInitiativeWindow(windowId);
+      if (closed) _playerInitiativeWindowId = null;
+      if (!closed && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not close player initiative.')),
+        );
+      }
+      return closed;
+    } catch (error, stackTrace) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not close player initiative: $error')),
+        );
+      } else {
+        debugPrint('Could not close player initiative: $error\n$stackTrace');
+      }
+      return false;
+    }
   }
 
   void _sortCombatants() {
@@ -258,11 +341,13 @@ class _RunCombatPageState extends State<RunCombatPage> {
     final key = _combatantKeys.putIfAbsent(combatant, GlobalKey.new);
     return RunCombatantCard(
       key: key,
+      isCreature: !combatant.isPlayer,
       combatant: combatant,
       selected: _selectedCombatant == combatant,
       isActiveTurn: index == _currentTurnIndex,
       onTap: () => _selectCombatant(combatant, isWide),
       onDelete: () => _deleteCombatant(combatant),
+      onCombatantChanged: _publishPlayerFacingCombat,
       onInitiativeChanged: (initiative) =>
           _updateCombatantInitiative(combatant, initiative),
     );
@@ -425,6 +510,7 @@ class _RunCombatPageState extends State<RunCombatPage> {
     try {
       await saveEncounter(database, encounter, existingId: _encounterId);
       if (!mounted) return;
+      if (!await _closePlayerInitiativeWindow() || !mounted) return;
       Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
     } catch (error) {
       if (mounted) {
@@ -433,6 +519,11 @@ class _RunCombatPageState extends State<RunCombatPage> {
         );
       }
     }
+  }
+
+  Future<void> _exitWithoutSaving() async {
+    if (!await _closePlayerInitiativeWindow() || !mounted) return;
+    Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
   }
 
   Future<void> _editEncounter() async {
@@ -465,6 +556,7 @@ class _RunCombatPageState extends State<RunCombatPage> {
       }
       setState(() {
         _encounterName = updatedEncounter.name;
+        _enemyNumbers.clear();
         _combatants
           ..clear()
           ..addAll(updatedEncounter.combatants)
@@ -481,6 +573,7 @@ class _RunCombatPageState extends State<RunCombatPage> {
         _selectedCreature = null;
         _selectedPlayer = null;
         _selectionError = null;
+        _updateTurnFlags();
       });
     } catch (error) {
       if (mounted) {
@@ -513,10 +606,10 @@ class _RunCombatPageState extends State<RunCombatPage> {
                   onPressed: _sortCombatantsByInitiative,
                   icon: const Icon(Icons.sort),
                 ),
-                if (isWide)
+                if (supportsMultiViewPlatform)
                   IconButton(
-                    onPressed: () {},
-                    icon: Icon(Icons.open_in_new),
+                    onPressed: _openPlayerInitiative,
+                    icon: const Icon(Icons.open_in_new),
                     tooltip: 'Pop-out Player Initiative',
                   ),
               ],
@@ -547,173 +640,184 @@ class _RunCombatPageState extends State<RunCombatPage> {
                     maxWidth: min(constraints.maxWidth - 50, 500),
                     onSaved: _saveSelectedNotes,
                   ),
-            body: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
-                    children: [
-                      Expanded(
-                        flex: 7,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: AppSpacing.spacingLarge,
+            body: SafeArea(
+              key: const ValueKey('combat-body-safe-area'),
+              top: false,
+              left: false,
+              right: false,
+              bottom: !isWide,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      children: [
+                        Expanded(
+                          flex: 7,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.spacingLarge,
+                            ),
+                            child: SingleChildScrollView(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              key: _combatantListViewportKey,
+                              controller: _combatantListScrollController,
+                              child: Column(
+                                children: [
+                                  for (
+                                    var index = 0;
+                                    index < _combatants.length;
+                                    index++
+                                  )
+                                    _buildCombatantCard(
+                                      _combatants[index],
+                                      index,
+                                      isWide,
+                                    ),
+                                ],
+                              ),
+                            ),
                           ),
-                          child: SingleChildScrollView(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            key: _combatantListViewportKey,
-                            controller: _combatantListScrollController,
+                        ),
+                        const ColoredBox(
+                          color: AppColors.background,
+                          child: Divider(
+                            color: AppColors.primary,
+                            thickness: 1,
+                          ),
+                        ),
+                        Expanded(
+                          flex: 3,
+                          child: ColoredBox(
+                            color: AppColors.background,
                             child: Column(
                               children: [
-                                for (
-                                  var index = 0;
-                                  index < _combatants.length;
-                                  index++
-                                )
-                                  _buildCombatantCard(
-                                    _combatants[index],
-                                    index,
-                                    isWide,
+                                Expanded(
+                                  flex: 6,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(
+                                      AppSpacing.spacingMedium,
+                                    ),
+                                    child: _EncounterNotesEditor(
+                                      controller: _encounterNotesController,
+                                    ),
                                   ),
+                                ),
+                                const Divider(
+                                  color: AppColors.primary,
+                                  thickness: 1,
+                                ),
+                                Expanded(
+                                  flex: 2,
+                                  child: SizedBox(
+                                    width: double.infinity,
+                                    child: ValueListenableBuilder<bool>(
+                                      valueListenable: turnHighlightEnabled,
+                                      builder:
+                                          (
+                                            context,
+                                            isHighlightEnabled,
+                                            _,
+                                          ) => Wrap(
+                                            runAlignment: WrapAlignment.center,
+                                            alignment:
+                                                WrapAlignment.spaceEvenly,
+                                            spacing: AppSpacing.spacingLarge,
+                                            children: [
+                                              ElevatedButton(
+                                                onPressed: isHighlightEnabled
+                                                    ? () => _moveTurn(-1)
+                                                    : null,
+                                                child: Text('Previous'),
+                                              ),
+                                              ElevatedButton(
+                                                onPressed: isHighlightEnabled
+                                                    ? () => _moveTurn(1)
+                                                    : null,
+                                                child: Text('Next'),
+                                              ),
+                                            ],
+                                          ),
+                                    ),
+                                  ),
+                                ),
+                                const Divider(
+                                  color: AppColors.primary,
+                                  thickness: 1,
+                                ),
+                                Expanded(
+                                  flex: 2,
+                                  child: SizedBox(
+                                    width: double.infinity,
+                                    child: Wrap(
+                                      runAlignment: WrapAlignment.center,
+                                      alignment: WrapAlignment.spaceEvenly,
+                                      crossAxisAlignment:
+                                          WrapCrossAlignment.center,
+                                      spacing: AppSpacing.spacingLarge,
+                                      children: [
+                                        ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal:
+                                                  AppSpacing.spacingMedium,
+                                              vertical: AppSpacing.spacingSmall,
+                                            ),
+                                          ),
+                                          onPressed: _editEncounter,
+                                          child: Text('Edit'),
+                                        ),
+                                        ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal:
+                                                  AppSpacing.spacingMedium,
+                                              vertical: AppSpacing.spacingSmall,
+                                            ),
+                                          ),
+                                          onPressed: _saveAndExit,
+                                          child: const Text('Save & Exit'),
+                                        ),
+                                        ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal:
+                                                  AppSpacing.spacingMedium,
+                                              vertical: AppSpacing.spacingSmall,
+                                            ),
+                                          ),
+                                          onPressed: _exitWithoutSaving,
+                                          child: Text('Exit'),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: AppSpacing.spacingLarge),
                               ],
                             ),
                           ),
                         ),
-                      ),
-                      const ColoredBox(
-                        color: AppColors.background,
-                        child: Divider(color: AppColors.primary, thickness: 1),
-                      ),
-                      Expanded(
-                        flex: 3,
-                        child: ColoredBox(
-                          color: AppColors.background,
-                          child: Column(
-                            children: [
-                              Expanded(
-                                flex: 6,
-                                child: Padding(
-                                  padding: const EdgeInsets.all(
-                                    AppSpacing.spacingMedium,
-                                  ),
-                                  child: _EncounterNotesEditor(
-                                    controller: _encounterNotesController,
-                                  ),
-                                ),
-                              ),
-                              const Divider(
-                                color: AppColors.primary,
-                                thickness: 1,
-                              ),
-                              Expanded(
-                                flex: 2,
-                                child: SizedBox(
-                                  width: double.infinity,
-                                  child: ValueListenableBuilder<bool>(
-                                    valueListenable: turnHighlightEnabled,
-                                    builder: (context, isHighlightEnabled, _) =>
-                                        Wrap(
-                                          runAlignment: WrapAlignment.center,
-                                          alignment: WrapAlignment.spaceEvenly,
-                                          spacing: AppSpacing.spacingLarge,
-                                          children: [
-                                            ElevatedButton(
-                                              onPressed: isHighlightEnabled
-                                                  ? () => _moveTurn(-1)
-                                                  : null,
-                                              child: Text('Previous'),
-                                            ),
-                                            ElevatedButton(
-                                              onPressed: isHighlightEnabled
-                                                  ? () => _moveTurn(1)
-                                                  : null,
-                                              child: Text('Next'),
-                                            ),
-                                          ],
-                                        ),
-                                  ),
-                                ),
-                              ),
-                              const Divider(
-                                color: AppColors.primary,
-                                thickness: 1,
-                              ),
-                              Expanded(
-                                flex: 2,
-                                child: SizedBox(
-                                  width: double.infinity,
-                                  child: Wrap(
-                                    runAlignment: WrapAlignment.center,
-                                    alignment: WrapAlignment.spaceEvenly,
-                                    crossAxisAlignment:
-                                        WrapCrossAlignment.center,
-                                    spacing: AppSpacing.spacingLarge,
-                                    children: [
-                                      ElevatedButton(
-                                        style: ElevatedButton.styleFrom(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal:
-                                                AppSpacing.spacingMedium,
-                                            vertical: AppSpacing.spacingSmall,
-                                          ),
-                                        ),
-                                        onPressed: _editEncounter,
-                                        child: Text('Edit'),
-                                      ),
-                                      ElevatedButton(
-                                        style: ElevatedButton.styleFrom(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal:
-                                                AppSpacing.spacingMedium,
-                                            vertical: AppSpacing.spacingSmall,
-                                          ),
-                                        ),
-                                        onPressed: _saveAndExit,
-                                        child: const Text('Save & Exit'),
-                                      ),
-                                      ElevatedButton(
-                                        style: ElevatedButton.styleFrom(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal:
-                                                AppSpacing.spacingMedium,
-                                            vertical: AppSpacing.spacingSmall,
-                                          ),
-                                        ),
-                                        onPressed: () => Navigator.of(context)
-                                            .pushNamedAndRemoveUntil(
-                                              '/home',
-                                              (route) => false,
-                                            ),
-                                        child: Text('Exit'),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: AppSpacing.spacingLarge),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                if (isWide) ...[
-                  const VerticalDivider(
-                    color: AppColors.primary,
-                    width: 5,
-                    thickness: 1,
-                  ),
-                  Expanded(
-                    child: Padding(
-                      padding: EdgeInsetsGeometry.symmetric(
-                        horizontal: AppSpacing.spacingLarge,
-                      ),
-                      child: _combatantDetails(isWide: true),
+                      ],
                     ),
                   ),
+                  if (isWide) ...[
+                    const VerticalDivider(
+                      color: AppColors.primary,
+                      width: 5,
+                      thickness: 1,
+                    ),
+                    Expanded(
+                      child: Padding(
+                        padding: EdgeInsetsGeometry.symmetric(
+                          horizontal: AppSpacing.spacingLarge,
+                        ),
+                        child: _combatantDetails(isWide: true),
+                      ),
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
         );
@@ -830,33 +934,45 @@ class _EncounterChoicePageState extends State<EncounterChoicePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            SizedBox(
-              height: 75,
-              width: 150,
-              child: ElevatedButton(
-                onPressed: _returnHome,
-                child: Text('Return'),
+      body: SafeArea(
+        top: false,
+        left: false,
+        right: false,
+        bottom: ResponsiveLayout.isNarrow(
+          MediaQuery.sizeOf(context).width,
+          breakpoint: ResponsiveBreakpoints.navigation,
+        ),
+        child: Center(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              SizedBox(
+                height: 75,
+                width: 150,
+                child: ElevatedButton(
+                  onPressed: _returnHome,
+                  child: Text('Return'),
+                ),
               ),
-            ),
-            SizedBox(
-              height: 75,
-              width: 150,
-              child: ElevatedButton(onPressed: _openCreate, child: Text('New')),
-            ),
-            SizedBox(
-              height: 75,
-              width: 150,
-              child: ElevatedButton(
-                onPressed: _openExisting,
-                child: const Text('Existing'),
+              SizedBox(
+                height: 75,
+                width: 150,
+                child: ElevatedButton(
+                  onPressed: _openCreate,
+                  child: Text('New'),
+                ),
               ),
-            ),
-          ],
+              SizedBox(
+                height: 75,
+                width: 150,
+                child: ElevatedButton(
+                  onPressed: _openExisting,
+                  child: const Text('Existing'),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -70,7 +70,7 @@ Future<void> initializeDatabase() async {
             pClass: 'Monk',
             pArmorClass: Value(15),
             pHitPoints: Value(38),
-            pLevel: Value(1),
+            pLevel: Value(11),
             pOriginalCampaign: Value('Finndalin'),
             pNotes: Value('I AM VERY FAST!!!'),
           ),
