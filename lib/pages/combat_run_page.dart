@@ -42,6 +42,7 @@ class _RunCombatPageState extends State<RunCombatPage> {
   final _formKey = GlobalKey<FormState>();
   final _combatantListViewportKey = GlobalKey();
   final _combatantListScrollController = ScrollController();
+  final _encounterNotesFocusNode = FocusNode();
   final Map<Combatant, GlobalKey> _combatantKeys = {};
   final Map<Combatant, int> _enemyNumbers = {};
   late final List<Combatant> _combatants;
@@ -59,6 +60,7 @@ class _RunCombatPageState extends State<RunCombatPage> {
   @override
   void initState() {
     super.initState();
+    _encounterNotesFocusNode.addListener(_onEncounterNotesFocusChanged);
     // Space advances the active turn unless focus is inside a text field.
     HardwareKeyboard.instance.addHandler(_handleHardwareKey);
     _hasStarted = widget.encounter?.hasStarted ?? false;
@@ -107,12 +109,19 @@ class _RunCombatPageState extends State<RunCombatPage> {
 
   @override
   void dispose() {
+    _encounterNotesFocusNode
+      ..removeListener(_onEncounterNotesFocusChanged)
+      ..dispose();
     unawaited(_closePlayerInitiativeWindow());
     updatePlayerFacingCombat(const []);
     HardwareKeyboard.instance.removeHandler(_handleHardwareKey);
     _combatantListScrollController.dispose();
     _encounterNotesController.dispose();
     super.dispose();
+  }
+
+  void _onEncounterNotesFocusChanged() {
+    if (mounted) setState(() {});
   }
 
   void _deleteCombatant(Combatant combatant) {
@@ -592,6 +601,10 @@ class _RunCombatPageState extends State<RunCombatPage> {
           constraints.maxWidth,
           breakpoint: ResponsiveBreakpoints.browseDetails,
         );
+        final notesKeyboardVisible =
+            ResponsiveLayout.isMobilePlatform &&
+            _encounterNotesFocusNode.hasFocus &&
+            MediaQuery.viewInsetsOf(context).bottom > 0;
         return Form(
           key: _formKey,
           child: Scaffold(
@@ -653,7 +666,11 @@ class _RunCombatPageState extends State<RunCombatPage> {
                     child: Column(
                       children: [
                         Expanded(
-                          flex: 7,
+                          flex: notesKeyboardVisible
+                              ? 7
+                              : ResponsiveLayout.isMobilePlatform
+                              ? 6
+                              : 7,
                           child: Padding(
                             padding: const EdgeInsets.symmetric(
                               horizontal: AppSpacing.spacingLarge,
@@ -687,113 +704,137 @@ class _RunCombatPageState extends State<RunCombatPage> {
                           ),
                         ),
                         Expanded(
-                          flex: 3,
+                          flex: notesKeyboardVisible
+                              ? 3
+                              : ResponsiveLayout.isMobilePlatform
+                              ? 4
+                              : 3,
                           child: ColoredBox(
                             color: AppColors.background,
                             child: Column(
                               children: [
                                 Expanded(
-                                  flex: 6,
+                                  flex: notesKeyboardVisible
+                                      ? 1
+                                      : ResponsiveLayout.isMobilePlatform
+                                      ? 5
+                                      : 6,
                                   child: Padding(
                                     padding: const EdgeInsets.all(
                                       AppSpacing.spacingMedium,
                                     ),
                                     child: _EncounterNotesEditor(
                                       controller: _encounterNotesController,
+                                      focusNode: _encounterNotesFocusNode,
                                     ),
                                   ),
                                 ),
-                                const Divider(
-                                  color: AppColors.primary,
-                                  thickness: 1,
-                                ),
-                                Expanded(
-                                  flex: 2,
-                                  child: SizedBox(
-                                    width: double.infinity,
-                                    child: ValueListenableBuilder<bool>(
-                                      valueListenable: turnHighlightEnabled,
-                                      builder:
-                                          (
-                                            context,
-                                            isHighlightEnabled,
-                                            _,
-                                          ) => Wrap(
-                                            runAlignment: WrapAlignment.center,
-                                            alignment:
-                                                WrapAlignment.spaceEvenly,
-                                            spacing: AppSpacing.spacingLarge,
-                                            children: [
-                                              ElevatedButton(
-                                                onPressed: isHighlightEnabled
-                                                    ? () => _moveTurn(-1)
-                                                    : null,
-                                                child: Text('Previous'),
-                                              ),
-                                              ElevatedButton(
-                                                onPressed: isHighlightEnabled
-                                                    ? () => _moveTurn(1)
-                                                    : null,
-                                                child: Text('Next'),
-                                              ),
-                                            ],
-                                          ),
+                                if (!notesKeyboardVisible) ...[
+                                  const Divider(
+                                    color: AppColors.primary,
+                                    thickness: 1,
+                                  ),
+                                  Expanded(
+                                    flex: ResponsiveLayout.isMobilePlatform
+                                        ? 3
+                                        : 2,
+                                    child: SizedBox(
+                                      width: double.infinity,
+                                      child: ValueListenableBuilder<bool>(
+                                        valueListenable: turnHighlightEnabled,
+                                        builder:
+                                            (
+                                              context,
+                                              isHighlightEnabled,
+                                              _,
+                                            ) => Wrap(
+                                              runAlignment:
+                                                  WrapAlignment.center,
+                                              alignment:
+                                                  WrapAlignment.spaceEvenly,
+                                              spacing: AppSpacing.spacingLarge,
+                                              children: [
+                                                ElevatedButton(
+                                                  onPressed: isHighlightEnabled
+                                                      ? () => _moveTurn(-1)
+                                                      : null,
+                                                  child: Text('Previous'),
+                                                ),
+                                                ElevatedButton(
+                                                  onPressed: isHighlightEnabled
+                                                      ? () => _moveTurn(1)
+                                                      : null,
+                                                  child: Text('Next'),
+                                                ),
+                                              ],
+                                            ),
+                                      ),
                                     ),
                                   ),
-                                ),
-                                const Divider(
-                                  color: AppColors.primary,
-                                  thickness: 1,
-                                ),
-                                Expanded(
-                                  flex: 2,
-                                  child: SizedBox(
-                                    width: double.infinity,
-                                    child: Wrap(
-                                      runAlignment: WrapAlignment.center,
-                                      alignment: WrapAlignment.spaceEvenly,
-                                      crossAxisAlignment:
-                                          WrapCrossAlignment.center,
-                                      spacing: AppSpacing.spacingLarge,
-                                      children: [
-                                        ElevatedButton(
-                                          style: ElevatedButton.styleFrom(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal:
-                                                  AppSpacing.spacingMedium,
-                                              vertical: AppSpacing.spacingSmall,
+                                  const Divider(
+                                    color: AppColors.primary,
+                                    thickness: 1,
+                                  ),
+                                  Expanded(
+                                    flex: ResponsiveLayout.isMobilePlatform
+                                        ? 3
+                                        : 2,
+                                    child: SizedBox(
+                                      width: double.infinity,
+                                      child: Wrap(
+                                        runAlignment: WrapAlignment.center,
+                                        alignment: WrapAlignment.spaceEvenly,
+                                        crossAxisAlignment:
+                                            WrapCrossAlignment.center,
+                                        spacing: AppSpacing.spacingLarge,
+                                        children: [
+                                          ElevatedButton(
+                                            style: ElevatedButton.styleFrom(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: AppSpacing
+                                                        .spacingMedium,
+                                                    vertical:
+                                                        AppSpacing.spacingSmall,
+                                                  ),
                                             ),
+                                            onPressed: _editEncounter,
+                                            child: Text('Edit'),
                                           ),
-                                          onPressed: _editEncounter,
-                                          child: Text('Edit'),
-                                        ),
-                                        ElevatedButton(
-                                          style: ElevatedButton.styleFrom(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal:
-                                                  AppSpacing.spacingMedium,
-                                              vertical: AppSpacing.spacingSmall,
+                                          ElevatedButton(
+                                            style: ElevatedButton.styleFrom(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: AppSpacing
+                                                        .spacingMedium,
+                                                    vertical:
+                                                        AppSpacing.spacingSmall,
+                                                  ),
                                             ),
+                                            onPressed: _saveAndExit,
+                                            child: const Text('Save & Exit'),
                                           ),
-                                          onPressed: _saveAndExit,
-                                          child: const Text('Save & Exit'),
-                                        ),
-                                        ElevatedButton(
-                                          style: ElevatedButton.styleFrom(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal:
-                                                  AppSpacing.spacingMedium,
-                                              vertical: AppSpacing.spacingSmall,
+                                          ElevatedButton(
+                                            style: ElevatedButton.styleFrom(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: AppSpacing
+                                                        .spacingMedium,
+                                                    vertical:
+                                                        AppSpacing.spacingSmall,
+                                                  ),
                                             ),
+                                            onPressed: _exitWithoutSaving,
+                                            child: Text('Exit'),
                                           ),
-                                          onPressed: _exitWithoutSaving,
-                                          child: Text('Exit'),
-                                        ),
-                                      ],
+                                        ],
+                                      ),
                                     ),
                                   ),
-                                ),
-                                const SizedBox(height: AppSpacing.spacingLarge),
+                                  const SizedBox(
+                                    height: AppSpacing.spacingLarge,
+                                  ),
+                                ],
                               ],
                             ),
                           ),
@@ -827,14 +868,19 @@ class _RunCombatPageState extends State<RunCombatPage> {
 }
 
 class _EncounterNotesEditor extends StatelessWidget {
-  const _EncounterNotesEditor({required this.controller});
+  const _EncounterNotesEditor({
+    required this.controller,
+    required this.focusNode,
+  });
 
   final TextEditingController controller;
+  final FocusNode focusNode;
 
   @override
   Widget build(BuildContext context) {
     return TextField(
       controller: controller,
+      focusNode: focusNode,
       expands: true,
       maxLines: null,
       textAlignVertical: TextAlignVertical.top,

@@ -9,6 +9,7 @@ import 'package:gmdex/models/combat.dart';
 import 'package:gmdex/models/turn_highlight_preference.dart';
 import 'package:gmdex/components/status_button.dart';
 import 'package:gmdex/platform/multiview_support.dart';
+import 'package:gmdex/components/responsive_layout.dart';
 
 /// Participant controls shown while assembling an encounter.
 class BuildCombatantCard extends StatelessWidget {
@@ -39,6 +40,14 @@ class BuildCombatantCard extends StatelessWidget {
       child: ListTile(
         selected: selected,
         onTap: onTap,
+        contentPadding: EdgeInsets.symmetric(
+          horizontal: ResponsiveLayout.isMobilePlatform
+              ? AppSpacing.spacingSmall
+              : AppSpacing.spacingMedium, // or EdgeInsets.zero
+          vertical: ResponsiveLayout.isMobilePlatform
+              ? 2
+              : AppSpacing.spacingMedium,
+        ),
         tileColor: isCreature ? AppColors.creatureCard : AppColors.playerCard,
         selectedTileColor: AppColors.cardSelected,
         selectedColor: AppColors.accent,
@@ -49,7 +58,9 @@ class BuildCombatantCard extends StatelessWidget {
               children: [
                 Padding(
                   padding: EdgeInsetsGeometry.symmetric(
-                    horizontal: AppSpacing.spacingMedium,
+                    horizontal: ResponsiveLayout.isMobilePlatform
+                        ? AppSpacing.spacingSmall
+                        : AppSpacing.spacingMedium,
                   ),
                   child: ElevatedButton(
                     onPressed: onDelete,
@@ -58,9 +69,10 @@ class BuildCombatantCard extends StatelessWidget {
                       padding: EdgeInsets.symmetric(
                         horizontal: AppSpacing.spacingSmall,
                       ),
-                      minimumSize: Size(60, 40),
+                      minimumSize: ResponsiveLayout.isMobilePlatform
+                          ? Size(40, 30)
+                          : Size(60, 40),
                     ),
-                    // icon: const Icon(Icons.remove),
                     child: const Icon(Icons.delete),
                   ),
                 ),
@@ -69,7 +81,8 @@ class BuildCombatantCard extends StatelessWidget {
                     left: AppSpacing.spacingMedium,
                   ),
                   child: SizedBox(
-                    width: 75,
+                    width: ResponsiveLayout.isMobilePlatform ? 60 : null,
+                    height: ResponsiveLayout.isMobilePlatform ? 45 : null,
                     child: TextFormField(
                       maxLines: 1,
                       initialValue: combatant.initiative.toString(),
@@ -106,7 +119,8 @@ class BuildCombatantCard extends StatelessWidget {
                     right: AppSpacing.spacingMedium,
                   ),
                   child: SizedBox(
-                    width: 75,
+                    width: ResponsiveLayout.isMobilePlatform ? 60 : null,
+                    height: ResponsiveLayout.isMobilePlatform ? 45 : null,
                     child: TextFormField(
                       maxLines: 1,
                       initialValue: combatant.quantity.toString(),
@@ -115,7 +129,9 @@ class BuildCombatantCard extends StatelessWidget {
                       style: Theme.of(context).textTheme.labelSmall,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
-                        labelText: 'Quantity',
+                        labelText: ResponsiveLayout.isMobilePlatform
+                            ? 'Qty'
+                            : 'Quantity',
                         labelStyle: Theme.of(context).textTheme.labelSmall,
                       ),
                       validator: (value) =>
@@ -192,7 +208,7 @@ Widget _combatantStatuses(Combatant combatant, {VoidCallback? onChanged}) {
       initiallySelected: selected,
       onChanged: onChanged,
       fillColor: AppColors.primary,
-      height: 20,
+      height: ResponsiveLayout.isMobilePlatform ? 25 : 30,
     );
   }
 
@@ -333,8 +349,8 @@ class _CombatantStatusSectionState extends State<_CombatantStatusSection> {
             const Tooltip(
               message: 'Active conditions',
               child: Icon(
-                Icons.circle,
-                size: 8,
+                Icons.circle_rounded,
+                size: 10,
                 color: AppColors.primary,
                 semanticLabel: 'Active conditions',
               ),
@@ -427,8 +443,12 @@ class _RunCombatantCardState extends State<RunCombatantCard> {
         padding: const EdgeInsets.symmetric(vertical: 2),
         child: ListTile(
           contentPadding: EdgeInsets.symmetric(
-            horizontal: AppSpacing.spacingMedium,
-            vertical: AppSpacing.spacingSmall,
+            horizontal: ResponsiveLayout.isMobilePlatform
+                ? AppSpacing.spacingSmall
+                : AppSpacing.spacingMedium, // or EdgeInsets.zero
+            vertical: ResponsiveLayout.isMobilePlatform
+                ? 2
+                : AppSpacing.spacingMedium,
           ),
           selected: widget.selected,
           onTap: widget.onTap,
@@ -460,9 +480,10 @@ class _RunCombatantCardState extends State<RunCombatantCard> {
                       padding: EdgeInsets.symmetric(
                         horizontal: AppSpacing.spacingSmall,
                       ),
-                      minimumSize: Size(46, 36),
+                      minimumSize: ResponsiveLayout.isMobilePlatform
+                          ? Size(36, 26)
+                          : Size(46, 36),
                     ),
-                    // icon: const Icon(Icons.remove),
                     child: const Icon(Icons.delete),
                   ),
                   Padding(
@@ -470,8 +491,8 @@ class _RunCombatantCardState extends State<RunCombatantCard> {
                       left: AppSpacing.spacingSmall,
                     ),
                     child: SizedBox(
-                      height: 44,
-                      width: 72,
+                      height: ResponsiveLayout.isMobilePlatform ? 45 : null,
+                      width: ResponsiveLayout.isMobilePlatform ? 55 : 75,
                       child: TextFormField(
                         maxLines: 1,
                         initialValue: widget.combatant.initiative.toString(),
@@ -480,14 +501,10 @@ class _RunCombatantCardState extends State<RunCombatantCard> {
                           FilteringTextInputFormatter.digitsOnly,
                         ],
                         style: Theme.of(context).textTheme.labelSmall,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           border: OutlineInputBorder(),
-                          prefixText: 'Init ',
-                          isDense: true,
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: AppSpacing.spacingSmall,
-                            vertical: AppSpacing.spacingMedium,
-                          ),
+                          labelText: 'Init',
+                          labelStyle: Theme.of(context).textTheme.labelSmall,
                         ),
                         validator: (value) =>
                             value == null || value.trim().isEmpty
@@ -543,30 +560,24 @@ class _RunCombatantCardState extends State<RunCombatantCard> {
                       right: AppSpacing.spacingMedium,
                     ),
                     child: SizedBox(
-                      height: 44,
-                      width: 75,
+                      height: 50,
+                      width: ResponsiveLayout.isMobilePlatform ? 60 : 75,
                       child: TextFormField(
                         key: _hitPointsFieldKey,
                         controller: _hitPointsController,
                         maxLines: 1,
-                        keyboardType: const TextInputType.numberWithOptions(
-                          signed: true,
-                        ),
+                        keyboardType: TextInputType.text,
                         textInputAction: TextInputAction.done,
                         inputFormatters: [
                           FilteringTextInputFormatter.allow(
-                            RegExp(r'[0-9+\-\s]'),
+                            RegExp(r'[0-9+\-]'),
                           ),
                         ],
                         style: Theme.of(context).textTheme.labelSmall,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           border: OutlineInputBorder(),
-                          prefixText: 'HP ',
-                          isDense: true,
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 10,
-                          ),
+                          labelText: 'HP',
+                          labelStyle: Theme.of(context).textTheme.labelSmall,
                         ),
                         validator: (value) =>
                             _evaluateHitPointExpression(value) == null
@@ -695,7 +706,6 @@ class PlayerFacingCombatantCard extends StatelessWidget {
                       ),
                       minimumSize: Size(60, 40),
                     ),
-                    // icon: const Icon(Icons.remove),
                     child: const Icon(Icons.delete),
                   ),
                 ),

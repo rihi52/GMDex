@@ -357,6 +357,7 @@ class _StatblockEditorForm extends State<StatblockEditorForm> {
                   children: [
                     Expanded(
                       child: StatblockEditSmallText(
+                        maxLines: ResponsiveLayout.isMobilePlatform ? 2 : null,
                         labelText: "Size",
                         startingValue: c?.size,
                         onSaved: (value) => _draft.size = value,
@@ -364,6 +365,7 @@ class _StatblockEditorForm extends State<StatblockEditorForm> {
                     ),
                     Expanded(
                       child: StatblockEditSmallText(
+                        maxLines: ResponsiveLayout.isMobilePlatform ? 2 : null,
                         labelText: "Type",
                         startingValue: c?.type,
                         onSaved: (value) => _draft.type = value,
@@ -371,6 +373,7 @@ class _StatblockEditorForm extends State<StatblockEditorForm> {
                     ),
                     Expanded(
                       child: StatblockEditSmallText(
+                        maxLines: ResponsiveLayout.isMobilePlatform ? 2 : null,
                         labelText: "Alignment",
                         startingValue: c?.alignment,
                         onSaved: (value) => _draft.alignment = value,
@@ -386,6 +389,7 @@ class _StatblockEditorForm extends State<StatblockEditorForm> {
                       children: [
                         Expanded(
                           child: StatblockEditSmallText(
+                            maxLines: ResponsiveLayout.isMobilePlatform ? 2 : null,
                             labelText: "Armor Class",
                             startingValue: c?.armorClass.ac.toString(),
                             required: true,
@@ -399,6 +403,7 @@ class _StatblockEditorForm extends State<StatblockEditorForm> {
                         ),
                         Expanded(
                           child: StatblockEditSmallText(
+                            maxLines: ResponsiveLayout.isMobilePlatform ? 2 : null,
                             labelText: "Armor Type",
                             startingValue: c?.armorClass.type,
                             onSaved: (value) => _draft.armorClass.type = value,

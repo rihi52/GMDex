@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gmdex/components/combatant_card.dart';
+import 'package:gmdex/components/responsive_layout.dart';
 import 'package:gmdex/components/status_button.dart';
 import 'package:gmdex/models/combat.dart';
 import 'package:gmdex/models/turn_highlight_preference.dart';
@@ -117,10 +118,10 @@ void main() {
     );
 
     final hitPointsField = find.byType(TextFormField).last;
-    expect(find.text('HP '), findsOneWidget);
+    expect(find.text('HP'), findsOneWidget);
     expect(
       tester.widget<EditableText>(find.byType(EditableText).last).keyboardType,
-      const TextInputType.numberWithOptions(signed: true),
+      TextInputType.text,
     );
     await tester.enterText(hitPointsField, '30-15');
     await tester.testTextInput.receiveAction(TextInputAction.done);
@@ -130,6 +131,12 @@ void main() {
     expect(field.controller!.text, '15');
     expect(combatant.currentHitPoints, 15);
     expect(changedCount, greaterThan(0));
+
+    await tester.enterText(hitPointsField, '12a+3');
+    expect(
+      tester.widget<TextFormField>(hitPointsField).controller!.text,
+      '12+3',
+    );
   });
 
   testWidgets('runtime condition changes notify the player-facing view', (
@@ -481,4 +488,38 @@ void main() {
     expect(combatant.quantity, 3);
     expect(updatedQuantity, 3);
   });
+
+  testWidgets(
+    'builder quantity field is narrower only on mobile',
+    (tester) async {
+      final combatant = Combatant(
+        name: 'Goblin',
+        isPlayer: false,
+        maxHitPoints: 7,
+        initiative: 10,
+        quantity: 1,
+        creatureId: 1,
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Form(
+              child: BuildCombatantCard(
+                isCreature: true,
+                combatant: combatant,
+                onDelete: () {},
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        tester.getSize(find.byType(TextFormField).last).width,
+        ResponsiveLayout.isMobilePlatform ? 60 : 75,
+      );
+    },
+    variant: TargetPlatformVariant.all(),
+  );
 }

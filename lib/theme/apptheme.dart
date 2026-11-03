@@ -4,6 +4,7 @@
 // visually consistent as the design evolves.
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gmdex/components/responsive_layout.dart';
 
 class AppColors {
   /// Brand and surface colors used throughout the dark theme.
@@ -103,17 +104,17 @@ class AppTheme {
           color: AppColors.primary,
         ),
         bodyLarge: GoogleFonts.metamorphous(
-          fontSize: 14,
+          fontSize: ResponsiveLayout.isMobilePlatform ? 13 : 14,
           fontWeight: FontWeight.normal,
           color: Colors.white,
         ),
         bodyMedium: GoogleFonts.metamorphous(
-          fontSize: 16,
+          fontSize: ResponsiveLayout.isMobilePlatform ? 14 : 16,
           fontWeight: FontWeight.normal,
           color: AppColors.filterText,
         ),
         bodySmall: GoogleFonts.metamorphous(
-          fontSize: 16,
+          fontSize: ResponsiveLayout.isMobilePlatform ? 14 : 16,
           fontWeight: FontWeight.bold,
           color: AppColors.appBlack,
         ),

@@ -588,11 +588,13 @@ class _EncounterBuildPageState extends State<EncounterBuildPage> {
 
   Widget _actionButton(String label, VoidCallback onPressed) {
     return SizedBox(
-      width: buttonWidth,
+      width: ResponsiveLayout.isMobilePlatform ? 55 : 75,
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
-          minimumSize: Size(buttonWidth, buttonHeight),
+          minimumSize: ResponsiveLayout.isMobilePlatform
+              ? Size(55, 35)
+              : Size(buttonWidth, buttonHeight),
           textStyle: Theme.of(context).textTheme.bodyLarge,
           padding: EdgeInsets.symmetric(horizontal: AppSpacing.spacingSmall),
         ),
@@ -916,20 +918,38 @@ class _EncounterBuildPageState extends State<EncounterBuildPage> {
               ? const []
               : [
                   IconButton(
+                    iconSize: ResponsiveLayout.isMobilePlatform ? 22 : null,
                     tooltip: 'Players',
                     icon: const Icon(Icons.people),
                     onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+                    style: ResponsiveLayout.isMobilePlatform ? IconButton.styleFrom(
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      padding: const EdgeInsets.all(6),
+                      minimumSize: Size.zero,
+                      visualDensity: VisualDensity.compact,
+                    ) : null,
                   ),
                   IconButton(
+                    iconSize: ResponsiveLayout.isMobilePlatform ? 22 : null,
                     tooltip: 'Bestiary',
                     icon: const Icon(Icons.pets),
                     onPressed: () => _scaffoldKey.currentState?.openEndDrawer(),
+                    style: ResponsiveLayout.isMobilePlatform ? IconButton.styleFrom(
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      padding: const EdgeInsets.all(6),
+                      minimumSize: Size.zero,
+                      visualDensity: VisualDensity.compact,
+                    ) : null,
                   ),
-                  const SizedBox(width: AppSpacing.spacingSmall),
+                  SizedBox(
+                    width: ResponsiveLayout.isMobilePlatform
+                        ? 2
+                        : AppSpacing.cornerRadiusSmall,
+                  ),
                   _actionButton('Save', _save),
                   const SizedBox(width: AppSpacing.spacingSmall),
                   _actionButton('Start', _start),
-                  const SizedBox(width: AppSpacing.spacingMedium),
+                  const SizedBox(width: AppSpacing.spacingSmall),
                 ],
         ),
         drawer: _searchDrawer(
@@ -963,7 +983,7 @@ class _EncounterBuildPageState extends State<EncounterBuildPage> {
                     )
                   : Expanded(flex: 6, child: _encounterList()),
               Expanded(
-                flex: 2,
+                flex: 3,
                 child: DecoratedBox(
                   decoration: BoxDecoration(
                     border: BoxBorder.fromLTRB(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gmdex/components/responsive_layout.dart';
 import 'package:gmdex/models/creature.dart' show crToXp;
 import 'package:gmdex/models/difficulty_calculator_ruleset.dart';
 import 'package:gmdex/theme/apptheme.dart';
@@ -46,9 +47,9 @@ class DifficultyCalculator extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  _StatRow('Difficulty (2014 5e):', _label(difficulty)),
+                  _StatRow('Level:', _label(difficulty)),
                   _StatRow('Total XP:', '${xp.totalXp}'),
-                  _StatRow('Adjusted XP:', '${xp.adjustedXp}'),
+                  _StatRow('Adj XP:', '${xp.adjustedXp}'),
                 ],
               ),
             ),
@@ -96,7 +97,7 @@ class DifficultyCalculator extends StatelessWidget {
               child: Column(
                 children: [
                   const Text('Flee, Mortals!'),
-                  _StatRow('Difficulty:', encounter.difficulty),
+                  _StatRow('Level:', encounter.difficulty),
                   _StatRow('Total CR:', _formatCr(encounter.totalCr)),
                 ],
               ),
@@ -115,9 +116,9 @@ class DifficultyCalculator extends StatelessWidget {
                 children: [
                   const Text('CR Budget'),
                   _StatRow('Easy:', _formatCr(encounter.budgets.easy)),
-                  _StatRow('Standard:', _formatCr(encounter.budgets.standard)),
+                  _StatRow('Regular:', _formatCr(encounter.budgets.standard)),
                   _StatRow('Hard:', _formatCr(encounter.budgets.hard)),
-                  _StatRow('One Creature Cap:', '${encounter.budgets.crCap}'),
+                  _StatRow( ResponsiveLayout.isMobilePlatform ? 'Single Cap:' : 'One Creature Cap:', '${encounter.budgets.crCap}'),
                 ],
               ),
             ),
