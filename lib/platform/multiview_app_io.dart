@@ -17,8 +17,13 @@ void runGmdexApp({
   runMultiApp(
     home: home,
     config: MultiAppConfig(
-      mainWindowOptions: defaultTargetPlatform == TargetPlatform.windows
-          ? const WindowOptions(minimumSize: Size(1400, 700))
+      mainWindowOptions:
+          {
+            TargetPlatform.windows,
+            TargetPlatform.macOS,
+            TargetPlatform.linux,
+          }.contains(defaultTargetPlatform)
+          ? const WindowOptions(minimumSize: Size(1400, 800))
           : null,
     ),
   );

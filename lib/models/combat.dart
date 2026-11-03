@@ -59,7 +59,7 @@ class EncounterDraft {
 /// Runtime combat fields are mutable so the initiative tracker can update
 /// hit points, conditions, and turn state before saving the encounter.
 class Combatant {
-  final String name;
+  String name;
   final bool isPlayer;
   final int maxHitPoints;
   int? currentHitPoints;

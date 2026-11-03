@@ -81,8 +81,8 @@ class BuildCombatantCard extends StatelessWidget {
                     left: AppSpacing.spacingMedium,
                   ),
                   child: SizedBox(
-                    width: ResponsiveLayout.isMobilePlatform ? 60 : null,
-                    height: ResponsiveLayout.isMobilePlatform ? 45 : null,
+                    width: ResponsiveLayout.isMobilePlatform ? 60 : 75,
+                    height: ResponsiveLayout.isMobilePlatform ? 45 : 60,
                     child: TextFormField(
                       maxLines: 1,
                       initialValue: combatant.initiative.toString(),
@@ -119,7 +119,7 @@ class BuildCombatantCard extends StatelessWidget {
                     right: AppSpacing.spacingMedium,
                   ),
                   child: SizedBox(
-                    width: ResponsiveLayout.isMobilePlatform ? 60 : null,
+                    width: ResponsiveLayout.isMobilePlatform ? 60 : 100,
                     height: ResponsiveLayout.isMobilePlatform ? 45 : null,
                     child: TextFormField(
                       maxLines: 1,
@@ -522,10 +522,39 @@ class _RunCombatantCardState extends State<RunCombatantCard> {
                       padding: const EdgeInsets.symmetric(
                         horizontal: AppSpacing.spacingMedium,
                       ),
-                      child: Text(
-                        widget.combatant.name,
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
+                      child:
+                          !widget.isCreature ||
+                              ResponsiveLayout.isMobilePlatform
+                          ? Text(
+                              widget.combatant.name,
+                              style: Theme.of(context).textTheme.bodySmall,
+                            )
+                          : Align(
+                              alignment: Alignment.centerLeft,
+                              child: ConstrainedBox(
+                                constraints: const BoxConstraints(
+                                  maxWidth: 275,
+                                ),
+                                child: TextFormField(
+                                  key: const ValueKey('combatant-name-field'),
+                                  initialValue: widget.combatant.name,
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                  decoration: const InputDecoration(
+                                    isDense: true,
+                                    border: OutlineInputBorder(),
+                                  ),
+                                  onChanged: (name) {
+                                    widget.combatant.name = name;
+                                    widget.onCombatantChanged?.call();
+                                  },
+                                  onSaved: (name) {
+                                    if (name != null) {
+                                      widget.combatant.name = name;
+                                    }
+                                  },
+                                ),
+                              ),
+                            ),
                     ),
                   ),
                   if (widget.isCreature && supportsMultiViewPlatform)

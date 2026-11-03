@@ -347,6 +347,15 @@ void main() {
       expect(playerFacing('Enemy 1'), findsNothing);
       expect(playerFacing('Enemy 2'), findsOneWidget);
       expect(playerFacing('Ogre'), findsNothing);
+
+      await tester.enterText(
+        find.byKey(const ValueKey('combatant-name-field')).first,
+        'Goblin Captain',
+      );
+      await tester.pump();
+
+      expect(firstCreature.name, 'Goblin Captain');
+      expect(playerFacing('Goblin Captain'), findsOneWidget);
     },
     variant: TargetPlatformVariant.desktop(),
   );

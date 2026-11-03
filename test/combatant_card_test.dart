@@ -248,6 +248,77 @@ void main() {
     expect(find.text('Init '), findsOneWidget);
   });
 
+  testWidgets(
+    'desktop combatant name editor has a bounded width',
+    (tester) async {
+      tester.view.physicalSize = const Size(1400, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      final combatant = Combatant(
+        name: 'Goblin',
+        isPlayer: false,
+        maxHitPoints: 30,
+        initiative: 10,
+        quantity: 1,
+        creatureId: 1,
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: RunCombatantCard(
+              isCreature: true,
+              combatant: combatant,
+              onDelete: () {},
+              onInitiativeChanged: (_) {},
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        tester
+            .getSize(find.byKey(const ValueKey('combatant-name-field')))
+            .width,
+        275,
+      );
+    },
+    variant: TargetPlatformVariant.desktop(),
+  );
+
+  testWidgets(
+    'desktop player name remains read-only',
+    (tester) async {
+      final combatant = Combatant(
+        name: 'Ravi',
+        isPlayer: true,
+        maxHitPoints: 30,
+        initiative: 10,
+        quantity: 1,
+        playerId: 1,
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: RunCombatantCard(
+              isCreature: false,
+              combatant: combatant,
+              onDelete: () {},
+              onInitiativeChanged: (_) {},
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byKey(const ValueKey('combatant-name-field')), findsNothing);
+      expect(find.text('Ravi'), findsOneWidget);
+    },
+    variant: TargetPlatformVariant.desktop(),
+  );
+
   testWidgets('active turn red outline follows the highlight preference', (
     tester,
   ) async {

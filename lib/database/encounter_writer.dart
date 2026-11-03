@@ -25,7 +25,7 @@ Future<int> saveEncounter(
               notes: encounter.encounterNotes ?? '',
               totalXp: Value(xp.totalXp),
               adjustedXp: Value(xp.adjustedXp),
-              hasStarted: Value(encounter.hasStarted)
+              hasStarted: Value(encounter.hasStarted),
             ),
           );
       await _saveCombatants(
@@ -47,7 +47,7 @@ Future<int> saveEncounter(
             totalXp: Value(xp.totalXp),
             adjustedXp: Value(xp.adjustedXp),
             updatedAt: Value(DateTime.now()),
-            hasStarted: Value(encounter.hasStarted)
+            hasStarted: Value(encounter.hasStarted),
           ),
         );
     if (updated != 1) {
@@ -199,6 +199,7 @@ Future<void> _saveCombatants(
                 isUnconscious: Value(combatant.isUnconscious),
                 isTurn: Value(isTurn && i == 0),
                 isUnmasked: Value(combatant.isUnmasked),
+                nameOverride: Value(combatant.name),
               ),
             );
       }
@@ -270,7 +271,7 @@ Future<Encounter?> loadEncounter(AppDatabase db, int encounterId) async {
     final maxHitPoints = creature.hitPoints ?? 0;
     combatants.add(
       Combatant(
-        name: creature.name,
+        name: link.nameOverride ?? creature.name,
         isPlayer: false,
         currentHitPoints: link.currentHitpoints,
         maxHitPoints: maxHitPoints,

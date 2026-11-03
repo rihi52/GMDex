@@ -73,6 +73,7 @@ class EncounterCreatures extends Table {
       boolean().withDefault(const Constant(false))();
   BoolColumn get isTurn => boolean().withDefault(const Constant(false))();
   BoolColumn get isUnmasked => boolean().withDefault(const Constant(false))();
+  TextColumn get nameOverride => text().nullable()();
 }
 
 /// Player instances and their combat state within a saved encounter.
@@ -375,7 +376,7 @@ class AppDatabase extends _$AppDatabase {
   }
 
   @override
-  int get schemaVersion => 14;
+  int get schemaVersion => 15;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -588,6 +589,9 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from < 14) {
         await m.addColumn(encounterCreatures, encounterCreatures.isUnmasked);
+      }
+      if (from < 15) {
+        await m.addColumn(encounterCreatures, encounterCreatures.nameOverride);
       }
     },
     beforeOpen: (details) async {

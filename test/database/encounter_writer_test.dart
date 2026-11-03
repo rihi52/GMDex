@@ -45,7 +45,7 @@ void main() {
           isPoisoned: true,
         ),
         Combatant(
-          name: 'Goblin',
+          name: 'Goblin Captain',
           isPlayer: false,
           currentHitPoints: 7,
           maxHitPoints: 7,
@@ -87,6 +87,7 @@ void main() {
       expect(savedCreature.exhaustionLevel, 3);
       expect(savedCreature.isRestrained, isTrue);
       expect(savedCreature.isUnmasked, isTrue);
+      expect(savedCreature.nameOverride, 'Goblin Captain');
     }
 
     final loaded = await loadEncounter(db, encounterId);
@@ -100,7 +101,14 @@ void main() {
       expect(creature.exhaustionLevel, 3);
       expect(creature.isRestrained, isTrue);
       expect(creature.isUnmasked, isTrue);
+      expect(creature.name, 'Goblin Captain');
     }
+    expect(
+      (await (db.select(
+        db.creatures,
+      )..where((row) => row.id.equals(creatureId))).getSingle()).name,
+      'Goblin',
+    );
   });
 
   test('saves and recalculates total and adjusted encounter XP', () async {

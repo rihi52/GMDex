@@ -166,6 +166,60 @@ class _EncounterBuildPageState extends State<EncounterBuildPage> {
     }
   }
 
+  void _openNavigationDrawer() {
+    showGeneralDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+      barrierColor: Colors.black54,
+      transitionDuration: const Duration(milliseconds: 250),
+      pageBuilder: (drawerContext, _, _) => Align(
+        alignment: Alignment.centerLeft,
+        child: SizedBox(
+          width: MediaQuery.sizeOf(
+            drawerContext,
+          ).width.clamp(0.0, 300.0).toDouble(),
+          child: Drawer(
+            child: SafeArea(
+              child: ListView(
+                padding: EdgeInsets.zero,
+                children: [
+                  ListTile(
+                    leading: const Icon(Icons.arrow_back),
+                    title: const Text('Return'),
+                    onTap: () {
+                      Navigator.of(drawerContext).pop();
+                      if (mounted && Navigator.of(context).canPop()) {
+                        Navigator.of(context).pop();
+                      }
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.settings),
+                    title: const Text('Settings'),
+                    onTap: () {
+                      Navigator.of(drawerContext).pop();
+                      if (mounted) {
+                        Navigator.of(context).pushNamed('/settings');
+                      }
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+      transitionBuilder: (_, animation, _, child) => SlideTransition(
+        position: Tween<Offset>(
+          begin: const Offset(-1, 0),
+          end: Offset.zero,
+        ).animate(animation),
+        child: child,
+      ),
+    );
+  }
+
   Future<void> _showCreatureFilterDialog() async {
     var type = _typeFilter;
     var size = _sizeFilter;
@@ -896,9 +950,11 @@ class _EncounterBuildPageState extends State<EncounterBuildPage> {
         appBar: AppBar(
           backgroundColor: AppColors.appBlack,
           scrolledUnderElevation: 0,
-          // With a drawer present, Scaffold would replace the back button
-          // with a hamburger, so the back button is set explicitly.
-          leading: Navigator.canPop(context) ? const BackButton() : null,
+          leading: IconButton(
+            tooltip: 'Open menu',
+            icon: const Icon(Icons.menu),
+            onPressed: _openNavigationDrawer,
+          ),
           title: TextFormField(
             initialValue: currentEncounter.name,
             onSaved: _saveEncounterName,
@@ -922,24 +978,28 @@ class _EncounterBuildPageState extends State<EncounterBuildPage> {
                     tooltip: 'Players',
                     icon: const Icon(Icons.people),
                     onPressed: () => _scaffoldKey.currentState?.openDrawer(),
-                    style: ResponsiveLayout.isMobilePlatform ? IconButton.styleFrom(
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      padding: const EdgeInsets.all(6),
-                      minimumSize: Size.zero,
-                      visualDensity: VisualDensity.compact,
-                    ) : null,
+                    style: ResponsiveLayout.isMobilePlatform
+                        ? IconButton.styleFrom(
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            padding: const EdgeInsets.all(6),
+                            minimumSize: Size.zero,
+                            visualDensity: VisualDensity.compact,
+                          )
+                        : null,
                   ),
                   IconButton(
                     iconSize: ResponsiveLayout.isMobilePlatform ? 22 : null,
                     tooltip: 'Bestiary',
                     icon: const Icon(Icons.pets),
                     onPressed: () => _scaffoldKey.currentState?.openEndDrawer(),
-                    style: ResponsiveLayout.isMobilePlatform ? IconButton.styleFrom(
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      padding: const EdgeInsets.all(6),
-                      minimumSize: Size.zero,
-                      visualDensity: VisualDensity.compact,
-                    ) : null,
+                    style: ResponsiveLayout.isMobilePlatform
+                        ? IconButton.styleFrom(
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            padding: const EdgeInsets.all(6),
+                            minimumSize: Size.zero,
+                            visualDensity: VisualDensity.compact,
+                          )
+                        : null,
                   ),
                   SizedBox(
                     width: ResponsiveLayout.isMobilePlatform

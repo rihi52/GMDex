@@ -87,23 +87,25 @@ by the app.
 
 ## Desktop Screenshots
 
-![image](https://github.com/rihi52/GMDex/blob/main/assets/homepage.png)
+![image](assets/homepage.png)
 
-![image](https://github.com/rihi52/GMDex/blob/main/assets/creaturelookup.png)
+![image](assets/creaturelookup.png)
 
-![image](https://github.com/rihi52/GMDex/blob/main/assets/creaturecreate.png)
+![image](assets/creaturecreate.png)
 
-![image](https://github.com/rihi52/GMDex/blob/main/assets/playerdatabase.png)
+![image](assets/playerdatabase.png)
 
-![image](https://github.com/rihi52/GMDex/blob/main/assets/encounterbuilder.png)
+![image](assets/encounterbuilder.png)
 
-![image](https://github.com/rihi52/GMDex/blob/main/assets/encounterdatabase.png)
+![image](assets/encounterdatabase.png)
 
-![image](https://github.com/rihi52/GMDex/blob/main/assets/encounterrunner.png)
+![image](assets/encounterrunner.png)
 
-![image](https://github.com/rihi52/GMDex/blob/main/assets/settingspage.png)
+![image](assets/playerinitiative.png)
 
-![image](https://github.com/rihi52/GMDex/blob/main/assets/playercreator.png)
+![image](assets/settingspage.png)
+
+![image](assets/playercreator.png)
 
 ## Mobile Screenshots
 
