@@ -31,10 +31,21 @@ class _SettingsPageState extends State<SettingsPage> {
     return showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('GMDex', style: Theme.of(context).textTheme.headlineLarge),
+        title: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('GMDex', style: Theme.of(context).textTheme.headlineLarge),
+                      SizedBox(width: 8),
+                      Image(
+                        image: AssetImage('assets/images/GMDexboldblack.png'),
+                        width: 32,
+                        height: 32,
+                      ),
+                    ],
+                  ),
         content: SingleChildScrollView(
           child: SelectableText(
-            'v0.9.5\n'
+            'v0.9.6\n'
             'GMDex is a free and open source tool for managing Dungeons & Dragons 5e '
             '2014 encounters. It is not affiliated with Wizards of the Coast or '
             'any other company. All trademarks are property of their respective owners.'
@@ -265,11 +276,18 @@ class _SettingsPageState extends State<SettingsPage> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Clear database data?'),
-        content: const Text(
+        title: Text(
+          'Clear database data?',
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        content: Text(
           'This permanently deletes all stored players, creatures, encounters, '
           'and notes. The database tables and structure will remain. '
           'This cannot be undone.',
+          style: Theme.of(context).textTheme.bodyLarge,
         ),
         actions: [
           ElevatedButton(
@@ -659,7 +677,18 @@ class _SettingsPageState extends State<SettingsPage> {
                 const SizedBox(height: AppSpacing.spacingExtraLarge),
                 ElevatedButton(
                   onPressed: _showAboutDialog,
-                  child: const Text('About GMDex'),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('About GMDex'),
+                      SizedBox(width: 8),
+                      Image(
+                        image: AssetImage('assets/images/GMDexlogoblack.png'),
+                        width: 24,
+                        height: 24,
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),

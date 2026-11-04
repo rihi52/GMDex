@@ -23,7 +23,7 @@ void runGmdexApp({
             TargetPlatform.macOS,
             TargetPlatform.linux,
           }.contains(defaultTargetPlatform)
-          ? const WindowOptions(minimumSize: Size(1400, 800))
+          ? const WindowOptions(size: Size(1300, 800))
           : null,
     ),
   );

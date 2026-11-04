@@ -238,16 +238,23 @@ class _BrowsePlayerWidgetState extends State<BrowsePlayerWidget> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Delete player?'),
+        title: Text(
+          'Delete player?',
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
         content: Text(
           'Are you sure you want to delete "${player.pName}"? This cannot be undone.',
+          style: Theme.of(context).textTheme.bodyLarge,
         ),
         actions: [
-          TextButton(
+          ElevatedButton(
             onPressed: () => Navigator.pop(dialogContext, false),
             child: const Text('Cancel'),
           ),
-          FilledButton(
+          ElevatedButton(
             onPressed: () => Navigator.pop(dialogContext, true),
             child: const Text('Delete'),
           ),

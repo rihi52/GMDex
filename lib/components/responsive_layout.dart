@@ -11,7 +11,7 @@ class ResponsiveBreakpoints {
   static const double browseDetails = 900;
   static const double encounterBuilder = 1050;
   static const double compactContent = 500;
-  static const double encounterRun = 800;
+  static const double encounterRun = 1081;
 }
 
 class ResponsiveLayout {

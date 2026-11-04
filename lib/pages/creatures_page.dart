@@ -286,17 +286,24 @@ class _BrowseCreatureWidgetState extends State<BrowseCreatureWidget> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Delete creature?'),
+        title: Text(
+          'Delete creature?',
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
         content: Text(
           'Are you sure you want to delete "${creature.name}"? '
           'This cannot be undone.',
+          style: Theme.of(context).textTheme.bodyLarge,
         ),
         actions: [
-          TextButton(
+          ElevatedButton(
             onPressed: () => Navigator.pop(dialogContext, false),
             child: const Text('Cancel'),
           ),
-          FilledButton(
+          ElevatedButton(
             onPressed: () => Navigator.pop(dialogContext, true),
             child: const Text('Delete'),
           ),

@@ -599,7 +599,7 @@ class _RunCombatPageState extends State<RunCombatPage> {
       builder: (context, constraints) {
         final isWide = ResponsiveLayout.isWide(
           constraints.maxWidth,
-          breakpoint: ResponsiveBreakpoints.browseDetails,
+          breakpoint: ResponsiveBreakpoints.encounterRun,
         );
         final notesKeyboardVisible =
             ResponsiveLayout.isMobilePlatform &&
