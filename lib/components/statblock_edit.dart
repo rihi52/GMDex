@@ -323,7 +323,6 @@ class _StatblockEditorForm extends State<StatblockEditorForm> {
                   onPressed: _submit,
                   child: Text(
                     widget.isEditing ? 'Save' : 'Create',
-                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ),
               ),

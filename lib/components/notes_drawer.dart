@@ -3,7 +3,6 @@
 // The page-view variant combines a caller-provided details panel with the
 // same notes editor, while NotesEditor owns form state and save feedback.
 import 'package:flutter/material.dart';
-import 'package:gmdex/theme/apptheme.dart';
 
 class NotesDrawer extends StatelessWidget {
   /// Shows the notes editor directly in a standard navigation drawer.

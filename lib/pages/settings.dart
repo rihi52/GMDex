@@ -35,11 +35,11 @@ class _SettingsPageState extends State<SettingsPage> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text('GMDex', style: Theme.of(context).textTheme.headlineLarge),
-                      SizedBox(width: 8),
+                      SizedBox(width: 24),
                       Image(
-                        image: AssetImage('assets/images/GMDexboldblack.png'),
-                        width: 32,
-                        height: 32,
+                        image: AssetImage('assets/images/GMDex.png'),
+                        width: 48,
+                        height: 48,
                       ),
                     ],
                   ),
@@ -201,7 +201,7 @@ class _SettingsPageState extends State<SettingsPage> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Replace entire database?'),
+        title: Text('Replace entire database?', style: Theme.of(context).textTheme.bodyLarge,),
         content: const Text(
           'Importing a backup permanently replaces all current players, '
           'creatures, encounters, notes, and related data. Export a backup '
@@ -333,13 +333,18 @@ class _SettingsPageState extends State<SettingsPage> {
           MediaQuery.sizeOf(context).width,
           breakpoint: ResponsiveBreakpoints.navigation,
         ),
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 600),
-            child: ListView(
-              padding: const EdgeInsets.all(24),
-              shrinkWrap: true,
-              children: [
+        child: ListView(
+          children: [
+            Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 600),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
                 Text(
                   'Database',
                   style: Theme.of(context).textTheme.headlineMedium,
@@ -675,24 +680,32 @@ class _SettingsPageState extends State<SettingsPage> {
                   },
                 ),
                 const SizedBox(height: AppSpacing.spacingExtraLarge),
+                SizedBox(
+                  width: double.infinity,
+                  child:
                 ElevatedButton(
                   onPressed: _showAboutDialog,
                   child: const Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text('About GMDex'),
-                      SizedBox(width: 8),
+                      SizedBox(width: 16),
                       Image(
                         image: AssetImage('assets/images/GMDexlogoblack.png'),
-                        width: 24,
-                        height: 24,
+                        width: 32,
+                        height: 32,
                       ),
                     ],
                   ),
                 ),
-              ],
+                    ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );
