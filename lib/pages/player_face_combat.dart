@@ -159,10 +159,6 @@ class _PlayerViewTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final style = Theme.of(context).textTheme.titleLarge;
-    final hitPoints = Text(
-      '${row.currentHitPoints}/${row.maxHitPoints} HP',
-      style: Theme.of(context).textTheme.titleLarge,
-    );
     final conditions = [
       for (final condition in row.conditions)
         Chip(
@@ -235,7 +231,7 @@ class _PlayerViewTile extends StatelessWidget {
                               spacing: AppSpacing.spacingSmall,
                               runSpacing: AppSpacing.spacingSmall,
                               crossAxisAlignment: WrapCrossAlignment.center,
-                              children: [hitPoints, ...conditions],
+                              children: conditions,
                             ),
                           ),
                         ],

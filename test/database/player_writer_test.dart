@@ -94,6 +94,43 @@ void main() {
               p_notes TEXT
             )
           ''');
+            sqliteDb.execute('''
+            CREATE TABLE creatures (
+              id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+              name TEXT,
+              source TEXT,
+              legendary_group_id INTEGER
+            )
+          ''');
+            sqliteDb.execute('''
+            CREATE TABLE legendary_groups (
+              id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+              name TEXT NOT NULL,
+              source TEXT NOT NULL
+            )
+          ''');
+            sqliteDb.execute('''
+            CREATE TABLE encounter_creatures (
+              id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+              encounter_id INTEGER NOT NULL,
+              creature_id INTEGER NOT NULL,
+              initiative INTEGER NOT NULL,
+              current_hitpoints INTEGER NOT NULL,
+              created_at INTEGER NOT NULL DEFAULT CURRENT_TIMESTAMP,
+              updated_at INTEGER NOT NULL DEFAULT CURRENT_TIMESTAMP
+            )
+          ''');
+            sqliteDb.execute('''
+            CREATE TABLE encounter_players (
+              id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+              encounter_id INTEGER NOT NULL,
+              player_id INTEGER NOT NULL,
+              initiative INTEGER NOT NULL,
+              current_hitpoints INTEGER NOT NULL,
+              created_at INTEGER NOT NULL DEFAULT CURRENT_TIMESTAMP,
+              updated_at INTEGER NOT NULL DEFAULT CURRENT_TIMESTAMP
+            )
+          ''');
             sqliteDb.execute(
               "INSERT INTO players (p_name, p_class, p_hit_points) "
               "VALUES ('Ravi', 'Rogue', 24)",
@@ -138,7 +175,17 @@ void main() {
           sqliteDb.execute('''
             CREATE TABLE creatures (
               id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-              hit_points INTEGER
+              name TEXT,
+              source TEXT,
+              hit_points INTEGER,
+              legendary_group_id INTEGER
+            )
+          ''');
+          sqliteDb.execute('''
+            CREATE TABLE legendary_groups (
+              id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+              name TEXT NOT NULL,
+              source TEXT NOT NULL
             )
           ''');
           sqliteDb.execute('''

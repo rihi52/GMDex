@@ -259,13 +259,80 @@ bool _hasRequiredCreatureFields(Map<String, dynamic> raw) {
   final firstArmorClass = armorClass is List && armorClass.isNotEmpty
       ? armorClass.first
       : null;
+  final specialArmorClass = firstArmorClass is Map
+      ? _specialArmorClassDetails(firstArmorClass['special'])
+      : null;
   final armorClassValue = firstArmorClass is Map
-      ? _int(firstArmorClass['ac'])
+      ? (_int(firstArmorClass['ac']) ?? specialArmorClass?.value)
       : _int(firstArmorClass);
   final hitPoints = raw['hp'];
-  final hitPointsValue = hitPoints is Map ? _int(hitPoints['average']) : null;
+  final hitPointsValue = _hitPointsValue(hitPoints);
 
   return armorClassValue != null && hitPointsValue != null;
+}
+
+({int value, String? type})? _specialArmorClassDetails(dynamic special) {
+  if (special is! String) return null;
+  final match = RegExp(r'^\s*(\d+)(?:\s+(.+?))?\s*$').firstMatch(special);
+  if (match == null) return null;
+
+  final value = int.tryParse(match.group(1)!);
+  if (value == null) return null;
+
+  final description = match.group(2)?.trim();
+  final unwrappedDescription = description?.replaceFirstMapped(
+    RegExp(r'^\((.*)\)$'),
+    (match) => match.group(1)!,
+  );
+  final type =
+      unwrappedDescription == null || unwrappedDescription.trim().isEmpty
+      ? null
+      : unwrappedDescription;
+  return (value: value, type: type);
+}
+
+({int value, String? formula})? _specialHitPointsDetails(dynamic special) {
+  final value = _int(special);
+  if (value != null) return (value: value, formula: null);
+  if (special is! String) return null;
+
+  final numericPrefix = RegExp(r'^\s*(\d+)(?=\s|$|\+)').firstMatch(special);
+  if (numericPrefix != null) {
+    final hitPoints = int.tryParse(numericPrefix.group(1)!);
+    if (hitPoints == null) return null;
+    final formula = special.substring(numericPrefix.end).trim();
+    return (value: hitPoints, formula: formula.isEmpty ? null : formula);
+  }
+
+  final wordPrefix = RegExp(
+    r'^\s*(six|seven|eight|nine)\b',
+    caseSensitive: false,
+  ).firstMatch(special);
+  final hitPoints = switch (wordPrefix?.group(1)?.toLowerCase()) {
+    'six' => 6,
+    'seven' => 7,
+    'eight' => 8,
+    'nine' => 9,
+    _ => null,
+  };
+  if (hitPoints == null) return null;
+
+  final formula = special.substring(wordPrefix!.end).trim();
+  return (value: hitPoints, formula: formula.isEmpty ? null : formula);
+}
+
+int? _hitPointsValue(dynamic hitPoints) {
+  if (hitPoints is! Map) return null;
+  return _int(hitPoints['average']) ??
+      _specialHitPointsDetails(hitPoints['special'])?.value;
+}
+
+String? _hitPointFormula(dynamic hitPoints) {
+  if (hitPoints is! Map) return null;
+  final formula = hitPoints['formula'];
+  if (formula != null) return formula.toString();
+  if (hitPoints['average'] != null) return null;
+  return _specialHitPointsDetails(hitPoints['special'])?.formula;
 }
 
 bool _sameSource(String first, String second) =>
@@ -441,6 +508,9 @@ Future<int> _insertCreature(
 }) async {
   final ac = (d['ac'] as List?) ?? const [];
   final firstAc = ac.isEmpty ? null : ac.first;
+  final specialAc = firstAc is Map
+      ? _specialArmorClassDetails(firstAc['special'])
+      : null;
   final hp = d['hp'];
   final speed = d['speed'];
   final cr = d['cr'];
@@ -458,13 +528,19 @@ Future<int> _insertCreature(
     type: Value(_typeName(d['type'])),
     typeTags: Value(_typeTags(d['type'])),
     alignment: Value(_alignment(d['alignment'])),
-    armorClass: Value(firstAc is Map ? _int(firstAc['ac']) : _int(firstAc)),
+    armorClass: Value(
+      firstAc is Map
+          ? (_int(firstAc['ac']) ?? specialAc?.value)
+          : _int(firstAc),
+    ),
     armorClassType: Value(
-      firstAc is Map ? _armorClassType(firstAc['from']) : null,
+      firstAc is Map
+          ? (_armorClassType(firstAc['from']) ?? specialAc?.type)
+          : null,
     ),
     armorClassOther: Value(_otherAc(ac)),
-    hitPoints: Value(hp is Map ? _int(hp['average']) : null),
-    hitPointFormula: Value(hp is Map ? hp['formula']?.toString() : null),
+    hitPoints: Value(_hitPointsValue(hp)),
+    hitPointFormula: Value(_hitPointFormula(hp)),
     speedWalk: Value(_speed(speed is Map ? speed['walk'] : null)),
     speedFly: Value(_speed(speed is Map ? speed['fly'] : null)),
     speedSwim: Value(_speed(speed is Map ? speed['swim'] : null)),

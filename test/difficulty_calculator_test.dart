@@ -67,7 +67,7 @@ void main() {
     );
 
     expect(find.text('Total XP:'), findsOneWidget);
-    expect(find.text('Adjusted XP:'), findsOneWidget);
+    expect(find.text('Adj XP:'), findsOneWidget);
     expect(find.text('100'), findsOneWidget);
     expect(find.text('150'), findsOneWidget);
     expect(find.text('Easy:'), findsOneWidget);

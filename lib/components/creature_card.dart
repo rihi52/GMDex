@@ -33,6 +33,10 @@ class CreatureCard extends StatelessWidget {
       child: ListTile(
         selected: selected,
         onTap: onTap,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.spacingLarge,
+          vertical: AppSpacing.spacingSmall,
+        ),
         tileColor: AppColors.cardBackground,
         selectedTileColor: AppColors.cardSelected,
         selectedColor: AppColors.accent,
@@ -41,7 +45,13 @@ class CreatureCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(name, style: Theme.of(context).textTheme.bodySmall),
+                Flexible(
+                  child: Text(
+                    name,
+                    style: Theme.of(context).textTheme.bodySmall,
+                    textAlign: TextAlign.center,
+                  ),
+                ),
               ],
             ),
             Row(

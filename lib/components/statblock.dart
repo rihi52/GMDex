@@ -90,6 +90,11 @@ class CreatureStatBlock extends StatelessWidget {
   Widget build(BuildContext context) {
     final double topButtonWidth = 110;
     if (creature == null) return const Text("Loading...");
+    final hitPointFormula = creature!.hitPointFormula?.trim() ?? '';
+    final isHitPointDiceFormula = RegExp(
+      r'^\d+d\d+(?:\s*[+-]\s*\d+)?$',
+      caseSensitive: false,
+    ).hasMatch(hitPointFormula);
 
     return SelectionArea(
       child: SingleChildScrollView(
@@ -195,15 +200,21 @@ class CreatureStatBlock extends StatelessWidget {
                       ],
                     ),
                     Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           'Hit Points:  ',
                           style: Theme.of(context).textTheme.titleSmall,
                         ),
                         StatblockSmallText(data: '${creature!.hitPoints}'),
-                        StatblockSmallText(
-                          data: '(${creature!.hitPointFormula})',
-                        ),
+                        if (hitPointFormula.isNotEmpty)
+                          Expanded(
+                            child: StatblockSmallText(
+                              data: isHitPointDiceFormula
+                                  ? '($hitPointFormula)'
+                                  : hitPointFormula,
+                            ),
+                          ),
                       ],
                     ),
                     Row(

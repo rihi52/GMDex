@@ -76,4 +76,41 @@ void main() {
       expect(reimported.challengeRating, '1/4');
     },
   );
+
+  test('preserves special AC text and special HP values on export', () async {
+    const source = '''
+      {
+        "monster": [
+          {
+            "name": "Special Export Beast",
+            "source": "TST",
+            "ac": [{"special": "13 plus PB (natural armor)"}],
+            "hp": {
+              "special": "7 + seven times caregiver's level"
+            }
+          }
+        ]
+      }
+    ''';
+    await importBestiaryJson(db, source);
+
+    final exported = jsonDecode(await exportBestiaryJson(db));
+    final monster =
+        (exported['monster'] as List).single as Map<String, dynamic>;
+    expect(monster['ac'], [
+      {'special': '13 plus PB (natural armor)'},
+    ]);
+    expect(monster['hp'], {
+      'average': 7,
+      'formula': '+ seven times caregiver\'s level',
+    });
+
+    await (db.delete(db.creatures)).go();
+    await importBestiaryJson(db, jsonEncode(exported));
+    final reimported = await db.select(db.creatures).getSingle();
+    expect(reimported.armorClass, 13);
+    expect(reimported.armorClassType, 'plus PB (natural armor)');
+    expect(reimported.hitPoints, 7);
+    expect(reimported.hitPointFormula, '+ seven times caregiver\'s level');
+  });
 }

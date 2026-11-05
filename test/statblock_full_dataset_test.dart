@@ -40,6 +40,41 @@ void main() {
     }
   });
 
+  testWidgets('renders special HP text without extra parentheses', (
+    WidgetTester tester,
+  ) async {
+    final monster = Map<String, dynamic>.from(_monsters.first as Map);
+    final hitPoints = Map<String, dynamic>.from(
+      monster['hp'] as Map<String, dynamic>,
+    );
+    hitPoints['formula'] = '+ seven times their level';
+    monster['hp'] = hitPoints;
+    final creature = parseCreature(monster, _legendaryGroups);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(body: CreatureStatBlock(creature: creature)),
+      ),
+    );
+
+    expect(find.text('+ seven times their level'), findsOneWidget);
+    expect(find.text('(+ seven times their level)'), findsNothing);
+
+    hitPoints['formula'] = '';
+    monster['hp'] = hitPoints;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: CreatureStatBlock(
+            creature: parseCreature(monster, _legendaryGroups),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('()'), findsNothing);
+  });
+
   testWidgets(
     'CreatureStatBlock builds for entire dataset',
     (WidgetTester tester) async {

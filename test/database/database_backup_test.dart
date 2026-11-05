@@ -39,7 +39,10 @@ void main() {
           CreaturesCompanion.insert(
             name: 'Goblin',
             source: const Value('Test'),
+            armorClass: const Value(13),
+            armorClassType: const Value('plus PB (natural armor)'),
             hitPoints: const Value(7),
+            hitPointFormula: const Value('+ seven times their level'),
             challengeRating: const Value('1/4'),
           ),
         );
@@ -85,6 +88,13 @@ void main() {
     expect(decoded['version'], databaseBackupVersion);
     final tables = decoded['tables'] as Map<String, dynamic>;
     expect((tables['notes'] as List).single['created_at'], isA<String>());
+    final backedUpCreature =
+        (tables['creatures'] as List).single as Map<String, dynamic>;
+    expect(backedUpCreature['id'], creatureId);
+    expect(backedUpCreature['armor_class'], 13);
+    expect(backedUpCreature['armor_class_type'], 'plus PB (natural armor)');
+    expect(backedUpCreature['hit_points'], 7);
+    expect(backedUpCreature['hit_point_formula'], '+ seven times their level');
 
     await db
         .into(db.players)
@@ -99,6 +109,11 @@ void main() {
     expect(players.single.pName, 'Ravi');
     expect(players.single.pNotes, 'Scout');
     expect((await db.select(db.creatures).get()).single.name, 'Goblin');
+    final restoredCreature = (await db.select(db.creatures).get()).single;
+    expect(restoredCreature.armorClass, 13);
+    expect(restoredCreature.armorClassType, 'plus PB (natural armor)');
+    expect(restoredCreature.hitPoints, 7);
+    expect(restoredCreature.hitPointFormula, '+ seven times their level');
     expect((await db.select(db.notes).get()).single.body, 'Tracks nearby');
 
     final encounters = await db.select(db.encounters).get();

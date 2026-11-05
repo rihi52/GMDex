@@ -144,6 +144,12 @@ List<Map<String, dynamic>> _armorClass(CreatureRow creature) {
 }
 
 Map<String, dynamic> _armorClassValue(int ac, String? description) {
+  if (description != null &&
+      description.isNotEmpty &&
+      !(description.startsWith('(') && description.endsWith(')'))) {
+    return {'special': '$ac $description'};
+  }
+
   final from = description
       ?.replaceAll(RegExp(r'^\(|\)$'), '')
       .split(',')

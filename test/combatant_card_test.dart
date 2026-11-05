@@ -6,6 +6,7 @@ import 'package:gmdex/components/status_button.dart';
 import 'package:gmdex/models/combat.dart';
 import 'package:gmdex/models/turn_highlight_preference.dart';
 import 'package:gmdex/pages/player_face_combat.dart';
+import 'package:gmdex/theme/apptheme.dart';
 
 void main() {
   testWidgets('status button width follows its label', (tester) async {
@@ -139,90 +140,98 @@ void main() {
     );
   });
 
-  testWidgets('runtime condition changes notify the player-facing view', (
-    tester,
-  ) async {
-    tester.view.physicalSize = const Size(1400, 900);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
+  testWidgets(
+    'runtime condition changes notify the player-facing view',
+    (tester) async {
+      tester.view.physicalSize = const Size(1400, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
 
-    final combatant = Combatant(
-      name: 'Goblin',
-      isPlayer: false,
-      currentHitPoints: 30,
-      maxHitPoints: 30,
-      initiative: 10,
-      quantity: 1,
-      creatureId: 1,
-    );
-    void publish() {
-      updatePlayerFacingCombat([
-        PlayerViewRow.fromCombatant(combatant, maskedName: 'Enemy 1'),
-      ]);
-    }
+      final combatant = Combatant(
+        name: 'Goblin',
+        isPlayer: false,
+        currentHitPoints: 30,
+        maxHitPoints: 30,
+        initiative: 10,
+        quantity: 1,
+        creatureId: 1,
+      );
+      void publish() {
+        updatePlayerFacingCombat([
+          PlayerViewRow.fromCombatant(combatant, maskedName: 'Enemy 1'),
+        ]);
+      }
 
-    publish();
-    addTearDown(() => updatePlayerFacingCombat(const []));
+      publish();
+      addTearDown(() => updatePlayerFacingCombat(const []));
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Row(
-          children: [
-            SizedBox(
-              width: 700,
-              child: Material(
-                child: SingleChildScrollView(
-                  child: RunCombatantCard(
-                    isCreature: true,
-                    combatant: combatant,
-                    onDelete: () {},
-                    onInitiativeChanged: (_) {},
-                    onCombatantChanged: publish,
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Row(
+            children: [
+              SizedBox(
+                width: 700,
+                child: Material(
+                  child: SingleChildScrollView(
+                    child: RunCombatantCard(
+                      isCreature: true,
+                      combatant: combatant,
+                      onDelete: () {},
+                      onInitiativeChanged: (_) {},
+                      onCombatantChanged: publish,
+                    ),
                   ),
                 ),
               ),
-            ),
-            const Expanded(child: PlayerFacingCombatPage()),
-          ],
+              const Expanded(child: PlayerFacingCombatPage()),
+            ],
+          ),
         ),
-      ),
-    );
+      );
 
-    expect(find.text('Frightened'), findsNothing);
-    expect(find.text('Enemy 1'), findsOneWidget);
-    await tester.enterText(find.byType(TextFormField).last, '30-18');
-    await tester.pump();
-    expect(combatant.currentHitPoints, 12);
-    expect(find.text('12/30 HP'), findsOneWidget);
+      expect(find.text('Frightened'), findsNothing);
+      expect(find.text('Enemy 1'), findsOneWidget);
+      await tester.enterText(find.byType(TextFormField).last, '30-18');
+      await tester.pump();
+      expect(combatant.currentHitPoints, 12);
+      expect(find.text('12/30 HP'), findsNothing);
 
-    await tester.tap(find.text('Conditions'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(StatusButton, 'Frightened'));
-    await tester.pump();
+      await tester.tap(find.text('Conditions'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(StatusButton, 'Frightened'));
+      await tester.pump();
 
-    expect(combatant.isFrightened, isTrue);
-    expect(find.text('Frightened'), findsNWidgets(2));
+      expect(combatant.isFrightened, isTrue);
+      expect(find.text('Frightened'), findsNWidgets(2));
 
-    await tester.tap(find.widgetWithText(StatusButton, 'Frightened'));
-    await tester.pump();
+      await tester.tap(find.widgetWithText(StatusButton, 'Frightened'));
+      await tester.pump();
 
-    expect(combatant.isFrightened, isFalse);
-    expect(find.text('Frightened'), findsOneWidget);
+      expect(combatant.isFrightened, isFalse);
+      expect(find.text('Frightened'), findsOneWidget);
 
-    await tester.tap(find.byType(Checkbox).last);
-    await tester.pump();
-    expect(combatant.isUnmasked, isTrue);
-    expect(find.text('Goblin'), findsOneWidget);
-    expect(find.text('Enemy 1'), findsNothing);
+      await tester.tap(find.byType(Checkbox).last);
+      await tester.pump();
+      expect(combatant.isUnmasked, isTrue);
+      expect(
+        find.descendant(
+          of: find.byType(PlayerFacingCombatPage),
+          matching: find.text('Goblin'),
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('Enemy 1'), findsNothing);
 
-    await tester.tap(find.byType(Checkbox).last);
-    await tester.pump();
-    expect(combatant.isUnmasked, isFalse);
-    expect(find.text('Enemy 1'), findsOneWidget);
-  });
+      await tester.tap(find.byType(Checkbox).last);
+      await tester.pump();
+      expect(combatant.isUnmasked, isFalse);
+      expect(find.text('Enemy 1'), findsOneWidget);
+    },
+    variant: TargetPlatformVariant.desktop(),
+  );
 
-  testWidgets('initiative field uses a compact in-field label', (tester) async {
+  testWidgets('initiative field uses an in-field label', (tester) async {
     final combatant = Combatant(
       name: 'Goblin',
       isPlayer: false,
@@ -245,7 +254,7 @@ void main() {
       ),
     );
 
-    expect(find.text('Init '), findsOneWidget);
+    expect(find.text('Init'), findsOneWidget);
   });
 
   testWidgets(
@@ -351,7 +360,7 @@ void main() {
     RoundedRectangleBorder shape() =>
         activeTile().shape! as RoundedRectangleBorder;
 
-    expect(shape().side.color, Colors.red);
+    expect(shape().side.color, AppColors.cardHighlight);
 
     turnHighlightEnabled.value = false;
     await tester.pump();
@@ -561,7 +570,7 @@ void main() {
   });
 
   testWidgets(
-    'builder quantity field is narrower only on mobile',
+    'builder quantity field width follows the platform layout',
     (tester) async {
       final combatant = Combatant(
         name: 'Goblin',
@@ -588,7 +597,7 @@ void main() {
 
       expect(
         tester.getSize(find.byType(TextFormField).last).width,
-        ResponsiveLayout.isMobilePlatform ? 60 : 75,
+        ResponsiveLayout.isMobilePlatform ? 60 : 100,
       );
     },
     variant: TargetPlatformVariant.all(),

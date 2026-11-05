@@ -590,8 +590,8 @@ class _EncounterBuildPageState extends State<EncounterBuildPage> {
       itemCount: visibleCreatures.length,
       itemBuilder: (context, index) {
         final row = visibleCreatures[index];
-        return SizedBox(
-          height: 100,
+        return ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 100),
           child: CreatureCard(
             name: row.name,
             type: row.type ?? '',

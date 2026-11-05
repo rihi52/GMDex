@@ -12,7 +12,7 @@ void main() {
   testWidgets(
     'safe area only applies to the narrow combat layout',
     (tester) async {
-      tester.view.physicalSize = const Size(700, 900);
+      tester.view.physicalSize = const Size(600, 900);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
@@ -23,7 +23,7 @@ void main() {
       );
       expect(tester.widget<SafeArea>(combatSafeArea).bottom, isTrue);
 
-      tester.view.physicalSize = const Size(1000, 900);
+      tester.view.physicalSize = const Size(1100, 900);
       await tester.pumpWidget(const MaterialApp(home: RunCombatPage()));
       expect(tester.widget<SafeArea>(combatSafeArea).bottom, isFalse);
     },
@@ -183,103 +183,106 @@ void main() {
     expect(cards.map((card) => card.isActiveTurn), [true, false, false]);
   });
 
-  testWidgets('player-facing initiative follows active player turns', (
-    tester,
-  ) async {
-    tester.view.physicalSize = const Size(800, 1000);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
-    addTearDown(() => updatePlayerFacingCombat(const []));
+  testWidgets(
+    'player-facing initiative follows active player turns',
+    (tester) async {
+      tester.view.physicalSize = const Size(800, 1000);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      addTearDown(() => updatePlayerFacingCombat(const []));
 
-    final encounter = Encounter(
-      name: 'Test',
-      currentTurnIndex: 0,
-      combatants: [
-        Combatant(
-          name: 'Goblin',
-          isPlayer: false,
-          maxHitPoints: 10,
-          initiative: 20,
-          quantity: 1,
-          creatureId: 1,
+      final encounter = Encounter(
+        name: 'Test',
+        currentTurnIndex: 0,
+        combatants: [
+          Combatant(
+            name: 'Goblin',
+            isPlayer: false,
+            maxHitPoints: 10,
+            initiative: 20,
+            quantity: 1,
+            creatureId: 1,
+          ),
+          Combatant(
+            name: 'Ravi',
+            isPlayer: true,
+            maxHitPoints: 10,
+            initiative: 12,
+            quantity: 1,
+            playerId: 1,
+          ),
+          Combatant(
+            name: 'Glimm',
+            isPlayer: true,
+            maxHitPoints: 10,
+            initiative: 7,
+            quantity: 1,
+            playerId: 2,
+          ),
+        ],
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Stack(
+            children: [
+              RunCombatPage(encounter: encounter),
+              const IgnorePointer(child: PlayerFacingCombatPage()),
+            ],
+          ),
         ),
-        Combatant(
-          name: 'Ravi',
-          isPlayer: true,
-          maxHitPoints: 10,
-          initiative: 12,
-          quantity: 1,
-          playerId: 1,
-        ),
-        Combatant(
-          name: 'Glimm',
-          isPlayer: true,
-          maxHitPoints: 10,
-          initiative: 7,
-          quantity: 1,
-          playerId: 2,
-        ),
-      ],
-    );
+      );
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Stack(
-          children: [
-            RunCombatPage(encounter: encounter),
-            const IgnorePointer(child: PlayerFacingCombatPage()),
-          ],
-        ),
-      ),
-    );
+      final playerView = find.byType(PlayerFacingCombatPage);
+      expect(
+        find.descendant(of: playerView, matching: find.text('Goblin')),
+        findsNothing,
+      );
+      expect(
+        find.descendant(of: playerView, matching: find.text('Enemy 1')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: playerView, matching: find.text('Ravi')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: playerView, matching: find.text('Glimm')),
+        findsOneWidget,
+      );
 
-    final playerView = find.byType(PlayerFacingCombatPage);
-    expect(
-      find.descendant(of: playerView, matching: find.text('Goblin')),
-      findsNothing,
-    );
-    expect(
-      find.descendant(of: playerView, matching: find.text('Enemy 1')),
-      findsOneWidget,
-    );
-    expect(
-      find.descendant(of: playerView, matching: find.text('Ravi')),
-      findsOneWidget,
-    );
-    expect(
-      find.descendant(of: playerView, matching: find.text('Glimm')),
-      findsOneWidget,
-    );
+      Finder playerRow(String name) => find
+          .ancestor(
+            of: find.descendant(of: playerView, matching: find.text(name)),
+            matching: find.byType(Container),
+          )
+          .first;
 
-    Finder playerRow(String name) => find
-        .ancestor(
-          of: find.descendant(of: playerView, matching: find.text(name)),
-          matching: find.byType(Container),
-        )
-        .first;
+      BoxDecoration rowDecoration(String name) =>
+          tester.widget<Container>(playerRow(name)).decoration!
+              as BoxDecoration;
 
-    BoxDecoration rowDecoration(String name) =>
-        tester.widget<Container>(playerRow(name)).decoration! as BoxDecoration;
+      expect(rowDecoration('Ravi').border!.top.color, Colors.transparent);
 
-    expect(rowDecoration('Ravi').border!.top.color, Colors.transparent);
+      await tester.tap(find.byType(Checkbox).first);
+      await tester.pump();
+      expect(
+        find.descendant(of: playerView, matching: find.text('Goblin')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: playerView, matching: find.text('Enemy 1')),
+        findsNothing,
+      );
 
-    await tester.tap(find.byType(Checkbox).first);
-    await tester.pump();
-    expect(
-      find.descendant(of: playerView, matching: find.text('Goblin')),
-      findsOneWidget,
-    );
-    expect(
-      find.descendant(of: playerView, matching: find.text('Enemy 1')),
-      findsNothing,
-    );
+      await tester.tap(find.text('Next'));
+      await tester.pump();
 
-    await tester.tap(find.text('Next'));
-    await tester.pump();
-
-    expect(rowDecoration('Ravi').border!.top.color, AppColors.accent);
-  });
+      expect(rowDecoration('Ravi').border!.top.color, AppColors.cardHighlight);
+    },
+    variant: TargetPlatformVariant.desktop(),
+  );
 
   testWidgets(
     'creatures stay masked until their Masked checkbox is cleared',
@@ -416,12 +419,12 @@ void main() {
     }
 
     expect(cards().map((card) => card.isActiveTurn), [true, false]);
-    expect(activeOutlineColor(0), Colors.red);
+    expect(activeOutlineColor(0), AppColors.cardHighlight);
 
     await tester.tap(find.text('Next'));
     await tester.pump();
     expect(cards().map((card) => card.isActiveTurn), [false, true]);
-    expect(activeOutlineColor(1), Colors.red);
+    expect(activeOutlineColor(1), AppColors.cardHighlight);
 
     await tester.sendKeyEvent(LogicalKeyboardKey.space);
     await tester.pump();

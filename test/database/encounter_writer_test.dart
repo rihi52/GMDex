@@ -414,7 +414,17 @@ void main() {
             sqliteDb.execute('''
             CREATE TABLE creatures (
               id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-              hit_points INTEGER
+              name TEXT,
+              source TEXT,
+              hit_points INTEGER,
+              legendary_group_id INTEGER
+            )
+          ''');
+            sqliteDb.execute('''
+            CREATE TABLE legendary_groups (
+              id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+              name TEXT NOT NULL,
+              source TEXT NOT NULL
             )
           ''');
             sqliteDb.execute('''
@@ -527,6 +537,21 @@ void main() {
               p_hit_points INTEGER,
               p_armor_class INTEGER,
               p_original_campaign TEXT
+            )
+          ''');
+          sqliteDb.execute('''
+            CREATE TABLE creatures (
+              id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+              name TEXT,
+              source TEXT,
+              legendary_group_id INTEGER
+            )
+          ''');
+          sqliteDb.execute('''
+            CREATE TABLE legendary_groups (
+              id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+              name TEXT NOT NULL,
+              source TEXT NOT NULL
             )
           ''');
           sqliteDb.execute('PRAGMA user_version = 2');

@@ -11,7 +11,7 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
 import 'package:gmdex/database/database.dart';
-// import 'package:gmdex/database/bestiary_importer.dart';
+import 'package:gmdex/database/bestiary_importer.dart';
 
 late AppDatabase _database;
 
@@ -71,7 +71,7 @@ Future<void> initializeDatabase() async {
             pArmorClass: Value(15),
             pHitPoints: Value(38),
             pLevel: Value(11),
-            pOriginalCampaign: Value('Finndalin'),
+            pOriginalCampaign: Value('Slipspot'),
             pNotes: Value('I AM VERY FAST!!!'),
           ),
           PlayersCompanion.insert(
@@ -106,14 +106,14 @@ Future<void> initializeDatabase() async {
       _database.creatures,
     )..limit(1)).get()).isNotEmpty;
     if (!hasCreatures) {
-      // final result = await importBestiary(_database);
+      final result = await importBestiary(_database);
       // Import failures are not surfaced from this startup path at present.
-      // for (final f in result.failed.take(10)) {
-      // }
+      for (final f in result.failed.take(10)) {
+      }
     }
 
     // Retain the final read currently used to verify that player queries work.
-    // final allItems = await _database.select(_database.players).get();
+    final allItems = await _database.select(_database.players).get();
   } catch (e) {
     // Keep startup non-fatal for compatibility; callers are not notified yet.
     return;

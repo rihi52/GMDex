@@ -63,10 +63,10 @@ void main() {
     expect(creatureRow.isCreature, isTrue);
     expect(playerRow.isCreature, isFalse);
     expect(creatureRow.conditions, ['Exhaustion 2', 'Prone']);
-    expect(find.text('12/30 HP'), findsOneWidget);
+    expect(find.text('12/30 HP'), findsNothing);
     expect(find.text('Prone'), findsOneWidget);
     expect(find.text('Exhaustion 2'), findsOneWidget);
-    expect(find.text('24/24 HP'), findsOneWidget);
+    expect(find.text('24/24 HP'), findsNothing);
   });
 
   testWidgets('active combatant scrolls into view when the turn changes', (

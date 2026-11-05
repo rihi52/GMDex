@@ -587,10 +587,10 @@ class AppDatabase extends _$AppDatabase {
             AND legendary_group_name IS NULL
         ''');
       }
-      if (from < 14) {
+      if (from >= 3 && from < 14) {
         await m.addColumn(encounterCreatures, encounterCreatures.isUnmasked);
       }
-      if (from < 15) {
+      if (from >= 3 && from < 15) {
         await m.addColumn(encounterCreatures, encounterCreatures.nameOverride);
       }
     },

@@ -45,7 +45,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
         content: SingleChildScrollView(
           child: SelectableText(
-            'v0.9.6\n'
+            'v1.0.0\n'
             'GMDex is a free and open source tool for managing Dungeons & Dragons 5e '
             '2014 encounters. It is not affiliated with Wizards of the Coast or '
             'any other company. All trademarks are property of their respective owners.'
@@ -201,7 +201,10 @@ class _SettingsPageState extends State<SettingsPage> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: Text('Replace entire database?', style: Theme.of(context).textTheme.bodyLarge,),
+        title: Text('Replace entire database?', style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+          ),),
         content: const Text(
           'Importing a backup permanently replaces all current players, '
           'creatures, encounters, notes, and related data. Export a backup '

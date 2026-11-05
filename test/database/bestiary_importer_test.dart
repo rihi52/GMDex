@@ -185,6 +185,78 @@ void main() {
     expect(goblin.armorClassType, '(leather armor, shield)');
   });
 
+  test('splits special HP and armor class values', () async {
+    const hpExpression =
+        "7 + seven times caregiver's level (number of d8 Hit Dice equal to their caregiver's level)";
+    const wordNumberHp =
+        'Eight times their level (number of d10 Hit Dice equal to their level)';
+    const json =
+        '''
+      {
+        "monster": [
+          {
+            "name": "Special AC Creature",
+            "source": "TST",
+            "ac": [{"special": "13 plus PB (natural armor)"}],
+            "hp": {"special": "$hpExpression"}
+          },
+          {
+            "name": "Word Number HP Creature",
+            "source": "TST",
+            "ac": [12],
+            "hp": {"special": "$wordNumberHp"}
+          },
+          {
+            "name": "Numeric HP Creature",
+            "source": "TST",
+            "ac": [12],
+            "hp": {"special": "8"}
+          },
+          {
+            "name": "Empty Special AC Creature",
+            "source": "TST",
+            "ac": [{"special": "13 ()"}],
+            "hp": {"special": "6"}
+          }
+        ]
+      }
+    ''';
+
+    final result = await importBestiaryJson(db, json);
+    final creatures = await db.select(db.creatures).get();
+    final specialAcCreature = creatures.singleWhere(
+      (creature) => creature.name == 'Special AC Creature',
+    );
+    final wordNumberCreature = creatures.singleWhere(
+      (creature) => creature.name == 'Word Number HP Creature',
+    );
+    final numericCreature = creatures.singleWhere(
+      (creature) => creature.name == 'Numeric HP Creature',
+    );
+    final emptySpecialAcCreature = creatures.singleWhere(
+      (creature) => creature.name == 'Empty Special AC Creature',
+    );
+
+    expect(result.imported, 4);
+    expect(result.skipped, 0);
+    expect(specialAcCreature.armorClass, 13);
+    expect(specialAcCreature.armorClassType, 'plus PB (natural armor)');
+    expect(specialAcCreature.hitPoints, 7);
+    expect(
+      specialAcCreature.hitPointFormula,
+      '+ seven times caregiver\'s level (number of d8 Hit Dice equal to their caregiver\'s level)',
+    );
+    expect(wordNumberCreature.hitPoints, 8);
+    expect(
+      wordNumberCreature.hitPointFormula,
+      'times their level (number of d10 Hit Dice equal to their level)',
+    );
+    expect(numericCreature.hitPoints, 8);
+    expect(numericCreature.hitPointFormula, isNull);
+    expect(emptySpecialAcCreature.armorClass, 13);
+    expect(emptySpecialAcCreature.armorClassType, isNull);
+  });
+
   test('rejects JSON without a monster array', () async {
     await expectLater(
       importBestiaryJson(db, '{"creature": []}'),

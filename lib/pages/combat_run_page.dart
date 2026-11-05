@@ -658,7 +658,10 @@ class _RunCombatPageState extends State<RunCombatPage> {
               top: false,
               left: false,
               right: false,
-              bottom: !isWide,
+              bottom: ResponsiveLayout.isNarrow(
+                constraints.maxWidth,
+                breakpoint: ResponsiveBreakpoints.navigation,
+              ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

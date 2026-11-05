@@ -21,7 +21,7 @@ void main() {
     await tester.tap(find.text('Settings'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Bestiary'), findsOneWidget);
+    expect(find.text('Settings'), findsOneWidget);
   });
 
   testWidgets('About GMDex opens a dialog with an exit button', (tester) async {
@@ -37,7 +37,8 @@ void main() {
     await tester.tap(aboutButton);
     await tester.pumpAndSettle();
 
-    expect(find.text('About GMDex'), findsNWidgets(2));
+    expect(find.text('About GMDex'), findsOneWidget);
+    expect(find.text('GMDex'), findsOneWidget);
     expect(find.text('Exit'), findsOneWidget);
 
     await tester.tap(find.text('Exit'));
@@ -118,7 +119,7 @@ void main() {
   testWidgets('clearing database data asks for confirmation', (tester) async {
     await tester.pumpWidget(const MaterialApp(home: SettingsPage()));
 
-    final clearButton = find.text('Clear database data');
+    final clearButton = find.text('Clear Database Data');
     await tester.ensureVisible(clearButton);
     await tester.pumpAndSettle();
     await tester.tap(clearButton);
