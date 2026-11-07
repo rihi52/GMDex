@@ -42,14 +42,9 @@ GMDex is a tool to help GM's of Dungeons and Dragons 5th Edition manage their ta
 
 ## Database backups
 
-Use **Export Entire Database** in Settings to create a portable JSON backup, and
-**Import Entire Database** to replace the current local data from that backup.
-The backup includes players, creatures, encounters, notes, and all related
-records. Importing replaces all current database records; export a backup
-before importing if you may need to restore them.
+Use **Export Entire Database** in Settings to create a portable JSON backup, and **Import Entire Database** to replace the current local data from that backup. The backup includes players, creatures, encounters, notes, and all related records. Importing replaces all current database records; export a backup before importing if you may need to restore them.
 
-The JSON format is versioned and retains record IDs so encounter references
-remain intact:
+The JSON format is versioned and retains record IDs so encounter references remain intact:
 
 ```json
 {
@@ -79,11 +74,7 @@ remain intact:
 }
 ```
 
-Each table value is an array of database rows. The example lists every table;
-the exported backup includes the row data for each. Row IDs are retained so
-encounter references remain intact, and date columns use ISO-8601 strings.
-Import accepts backups from this or an older database schema version supported
-by the app.
+Each table value is an array of database rows. The example lists every table; the exported backup includes the row data for each. Row IDs are retained so encounter references remain intact, and date columns use ISO-8601 strings. Import accepts backups from this or an older database schema version supported by the app.
 
 ## Desktop Screenshots
 
@@ -124,10 +115,18 @@ by the app.
   </tr>
 </table>
 
+## Json Structure
+
+Creature import files need to be JSON objects with a top-level `monster` array. Each item in that array describes the creature. The importer requires a creature name, armor class (`ac`), and hit points (`hp`); the other fields are optional. `ac` can be a number or an array, and `hp` should be an object with an `average` value and optional `formula`.
+
+See [template.json](template.json) for a complete, editable example. It includes common stat block fields, a trait, an action, and spellcasting. Remove optional fields you don't need, or add more creature objects to the `monster` array. Creature entries use the 5etools-style bestiary format; traits and actions use `name` and `entries` fields.
+
 ## Roadmap
 
 - Add spells
 - Possibly allow user specified location for database syncing across platforms
   - Right now you have to export your entire database and move that across platforms manually and import it
+
+### SRD License Information
 
 This work includes material taken from the System Reference Document 5.1 (“SRD 5.1”) by Wizards of the Coast LLC and available at <https://dnd.wizards.com/resources/systems-reference-document>. The SRD 5.1 is licensed under the Creative Commons Attribution 4.0 International License available at <https://creativecommons.org/licenses/by/4.0/legalcode>.

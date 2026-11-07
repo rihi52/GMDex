@@ -1,0 +1,65 @@
+{
+  "monster": [
+    {
+      "name": "Example Creature",
+      "source": "CUSTOM",
+      "size": ["M"],
+      "type": "humanoid",
+      "alignment": ["N"],
+      "ac": [
+        {
+          "ac": 13,
+          "from": ["natural armor"]
+        }
+      ],
+      "hp": {
+        "average": 22,
+        "formula": "4d8 + 4"
+      },
+      "speed": {
+        "walk": 30
+      },
+      "str": 12,
+      "dex": 14,
+      "con": 12,
+      "int": 10,
+      "wis": 11,
+      "cha": 10,
+      "save": {
+        "dex": "+4"
+      },
+      "skill": {
+        "perception": "+2"
+      },
+      "senses": ["darkvision 60 ft."],
+      "passive": 12,
+      "languages": ["Common"],
+      "cr": "1/2",
+      "trait": [
+        {
+          "name": "Keen Hearing",
+          "entries": ["The creature has advantage on Wisdom (Perception) checks that rely on hearing."]
+        }
+      ],
+      "action": [
+        {
+          "name": "Spear",
+          "entries": ["Melee or Ranged Weapon Attack: +3 to hit, reach 5 ft. or range 20/60 ft., one target. Hit: 5 (1d6 + 2) piercing damage."]
+        }
+      ],
+      "spellcasting": [
+        {
+          "name": "Spellcasting",
+          "ability": "wis",
+          "headerEntries": ["The creature is a 1st-level spellcaster."],
+          "spells": {
+            "0": {
+              "spells": ["guidance"]
+            }
+          }
+        }
+      ],
+      "environment": ["forest"]
+    }
+  ]
+}
