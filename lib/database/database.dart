@@ -251,6 +251,20 @@ class CreatureSpells extends Table {
   IntColumn get sortOrder => integer()();
 }
 
+/// SRD spell definitions, with the original JSON retained for full fidelity.
+@DataClassName('SpellRow')
+@TableIndex(name: 'idx_spell_level_school', columns: {#level, #school})
+@TableIndex(name: 'idx_spell_name', columns: {#name}, unique: true)
+class Spells extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get name => text()();
+  TextColumn get source => text()();
+  IntColumn get level => integer()();
+  TextColumn get school => text()();
+  TextColumn get data => text()();
+  TextColumn get notes => text().nullable()();
+}
+
 /// Per-ability saving-throw bonuses for each creature.
 @DataClassName('CreatureSaveRow')
 class CreatureSaves extends Table {
@@ -352,6 +366,7 @@ class LegendaryGroupEntries extends Table {
     CreatureTraits,
     CreatureSpellcastings,
     CreatureSpells,
+    Spells,
     CreatureSaves,
     CreatureSkills,
     CreatureSenses,
@@ -375,11 +390,43 @@ class AppDatabase extends _$AppDatabase {
     });
   }
 
+  Future<DateTime> getDatabaseCreatedAt() async {
+    final rows = await customSelect(
+      "SELECT value FROM database_metadata WHERE key = 'database_created_at'",
+    ).get();
+    if (rows.isEmpty) {
+      await _ensureDatabaseMetadata();
+      return getDatabaseCreatedAt();
+    }
+    return DateTime.parse(rows.single.read<String>('value'));
+  }
+
+  Future<void> recordDatabaseImport(DateTime? snapshotAt) async {
+    final importedAt = DateTime.now().toUtc();
+    final createdAt = (snapshotAt ?? importedAt).toUtc().toIso8601String();
+    await customStatement(
+      "INSERT OR REPLACE INTO database_metadata (key, value) "
+      "VALUES ('database_created_at', ?)",
+      [createdAt],
+    );
+    await customStatement(
+      "INSERT OR REPLACE INTO database_metadata (key, value) "
+      "VALUES ('last_imported_at', ?)",
+      [importedAt.toIso8601String()],
+    );
+  }
+
   @override
-  int get schemaVersion => 15;
+  int get schemaVersion => 19;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
+    onCreate: (m) async {
+      for (final entity in allSchemaEntities) {
+        await m.create(entity);
+      }
+      await _ensureDatabaseMetadata();
+    },
     // Apply each schema transition in version order for existing installations.
     onUpgrade: (m, from, to) async {
       if (from < 2) {
@@ -593,6 +640,33 @@ class AppDatabase extends _$AppDatabase {
       if (from >= 3 && from < 15) {
         await m.addColumn(encounterCreatures, encounterCreatures.nameOverride);
       }
+      if (from >= 2 && from < 16) {
+        await m.create(spells);
+      }
+      if (from >= 16 && from < 17) {
+        await customStatement('''
+          DELETE FROM spells
+          WHERE id != (
+            SELECT candidate.id
+            FROM spells AS candidate
+            WHERE candidate.name = spells.name
+            ORDER BY
+              CASE WHEN candidate.source = 'SRD' THEN 1 ELSE 0 END,
+              candidate.id DESC
+            LIMIT 1
+          )
+        ''');
+        await customStatement('DROP INDEX IF EXISTS idx_spell_name_source');
+        await customStatement('''
+          CREATE UNIQUE INDEX IF NOT EXISTS idx_spell_name ON spells (name)
+        ''');
+      }
+      if (from >= 16 && from < 18) {
+        await m.addColumn(spells, spells.notes);
+      }
+      if (to >= 19) {
+        await _ensureDatabaseMetadata();
+      }
     },
     beforeOpen: (details) async {
       // SQLite ignores foreign keys unless this is on, so the
@@ -600,4 +674,18 @@ class AppDatabase extends _$AppDatabase {
       await customStatement('PRAGMA foreign_keys = ON');
     },
   );
+
+  Future<void> _ensureDatabaseMetadata() async {
+    await customStatement('''
+      CREATE TABLE IF NOT EXISTS database_metadata (
+        key TEXT NOT NULL PRIMARY KEY,
+        value TEXT NOT NULL
+      )
+    ''');
+    await customStatement(
+      "INSERT OR IGNORE INTO database_metadata (key, value) "
+      "VALUES ('database_created_at', ?)",
+      [DateTime.now().toUtc().toIso8601String()],
+    );
+  }
 }

@@ -83,8 +83,12 @@ class PlayerDetails extends StatelessWidget {
                     width: topButtonWidth,
                     child: ElevatedButton(
                       onPressed: onNotesPressed,
-                      child: Text(
-                        'Notes',
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                      ),
+                      child: NotesLabel(
+                        hasNotes:
+                            selectedPlayer.pNotes?.trim().isNotEmpty == true,
                         style: Theme.of(context).textTheme.bodyLarge,
                       ),
                     ),

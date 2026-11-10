@@ -295,6 +295,21 @@ Widget _combatantStatuses(Combatant combatant, {VoidCallback? onChanged}) {
         selected: combatant.isUnconscious,
         onChanged: (value) => update(() => combatant.isUnconscious = value),
       ),
+      status(
+        label: 'Disadvantange',
+        selected: combatant.isUnconscious,
+        onChanged: (value) => update(() => combatant.isUnconscious = value),
+      ),
+      status(
+        label: 'Advantage',
+        selected: combatant.isUnconscious,
+        onChanged: (value) => update(() => combatant.isUnconscious = value),
+      ),
+      status(
+        label: 'Cursed',
+        selected: combatant.isUnconscious,
+        onChanged: (value) => update(() => combatant.isUnconscious = value),
+      ),
     ],
   );
 }

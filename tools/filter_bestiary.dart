@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 
 void main() {
@@ -86,7 +87,7 @@ void main() {
     File(
       outPath,
     ).writeAsStringSync(const JsonEncoder.withIndent('    ').convert(out));
-    print('Wrote $outPath');
+    log('Wrote $outPath');
   } else {
     stderr.writeln('Bestiary JSON does not have top-level "monster" array');
     exit(1);

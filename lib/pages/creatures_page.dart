@@ -90,6 +90,10 @@ class _CreaturesPageState extends State<CreaturesPage> {
             Navigator.pushNamed(context, '/players');
           },
         ),
+        NavigationSidebarItem(
+          title: 'Spells',
+          onTap: () => Navigator.pushNamed(context, '/spells'),
+        ),
       ],
       body: _buildContent(),
     );
@@ -627,6 +631,7 @@ class _BrowseCreatureWidgetState extends State<BrowseCreatureWidget> {
             ? SingleChildScrollView(
                 child: CreatureStatBlock(
                   creature: _selectedCreature!,
+                  database: database,
                   onEditPressed: widget.onEdit == null
                       ? null
                       : () => widget.onEdit!(_selectedCreature!),
@@ -706,6 +711,7 @@ class _BrowseCreatureWidgetState extends State<BrowseCreatureWidget> {
                   detailsLabel: 'Statblock',
                   details: CreatureStatBlock(
                     creature: _selectedCreature!,
+                    database: database,
                     onEditPressed: widget.onEdit == null
                         ? null
                         : () => widget.onEdit!(_selectedCreature!),

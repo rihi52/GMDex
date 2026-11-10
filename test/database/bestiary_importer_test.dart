@@ -185,6 +185,35 @@ void main() {
     expect(goblin.armorClassType, '(leather armor, shield)');
   });
 
+  test('formats bare recharge tags as Recharge 6', () async {
+    const json = '''
+      {
+        "monster": [
+          {
+            "name": "Recharge Creature",
+            "source": "TST",
+            "ac": [12],
+            "hp": {"average": 5},
+            "action": [
+              {"name": "Breath {@recharge}", "entries": ["Breathes fire."]},
+              {"name": "Blast {@recharge 5}", "entries": ["Blasts energy."]}
+            ]
+          }
+        ]
+      }
+    ''';
+
+    await importBestiaryJson(db, json);
+    final row = await db.select(db.creatures).getSingle();
+    final creature = await loadCreature(db, row.id);
+
+    expect(creature?.actions, isNotNull);
+    expect(creature!.actions!.map((action) => action.name), [
+      'Breath Recharge 6',
+      'Blast Recharge 5-6',
+    ]);
+  });
+
   test('splits special HP and armor class values', () async {
     const hpExpression =
         "7 + seven times caregiver's level (number of d8 Hit Dice equal to their caregiver's level)";

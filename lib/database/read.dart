@@ -333,6 +333,12 @@ String parseEntries(List entries) {
     (match) => '+${match.group(1)}',
   );
 
+  // Scaled dice markup stores the displayed dice before its scaling data.
+  text = text.replaceAllMapped(
+    RegExp(r'\{@scaledice ([^|}]+)(?:\|[^}]*)?\}'),
+    (match) => match.group(1)!.trim(),
+  );
+
   // Hit result
   text = text.replaceAllMapped(
     RegExp(r'\{@h\}(\d+)'),
@@ -384,6 +390,8 @@ String parseEntries(List entries) {
     RegExp(r'\{@recharge (\d+)-(\d+)\}'),
     (match) => 'Recharge ${match.group(1)}-${match.group(2)}',
   );
+
+  text = text.replaceAll('{@recharge}', 'Recharge 6');
 
   text = text.replaceAllMapped(RegExp(r'\{@recharge (\d+)\}'), (match) {
     final min = int.parse(match.group(1)!);

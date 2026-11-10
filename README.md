@@ -39,10 +39,14 @@ GMDex is a tool to help GM's of Dungeons and Dragons 5th Edition manage their ta
     - Armor Class
     - Passive Perception
   - Players can be edited, copied, and created new
+- Spells
+  - All SRD spells are included, and you can import your own using the specified json format
+  - Can be pulled up from a creature's statblock in the database or in an encounter
+  - Newly created creatures with spells will be linked to database spells if they exist
 
 ## Database backups
 
-Use **Export Entire Database** in Settings to create a portable JSON backup, and **Import Entire Database** to replace the current local data from that backup. The backup includes players, creatures, encounters, notes, and all related records. Importing replaces all current database records; export a backup before importing if you may need to restore them.
+Use **Export Entire Database** in Settings to create a portable JSON backup named with its export date (`YYYYMMDD`), and **Import Entire Database** to replace the current local data from that backup. The backup includes players, creatures, encounters, notes, and all related records. Importing replaces all current database records; export a backup before importing if you may need to restore them. If a backup's export time is older than the current database snapshot time, the app displays both times and asks for confirmation before replacing data.
 
 The JSON format is versioned and retains record IDs so encounter references remain intact:
 
@@ -50,7 +54,7 @@ The JSON format is versioned and retains record IDs so encounter references rema
 {
   "format": "gmdex-database-backup",
   "version": 1,
-  "databaseSchemaVersion": 12,
+  "databaseSchemaVersion": 19,
   "exportedAt": "2026-11-01T10:18:55.141Z",
   "tables": {
     "legendary_groups": [],
@@ -98,6 +102,8 @@ Each table value is an array of database rows. The example lists every table; th
 
 ![image](assets/playercreator.png)
 
+![image](assets/spelldatabase.png)
+
 ## Mobile Screenshots
 
 <table>
@@ -113,19 +119,33 @@ Each table value is an array of database rows. The example lists every table; th
     <td><img src="assets/mobileruncombat.png" width="160" alt="Mobile combat runner"></td>
     <td><img src="assets/mobilesettings.png" width="160" alt="Mobile settings"></td>
   </tr>
+  <tr>
+    <td><img src="assets/mobilestatblockcombat.png" width="160" alt="Mobile encounter builder"></td>
+    <td><img src="assets/mobileplayercreate.png" width="160" alt="Mobile encounter database"></td>
+    <td><img src="assets/mobilespell.png" width="160" alt="Mobile combat runner"></td>
+    <td><img src="assets/mobilespelldb.png" width="160" alt="Mobile settings"></td>
+  </tr>
 </table>
 
 ## Json Structure
+
+### Bestiary
 
 Creature import files need to be JSON objects with a top-level `monster` array. Each item in that array describes the creature. The importer requires a creature name, armor class (`ac`), and hit points (`hp`); the other fields are optional. `ac` can be a number or an array, and `hp` should be an object with an `average` value and optional `formula`.
 
 See [template.json](template.json) for a complete, editable example. It includes common stat block fields, a trait, an action, and spellcasting. Remove optional fields you don't need, or add more creature objects to the `monster` array. Creature entries use the 5etools-style bestiary format; traits and actions use `name` and `entries` fields.
 
+### Spells
+
+Spell import files need to be JSON objects with a top-level `spell` array. Each item in that array describes one spell. The importer requires `name`, `source`, `level`, and `school`; other spell fields are optional. Use a numeric `level` from 0 to 9 (`0` for a cantrip) and a school code such as `A` for Abjuration or `V` for Evocation.
+
+See [spell-template.json](spell-template.json) for an editable example in the same format as [spells-srd.json](assets/spells-srd.json). Replace the example values and add or remove optional fields as needed, or add more spell objects to the `spell` array.
+
 ## Roadmap
 
-- Add spells
 - Possibly allow user specified location for database syncing across platforms
   - Right now you have to export your entire database and move that across platforms manually and import it
+  - 
 
 ### SRD License Information
 

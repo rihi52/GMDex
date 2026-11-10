@@ -80,6 +80,10 @@ class _PlayersPageState extends State<PlayersPage> {
             Navigator.pushNamed(context, '/creatures');
           },
         ),
+        NavigationSidebarItem(
+          title: 'Spells',
+          onTap: () => Navigator.pushNamed(context, '/spells'),
+        ),
       ],
       body: _buildContent(),
     );
