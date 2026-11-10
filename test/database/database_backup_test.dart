@@ -6,6 +6,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:gmdex/database/database.dart';
 import 'package:gmdex/database/database_backup.dart';
 import 'package:gmdex/database/encounter_writer.dart';
+import 'package:gmdex/database/spell_importer.dart';
+import 'package:gmdex/database/spell_writer.dart';
 import 'package:gmdex/models/combat.dart';
 
 void main() {
@@ -127,6 +129,80 @@ void main() {
     expect(encounterCreatures.single.currentHitpoints, 5);
     expect(encounterCreatures.single.isPoisoned, isTrue);
     expect(encounterCreatures.single.isTurn, isTrue);
+  });
+
+  test('round-trips spell catalog data and accepts older backups', () async {
+    const spellJson = '''
+      {
+        "spell": [{
+          "name": "Example Spell",
+          "source": "SRD",
+          "level": 1,
+          "school": "A",
+          "entries": ["Full spell description."]
+        }]
+      }
+    ''';
+    await importSpellsJson(db, spellJson);
+    final spell = await db.select(db.spells).getSingle();
+    await saveSpellNotes(db, spell.id, '  Find this in the tower.  ');
+
+    final decoded =
+        jsonDecode(await exportDatabaseBackupJson(db)) as Map<String, dynamic>;
+    final tables = decoded['tables'] as Map<String, dynamic>;
+    final backedUpSpells = tables['spells'] as List<dynamic>;
+    expect(backedUpSpells, hasLength(1));
+    expect(
+      jsonDecode(backedUpSpells.single['data'] as String),
+      jsonDecode(spellJson)['spell'][0],
+    );
+    expect(backedUpSpells.single['notes'], 'Find this in the tower.');
+
+    await importDatabaseBackupJson(db, jsonEncode(decoded));
+    expect(
+      (await db.select(db.spells).getSingle()).notes,
+      'Find this in the tower.',
+    );
+
+    final oldBackup = Map<String, dynamic>.from(decoded)
+      ..['databaseSchemaVersion'] = db.schemaVersion - 1;
+    final oldTables = Map<String, dynamic>.from(tables)..remove('spells');
+    oldBackup['tables'] = oldTables;
+    final result = await importDatabaseBackupJson(db, jsonEncode(oldBackup));
+
+    expect(result.playerCount, 0);
+    expect(await db.select(db.spells).get(), isEmpty);
+  });
+
+  test('restores legacy duplicate spell rows with non-SRD priority', () async {
+    const spellJson = '''
+      {"spell":[{"name":"Shared Spell","source":"SRD","level":1,
+        "school":"E","entries":["SRD version."]}]}
+    ''';
+    await importSpellsJson(db, spellJson);
+
+    final decoded =
+        jsonDecode(await exportDatabaseBackupJson(db)) as Map<String, dynamic>;
+    decoded['databaseSchemaVersion'] = 16;
+    final tables = decoded['tables'] as Map<String, dynamic>;
+    final spells = tables['spells'] as List<dynamic>;
+    final phbSpell = Map<String, dynamic>.from(spells.single as Map)
+      ..['id'] = 2
+      ..['source'] = 'PHB'
+      ..['data'] = jsonEncode({
+        'name': 'Shared Spell',
+        'source': 'PHB',
+        'level': 2,
+        'school': 'A',
+        'entries': ['PHB version.'],
+      });
+    spells.add(phbSpell);
+
+    await importDatabaseBackupJson(db, jsonEncode(decoded));
+
+    final restored = await db.select(db.spells).getSingle();
+    expect(restored.source, 'PHB');
+    expect(jsonDecode(restored.data)['entries'], ['PHB version.']);
   });
 
   test(

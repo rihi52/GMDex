@@ -8,6 +8,7 @@ import 'package:gmdex/pages/creatures_page.dart';
 import 'package:gmdex/pages/encounters_page.dart';
 import 'package:gmdex/pages/home_page.dart';
 import 'package:gmdex/pages/players_page.dart';
+import 'package:gmdex/pages/spells_page.dart';
 import 'package:gmdex/pages/settings.dart' show SettingsPage;
 import 'package:gmdex/theme/apptheme.dart';
 import 'package:gmdex/database/database_initialize.dart';
@@ -43,6 +44,7 @@ class MyApp extends StatelessWidget {
         '/home': (context) => const MyHomePage(),
         '/players': (context) => const PlayersPage(),
         '/creatures': (context) => const CreaturesPage(),
+        '/spells': (context) => const SpellsPage(),
         '/encounters': (context) => const EncountersPage(),
         '/settings': (context) => const SettingsPage(),
         '/player_combat': (context) => const PlayerFacingCombatPage(),

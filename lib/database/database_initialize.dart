@@ -12,6 +12,7 @@ import 'package:path_provider/path_provider.dart';
 
 import 'package:gmdex/database/database.dart';
 import 'package:gmdex/database/bestiary_importer.dart';
+import 'package:gmdex/database/spell_importer.dart';
 
 late AppDatabase _database;
 
@@ -108,9 +109,10 @@ Future<void> initializeDatabase() async {
     if (!hasCreatures) {
       final result = await importBestiary(_database);
       // Import failures are not surfaced from this startup path at present.
-      for (final f in result.failed.take(10)) {
-      }
+      for (final f in result.failed.take(10)) {}
     }
+
+    await importSpells(_database);
 
     // Retain the final read currently used to verify that player queries work.
     final allItems = await _database.select(_database.players).get();

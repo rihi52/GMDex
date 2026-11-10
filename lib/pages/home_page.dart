@@ -7,6 +7,7 @@ import 'package:gmdex/components/responsive_layout.dart';
 import 'package:gmdex/pages/encounters_page.dart';
 import 'package:gmdex/pages/players_page.dart';
 import 'package:gmdex/pages/creatures_page.dart';
+import 'package:gmdex/pages/spells_page.dart';
 import 'package:gmdex/pages/settings.dart';
 
 /// Landing screen that routes into the encounter, player, and creature tools.
@@ -22,6 +23,7 @@ class _MyHomePageState extends State<MyHomePage> {
     'Encounters',
     'Players',
     'Bestiary',
+    'Spells',
     'Settings',
   ];
 
@@ -29,6 +31,7 @@ class _MyHomePageState extends State<MyHomePage> {
     const EncountersPage(),
     const PlayersPage(),
     const CreaturesPage(),
+    const SpellsPage(),
     const SettingsPage(),
   ];
 
@@ -49,43 +52,45 @@ class _MyHomePageState extends State<MyHomePage> {
             right: false,
             bottom: isNarrow,
             child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  if (isNarrow)
-                    Image.asset(
-                      'assets/images/GMDex.png',
-                      width: 250,
-                      height: 250,
-                      fit: BoxFit.contain, // Optional scaling behavior
-                    ),
-                  if (!isNarrow)
-                    Image.asset(
-                      'assets/images/GMDex_wide.png',
-                      width: 500,
-                      height: 200,
-                      fit: BoxFit.contain, // Optional scaling behavior
-                    ),
-                  // Text('GMDex', style: Theme.of(context).textTheme.headlineLarge),
-                  const SizedBox(height: 20),
-
-                  ...List.generate(
-                    buttons.length,
-                    (index) => Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          minimumSize: Size(250, 55),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    if (isNarrow)
+                      Image.asset(
+                        'assets/images/GMDex.png',
+                        width: 250,
+                        height: 250,
+                        fit: BoxFit.contain, // Optional scaling behavior
+                      ),
+                    if (!isNarrow)
+                      Image.asset(
+                        'assets/images/GMDex_wide.png',
+                        width: 500,
+                        height: 200,
+                        fit: BoxFit.contain, // Optional scaling behavior
+                      ),
+                    const SizedBox(height: 20),
+                    ...List.generate(
+                      buttons.length,
+                      (index) => Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            minimumSize: const Size(250, 55),
+                          ),
+                          onPressed: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => pages[index],
+                            ),
+                          ),
+                          child: Text(buttons[index]),
                         ),
-                        onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => pages[index]),
-                        ),
-                        child: Text(buttons[index]),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

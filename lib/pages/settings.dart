@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:gmdex/components/responsive_layout.dart';
 import 'package:gmdex/components/bestiary_file_import.dart';
 import 'package:gmdex/components/legendary_group_file_import.dart';
+import 'package:gmdex/components/spell_file_import.dart';
 import 'package:gmdex/database/bestiary_exporter.dart';
 import 'package:gmdex/database/database_backup.dart';
 import 'package:gmdex/database/database_initialize.dart';
@@ -32,17 +33,17 @@ class _SettingsPageState extends State<SettingsPage> {
       context: context,
       builder: (context) => AlertDialog(
         title: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text('GMDex', style: Theme.of(context).textTheme.headlineLarge),
-                      SizedBox(width: 24),
-                      Image(
-                        image: AssetImage('assets/images/GMDex.png'),
-                        width: 48,
-                        height: 48,
-                      ),
-                    ],
-                  ),
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('GMDex', style: Theme.of(context).textTheme.headlineLarge),
+            SizedBox(width: 24),
+            Image(
+              image: AssetImage('assets/images/GMDex.png'),
+              width: 48,
+              height: 48,
+            ),
+          ],
+        ),
         content: SingleChildScrollView(
           child: SelectableText(
             'v1.0.0\n'
@@ -141,6 +142,30 @@ class _SettingsPageState extends State<SettingsPage> {
     }
   }
 
+  Future<void> _importSpells() async {
+    setState(() => _isImporting = true);
+    try {
+      final importedFile = await importSpellsFromFile(database);
+      if (importedFile == null || !mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            '${importedFile.fileName}: imported ${importedFile.imported} spells.',
+          ),
+        ),
+      );
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not import spells: $error')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isImporting = false);
+    }
+  }
+
   Future<void> _exportCreatures() async {
     setState(() => _isExporting = true);
     try {
@@ -201,10 +226,13 @@ class _SettingsPageState extends State<SettingsPage> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: Text('Replace entire database?', style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+        title: Text(
+          'Replace entire database?',
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
             color: Colors.white,
             fontWeight: FontWeight.w600,
-          ),),
+          ),
+        ),
         content: const Text(
           'Importing a backup permanently replaces all current players, '
           'creatures, encounters, notes, and related data. Export a backup '
@@ -348,360 +376,421 @@ class _SettingsPageState extends State<SettingsPage> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                Text(
-                  'Database',
-                  style: Theme.of(context).textTheme.headlineMedium,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 12),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: SizedBox(
-                    width: double.infinity,
-                    height: 40,
-                    child: ElevatedButton.icon(
-                      onPressed: _isImporting || _isExporting || _isDeleting
-                          ? null
-                          : _importBestiary,
-                      icon: _isImporting
-                          ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Icon(Icons.file_upload_outlined),
-                      label: Text(
-                        _isImporting ? 'Importing...' : 'Import Bestiary',
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                    ),
-                  ),
-                ),
-                Text(
-                  'Import a json file containing bestiary data. Structure must match the expected format (the structure a website with tools for 5e might have).',
-                  style: Theme.of(context).textTheme.bodyLarge,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: AppSpacing.spacingMedium),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: SizedBox(
-                    width: double.infinity,
-                    height: 40,
-                    child: ElevatedButton.icon(
-                      onPressed: _isImporting || _isExporting || _isDeleting
-                          ? null
-                          : _importLegendaryGroups,
-                      icon: _isImporting
-                          ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Icon(Icons.file_upload_outlined),
-                      label: Text(
-                        _isImporting
-                            ? 'Importing...'
-                            : 'Import Legendary Groups',
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                    ),
-                  ),
-                ),
-                Text(
-                  'Import legendarygroups.json separately. Import order does not matter; links use name and source, with a unique-name fallback for blank references.',
-                  style: Theme.of(context).textTheme.bodyLarge,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: AppSpacing.spacingLarge),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: SizedBox(
-                    width: double.infinity,
-                    height: 40,
-                    child: ElevatedButton.icon(
-                      onPressed: _isImporting || _isExporting || _isDeleting
-                          ? null
-                          : _exportCreatures,
-                      icon: _isExporting
-                          ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Icon(Icons.file_download_outlined),
-                      label: Text(
-                        _isExporting
-                            ? 'Exporting...'
-                            : 'Export Bestiary Database',
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                    ),
-                  ),
-                ),
-                Text(
-                  'Exports a json file of the bestiary database.',
-                  style: Theme.of(context).textTheme.bodyLarge,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: AppSpacing.spacingLarge),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: SizedBox(
-                    width: double.infinity,
-                    height: 40,
-                    child: ElevatedButton.icon(
-                      onPressed: _isImporting || _isExporting || _isDeleting
-                          ? null
-                          : _clearDatabaseData,
-                      icon: _isDeleting
-                          ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Icon(Icons.delete_outlined),
-                      label: Text(
-                        _isDeleting ? 'Clearing...' : 'Clear Database Data',
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                    ),
-                  ),
-                ),
-                Text(
-                  'Permanently removes all saved data while keeping the database structure.',
-                  style: Theme.of(context).textTheme.bodyLarge,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: AppSpacing.spacingLarge),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: SizedBox(
-                    width: double.infinity,
-                    height: 40,
-                    child: ElevatedButton.icon(
-                      onPressed: _isImporting || _isExporting || _isDeleting
-                          ? null
-                          : _exportEntireDatabase,
-                      icon: _isExporting
-                          ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Icon(Icons.file_download_outlined),
-                      label: Text(
-                        _isExporting
-                            ? 'Exporting...'
-                            : 'Export Entire Database',
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                    ),
-                  ),
-                ),
-                Text(
-                  'Exports all players, creatures, encounters, notes, and related data to a portable GMDex JSON backup.',
-                  style: Theme.of(context).textTheme.bodyLarge,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: AppSpacing.spacingLarge),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: SizedBox(
-                    width: double.infinity,
-                    height: 40,
-                    child: ElevatedButton.icon(
-                      onPressed: _isImporting || _isExporting || _isDeleting
-                          ? null
-                          : _importEntireDatabase,
-                      icon: _isImporting
-                          ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Icon(Icons.file_upload_outlined),
-                      label: Text(
-                        _isImporting
-                            ? 'Importing...'
-                            : 'Import Entire Database',
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                    ),
-                  ),
-                ),
-                Text(
-                  'Replaces the current database with data from a GMDex JSON backup.',
-                  style: Theme.of(context).textTheme.bodyLarge,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 32),
-                Text(
-                  'Combat Options',
-                  style: Theme.of(context).textTheme.headlineMedium,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: AppSpacing.spacingLarge),
-                Text(
-                  'Turn Highlighter',
-                  style: Theme.of(context).textTheme.displayMedium,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: AppSpacing.spacingMedium),
-                ValueListenableBuilder<bool>(
-                  valueListenable: turnHighlightEnabled,
-                  builder: (context, isHighlight, _) {
-                    return Switch(
-                      value: isHighlight,
-                      onChanged: (value) async {
-                        try {
-                          await saveTurnHighlightPreference(value);
-                        } catch (error) {
-                          if (!context.mounted) return;
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'Could not save turn highlight setting: $error',
+                        Text(
+                          'Database',
+                          style: Theme.of(context).textTheme.headlineMedium,
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 12),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: SizedBox(
+                            width: double.infinity,
+                            height: 40,
+                            child: ElevatedButton.icon(
+                              onPressed:
+                                  _isImporting || _isExporting || _isDeleting
+                                  ? null
+                                  : _importBestiary,
+                              icon: _isImporting
+                                  ? const SizedBox(
+                                      width: 18,
+                                      height: 18,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : const Icon(Icons.file_upload_outlined),
+                              label: Text(
+                                _isImporting
+                                    ? 'Importing...'
+                                    : 'Import Bestiary',
+                                style: Theme.of(context).textTheme.bodyLarge,
                               ),
                             ),
-                          );
-                        }
-                      },
-                    );
-                  },
-                ),
-                const SizedBox(height: AppSpacing.spacingLarge),
-                Text(
-                  'Difficulty Calculator',
-                  style: Theme.of(context).textTheme.displayMedium,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 12),
-                ValueListenableBuilder<DifficultyCalculatorRuleset>(
-                  valueListenable: selectedDifficultyCalculator,
-                  builder: (context, selected, _) {
-                    return SegmentedButton<DifficultyCalculatorRuleset>(
-                      showSelectedIcon: false,
-                      segments: [
-                        ButtonSegment(
-                          value: DifficultyCalculatorRuleset.dnd2014,
-                          label: SizedBox(
-                            width: 300,
-                            child: Stack(
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.only(right: 28),
-                                  child: Text.rich(
-                                    TextSpan(
+                          ),
+                        ),
+                        Text(
+                          'Import a json file containing bestiary data. Structure must match the expected format (the structure a website with tools for 5e might have).',
+                          style: Theme.of(context).textTheme.bodyLarge,
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: AppSpacing.spacingMedium),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: SizedBox(
+                            width: double.infinity,
+                            height: 40,
+                            child: ElevatedButton.icon(
+                              onPressed:
+                                  _isImporting || _isExporting || _isDeleting
+                                  ? null
+                                  : _importLegendaryGroups,
+                              icon: _isImporting
+                                  ? const SizedBox(
+                                      width: 18,
+                                      height: 18,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : const Icon(Icons.file_upload_outlined),
+                              label: Text(
+                                _isImporting
+                                    ? 'Importing...'
+                                    : 'Import Legendary Groups',
+                                style: Theme.of(context).textTheme.bodyLarge,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Text(
+                          'Import legendarygroups.json separately. Import order does not matter; links use name and source, with a unique-name fallback for blank references.',
+                          style: Theme.of(context).textTheme.bodyLarge,
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: AppSpacing.spacingLarge),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: SizedBox(
+                            width: double.infinity,
+                            height: 40,
+                            child: ElevatedButton.icon(
+                              onPressed:
+                                  _isImporting || _isExporting || _isDeleting
+                                  ? null
+                                  : _importSpells,
+                              icon: _isImporting
+                                  ? const SizedBox(
+                                      width: 18,
+                                      height: 18,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : const Icon(Icons.file_upload_outlined),
+                              label: Text(
+                                _isImporting ? 'Importing...' : 'Import Spells',
+                                style: Theme.of(context).textTheme.bodyLarge,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Text(
+                          'Import a spells.json file containing a "spell" array, such as spells-phb.json or spells-tce.json. Imported non-SRD spells replace same-name SRD entries.',
+                          style: Theme.of(context).textTheme.bodyLarge,
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: AppSpacing.spacingLarge),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: SizedBox(
+                            width: double.infinity,
+                            height: 40,
+                            child: ElevatedButton.icon(
+                              onPressed:
+                                  _isImporting || _isExporting || _isDeleting
+                                  ? null
+                                  : _exportCreatures,
+                              icon: _isExporting
+                                  ? const SizedBox(
+                                      width: 18,
+                                      height: 18,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : const Icon(Icons.file_download_outlined),
+                              label: Text(
+                                _isExporting
+                                    ? 'Exporting...'
+                                    : 'Export Bestiary Database',
+                                style: Theme.of(context).textTheme.bodyLarge,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Text(
+                          'Exports a json file of the bestiary database.',
+                          style: Theme.of(context).textTheme.bodyLarge,
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: AppSpacing.spacingLarge),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: SizedBox(
+                            width: double.infinity,
+                            height: 40,
+                            child: ElevatedButton.icon(
+                              onPressed:
+                                  _isImporting || _isExporting || _isDeleting
+                                  ? null
+                                  : _clearDatabaseData,
+                              icon: _isDeleting
+                                  ? const SizedBox(
+                                      width: 18,
+                                      height: 18,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : const Icon(Icons.delete_outlined),
+                              label: Text(
+                                _isDeleting
+                                    ? 'Clearing...'
+                                    : 'Clear Database Data',
+                                style: Theme.of(context).textTheme.bodyLarge,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Text(
+                          'Permanently removes all saved data while keeping the database structure.',
+                          style: Theme.of(context).textTheme.bodyLarge,
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: AppSpacing.spacingLarge),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: SizedBox(
+                            width: double.infinity,
+                            height: 40,
+                            child: ElevatedButton.icon(
+                              onPressed:
+                                  _isImporting || _isExporting || _isDeleting
+                                  ? null
+                                  : _exportEntireDatabase,
+                              icon: _isExporting
+                                  ? const SizedBox(
+                                      width: 18,
+                                      height: 18,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : const Icon(Icons.file_download_outlined),
+                              label: Text(
+                                _isExporting
+                                    ? 'Exporting...'
+                                    : 'Export Entire Database',
+                                style: Theme.of(context).textTheme.bodyLarge,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Text(
+                          'Exports all players, creatures, encounters, notes, and related data to a portable GMDex JSON backup.',
+                          style: Theme.of(context).textTheme.bodyLarge,
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: AppSpacing.spacingLarge),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: SizedBox(
+                            width: double.infinity,
+                            height: 40,
+                            child: ElevatedButton.icon(
+                              onPressed:
+                                  _isImporting || _isExporting || _isDeleting
+                                  ? null
+                                  : _importEntireDatabase,
+                              icon: _isImporting
+                                  ? const SizedBox(
+                                      width: 18,
+                                      height: 18,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : const Icon(Icons.file_upload_outlined),
+                              label: Text(
+                                _isImporting
+                                    ? 'Importing...'
+                                    : 'Import Entire Database',
+                                style: Theme.of(context).textTheme.bodyLarge,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Text(
+                          'Replaces the current database with data from a GMDex JSON backup.',
+                          style: Theme.of(context).textTheme.bodyLarge,
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 32),
+                        Text(
+                          'Combat Options',
+                          style: Theme.of(context).textTheme.headlineMedium,
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: AppSpacing.spacingLarge),
+                        Text(
+                          'Turn Highlighter',
+                          style: Theme.of(context).textTheme.displayMedium,
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: AppSpacing.spacingMedium),
+                        ValueListenableBuilder<bool>(
+                          valueListenable: turnHighlightEnabled,
+                          builder: (context, isHighlight, _) {
+                            return Switch(
+                              value: isHighlight,
+                              onChanged: (value) async {
+                                try {
+                                  await saveTurnHighlightPreference(value);
+                                } catch (error) {
+                                  if (!context.mounted) return;
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        'Could not save turn highlight setting: $error',
+                                      ),
+                                    ),
+                                  );
+                                }
+                              },
+                            );
+                          },
+                        ),
+                        const SizedBox(height: AppSpacing.spacingLarge),
+                        Text(
+                          'Difficulty Calculator',
+                          style: Theme.of(context).textTheme.displayMedium,
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 12),
+                        ValueListenableBuilder<DifficultyCalculatorRuleset>(
+                          valueListenable: selectedDifficultyCalculator,
+                          builder: (context, selected, _) {
+                            return SegmentedButton<DifficultyCalculatorRuleset>(
+                              showSelectedIcon: false,
+                              segments: [
+                                ButtonSegment(
+                                  value: DifficultyCalculatorRuleset.dnd2014,
+                                  label: SizedBox(
+                                    width: 300,
+                                    child: Stack(
                                       children: [
-                                        TextSpan(
-                                          text: '2014 5e\n',
-                                          style: Theme.of(
-                                            context,
-                                          ).textTheme.bodyLarge,
+                                        Padding(
+                                          padding: const EdgeInsets.only(
+                                            right: 28,
+                                          ),
+                                          child: Text.rich(
+                                            TextSpan(
+                                              children: [
+                                                TextSpan(
+                                                  text: '2014 5e\n',
+                                                  style: Theme.of(
+                                                    context,
+                                                  ).textTheme.bodyLarge,
+                                                ),
+                                                const TextSpan(
+                                                  text:
+                                                      'The traditional encounter building strategy as '
+                                                      'recommended by D&D 5e 2014. ',
+                                                ),
+                                              ],
+                                            ),
+                                          ),
                                         ),
-                                        const TextSpan(
-                                          text:
-                                              'The traditional encounter building strategy as '
-                                              'recommended by D&D 5e 2014. ',
-                                        ),
+                                        if (selected ==
+                                            DifficultyCalculatorRuleset.dnd2014)
+                                          const Positioned(
+                                            top: 0,
+                                            right: 0,
+                                            child: Icon(Icons.check),
+                                          ),
                                       ],
                                     ),
                                   ),
                                 ),
-                                if (selected ==
-                                    DifficultyCalculatorRuleset.dnd2014)
-                                  const Positioned(
-                                    top: 0,
-                                    right: 0,
-                                    child: Icon(Icons.check),
-                                  ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        ButtonSegment(
-                          value: DifficultyCalculatorRuleset.fleeMortals,
-                          label: SizedBox(
-                            width: 300,
-                            // height: 200,
-                            child: Stack(
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.only(right: 28),
-                                  child: Text.rich(
-                                    TextSpan(
+                                ButtonSegment(
+                                  value:
+                                      DifficultyCalculatorRuleset.fleeMortals,
+                                  label: SizedBox(
+                                    width: 300,
+                                    // height: 200,
+                                    child: Stack(
                                       children: [
-                                        TextSpan(
-                                          text: 'Flee, Mortals!\n',
-                                          style: Theme.of(
-                                            context,
-                                          ).textTheme.bodyLarge,
+                                        Padding(
+                                          padding: const EdgeInsets.only(
+                                            right: 28,
+                                          ),
+                                          child: Text.rich(
+                                            TextSpan(
+                                              children: [
+                                                TextSpan(
+                                                  text: 'Flee, Mortals!\n',
+                                                  style: Theme.of(
+                                                    context,
+                                                  ).textTheme.bodyLarge,
+                                                ),
+                                                TextSpan(
+                                                  text:
+                                                      'MCDM\'s Flee Mortals has a set of rules for creating encounters '
+                                                      'developed by them for their custom monsters. It is based on '
+                                                      'character levels contributing to a CR budget. See their book '
+                                                      'for more information. ',
+                                                ),
+                                              ],
+                                            ),
+                                          ),
                                         ),
-                                        TextSpan(
-                                          text:
-                                              'MCDM\'s Flee Mortals has a set of rules for creating encounters '
-                                              'developed by them for their custom monsters. It is based on '
-                                              'character levels contributing to a CR budget. See their book '
-                                              'for more information. ',
-                                        ),
+                                        if (selected ==
+                                            DifficultyCalculatorRuleset
+                                                .fleeMortals)
+                                          const Positioned(
+                                            top: 0,
+                                            right: 0,
+                                            child: Icon(Icons.check),
+                                          ),
                                       ],
                                     ),
                                   ),
                                 ),
-                                if (selected ==
-                                    DifficultyCalculatorRuleset.fleeMortals)
-                                  const Positioned(
-                                    top: 0,
-                                    right: 0,
-                                    child: Icon(Icons.check),
+                              ],
+                              selected: {selected},
+                              onSelectionChanged: (selection) async {
+                                try {
+                                  await saveDifficultyCalculatorRuleset(
+                                    selection.first,
+                                  );
+                                } catch (error) {
+                                  if (!context.mounted) return;
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        'Could not save difficulty calculator setting: '
+                                        '$error',
+                                      ),
+                                    ),
+                                  );
+                                }
+                              },
+                            );
+                          },
+                        ),
+                        const SizedBox(height: AppSpacing.spacingExtraLarge),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: _showAboutDialog,
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text('About GMDex'),
+                                SizedBox(width: 16),
+                                Image(
+                                  image: AssetImage(
+                                    'assets/images/GMDexlogoblack.png',
                                   ),
+                                  width: 32,
+                                  height: 32,
+                                ),
                               ],
                             ),
                           ),
                         ),
-                      ],
-                      selected: {selected},
-                      onSelectionChanged: (selection) async {
-                        try {
-                          await saveDifficultyCalculatorRuleset(
-                            selection.first,
-                          );
-                        } catch (error) {
-                          if (!context.mounted) return;
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'Could not save difficulty calculator setting: '
-                                '$error',
-                              ),
-                            ),
-                          );
-                        }
-                      },
-                    );
-                  },
-                ),
-                const SizedBox(height: AppSpacing.spacingExtraLarge),
-                SizedBox(
-                  width: double.infinity,
-                  child:
-                ElevatedButton(
-                  onPressed: _showAboutDialog,
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text('About GMDex'),
-                      SizedBox(width: 16),
-                      Image(
-                        image: AssetImage('assets/images/GMDexlogoblack.png'),
-                        width: 32,
-                        height: 32,
-                      ),
-                    ],
-                  ),
-                ),
-                    ),
                       ],
                     ),
                   ),

@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:gmdex/models/creature.dart';
 import 'package:gmdex/components/creature_calculations.dart';
 import 'package:gmdex/components/responsive_layout.dart';
+import 'package:gmdex/components/spell_reference.dart';
+import 'package:gmdex/database/database.dart';
 import 'package:gmdex/theme/apptheme.dart';
 
 /// Displays the full stat block for [creature], if it has loaded.
@@ -15,6 +17,7 @@ class CreatureStatBlock extends StatelessWidget {
   final VoidCallback? onCopyPressed;
   final VoidCallback? onDeletePressed;
   final VoidCallback? onNotesPressed;
+  final AppDatabase? database;
 
   const CreatureStatBlock({
     super.key,
@@ -23,7 +26,40 @@ class CreatureStatBlock extends StatelessWidget {
     this.onCopyPressed,
     this.onDeletePressed,
     this.onNotesPressed,
+    this.database,
   });
+
+  Widget _spellNames(
+    BuildContext context,
+    List<String> names, {
+    required TextStyle? style,
+  }) {
+    final db = database;
+    if (db == null) {
+      return Text(names.join(', '), style: style, softWrap: true);
+    }
+
+    return Text.rich(
+      TextSpan(
+        style: style,
+        children: [
+          for (var index = 0; index < names.length; index++) ...[
+            if (index > 0) const TextSpan(text: ', '),
+            WidgetSpan(
+              alignment: PlaceholderAlignment.baseline,
+              baseline: TextBaseline.alphabetic,
+              child: SpellReference(
+                database: db,
+                name: names[index],
+                style: style,
+              ),
+            ),
+          ],
+        ],
+      ),
+      softWrap: true,
+    );
+  }
 
   Widget _abilityScores(BuildContext context) {
     final a = creature!.abilityScores;
@@ -172,13 +208,16 @@ class CreatureStatBlock extends StatelessWidget {
                       ),
               ),
               StatblockSection(
-              child: SizedBox( width: double.infinity, child: Wrap(
+                child: SizedBox(
+                  width: double.infinity,
+                  child: Wrap(
                     children: [
                       StatblockSmallText(data: '${creature!.size} '),
                       StatblockSmallText(data: '${creature!.type}, '),
                       StatblockSmallText(data: creature?.alignment ?? ''),
                     ],
-              ),),
+                  ),
+                ),
               ),
               StatblockSection(
                 child: Column(
@@ -191,8 +230,7 @@ class CreatureStatBlock extends StatelessWidget {
                           style: Theme.of(context).textTheme.titleSmall,
                         ),
                         Expanded(
-                        child:
-                      StatblockSmallText(
+                          child: StatblockSmallText(
                             data:
                                 '${creature!.armorClass.ac.toString()}, ${creature!.armorClass.type}',
                           ),
@@ -339,9 +377,12 @@ class CreatureStatBlock extends StatelessWidget {
                             'Senses: ',
                             style: Theme.of(context).textTheme.titleSmall,
                           ),
-                        if (creature?.senses != null && creature?.senses != '')
+                          if (creature?.senses != null &&
+                              creature?.senses != '')
                             Expanded(
-                            child: StatblockSmallText(data: creature!.senses!),
+                              child: StatblockSmallText(
+                                data: creature!.senses!,
+                              ),
                             ),
                         ],
                       ),
@@ -359,15 +400,18 @@ class CreatureStatBlock extends StatelessWidget {
                         ),
                       ],
                     ),
-                  SizedBox(width: double.infinity, child:
-                  Wrap(
+                    SizedBox(
+                      width: double.infinity,
+                      child: Wrap(
                         //crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             'Challenge: ',
                             style: Theme.of(context).textTheme.titleSmall,
                           ),
-                      StatblockSmallText(data: '${creature!.challengeRating}'),
+                          StatblockSmallText(
+                            data: '${creature!.challengeRating}',
+                          ),
                           Text(
                             '   Prof Bonus: ',
                             style: Theme.of(context).textTheme.titleSmall,
@@ -423,11 +467,10 @@ class CreatureStatBlock extends StatelessWidget {
                                 data: '${innateSpellLevelNames[entry.key]}: ',
                               ),
                               Expanded(
-                                child: Text(
-                                  entry.value.join(', '),
+                                child: _spellNames(
+                                  context,
+                                  entry.value,
                                   style: Theme.of(context).textTheme.labelSmall,
-                                  softWrap: true,
-                                  overflow: TextOverflow.visible,
                                 ),
                               ),
                             ],
@@ -464,7 +507,31 @@ class CreatureStatBlock extends StatelessWidget {
                                     text:
                                         '${spellLevelNames[entry.key] ?? "${entry.key}th level"}${entry.key == 0 ? ' (at will): ' : ' (${entry.value.slots} slots): '}',
                                   ),
-                                  TextSpan(text: entry.value.spells.join(', ')),
+                                  for (
+                                    var index = 0;
+                                    index < entry.value.spells.length;
+                                    index++
+                                  ) ...[
+                                    if (index > 0) const TextSpan(text: ', '),
+                                    WidgetSpan(
+                                      alignment: PlaceholderAlignment.baseline,
+                                      baseline: TextBaseline.alphabetic,
+                                      child: database == null
+                                          ? Text(
+                                              entry.value.spells[index],
+                                              style: Theme.of(
+                                                context,
+                                              ).textTheme.labelSmall,
+                                            )
+                                          : SpellReference(
+                                              database: database!,
+                                              name: entry.value.spells[index],
+                                              style: Theme.of(
+                                                context,
+                                              ).textTheme.labelSmall,
+                                            ),
+                                    ),
+                                  ],
                                 ],
                               ),
                             ),

@@ -444,6 +444,7 @@ class _RunCombatPageState extends State<RunCombatPage> {
     if (creature != null) {
       return CreatureStatBlock(
         creature: creature,
+        database: database,
         onNotesPressed: isWide
             ? () => _scaffoldKey.currentState?.openEndDrawer()
             : null,

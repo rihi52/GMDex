@@ -8259,6 +8259,440 @@ class CreatureSpellsCompanion extends UpdateCompanion<CreatureSpellRow> {
   }
 }
 
+class $SpellsTable extends Spells with TableInfo<$SpellsTable, SpellRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SpellsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sourceMeta = const VerificationMeta('source');
+  @override
+  late final GeneratedColumn<String> source = GeneratedColumn<String>(
+    'source',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _levelMeta = const VerificationMeta('level');
+  @override
+  late final GeneratedColumn<int> level = GeneratedColumn<int>(
+    'level',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _schoolMeta = const VerificationMeta('school');
+  @override
+  late final GeneratedColumn<String> school = GeneratedColumn<String>(
+    'school',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _dataMeta = const VerificationMeta('data');
+  @override
+  late final GeneratedColumn<String> data = GeneratedColumn<String>(
+    'data',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
+  @override
+  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
+    'notes',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    name,
+    source,
+    level,
+    school,
+    data,
+    notes,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'spells';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SpellRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('source')) {
+      context.handle(
+        _sourceMeta,
+        source.isAcceptableOrUnknown(data['source']!, _sourceMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_sourceMeta);
+    }
+    if (data.containsKey('level')) {
+      context.handle(
+        _levelMeta,
+        level.isAcceptableOrUnknown(data['level']!, _levelMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_levelMeta);
+    }
+    if (data.containsKey('school')) {
+      context.handle(
+        _schoolMeta,
+        school.isAcceptableOrUnknown(data['school']!, _schoolMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_schoolMeta);
+    }
+    if (data.containsKey('data')) {
+      context.handle(
+        _dataMeta,
+        this.data.isAcceptableOrUnknown(data['data']!, _dataMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_dataMeta);
+    }
+    if (data.containsKey('notes')) {
+      context.handle(
+        _notesMeta,
+        notes.isAcceptableOrUnknown(data['notes']!, _notesMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  SpellRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SpellRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      source: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source'],
+      )!,
+      level: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}level'],
+      )!,
+      school: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}school'],
+      )!,
+      data: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}data'],
+      )!,
+      notes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}notes'],
+      ),
+    );
+  }
+
+  @override
+  $SpellsTable createAlias(String alias) {
+    return $SpellsTable(attachedDatabase, alias);
+  }
+}
+
+class SpellRow extends DataClass implements Insertable<SpellRow> {
+  final int id;
+  final String name;
+  final String source;
+  final int level;
+  final String school;
+  final String data;
+  final String? notes;
+  const SpellRow({
+    required this.id,
+    required this.name,
+    required this.source,
+    required this.level,
+    required this.school,
+    required this.data,
+    this.notes,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['name'] = Variable<String>(name);
+    map['source'] = Variable<String>(source);
+    map['level'] = Variable<int>(level);
+    map['school'] = Variable<String>(school);
+    map['data'] = Variable<String>(data);
+    if (!nullToAbsent || notes != null) {
+      map['notes'] = Variable<String>(notes);
+    }
+    return map;
+  }
+
+  SpellsCompanion toCompanion(bool nullToAbsent) {
+    return SpellsCompanion(
+      id: Value(id),
+      name: Value(name),
+      source: Value(source),
+      level: Value(level),
+      school: Value(school),
+      data: Value(data),
+      notes: notes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(notes),
+    );
+  }
+
+  factory SpellRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SpellRow(
+      id: serializer.fromJson<int>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      source: serializer.fromJson<String>(json['source']),
+      level: serializer.fromJson<int>(json['level']),
+      school: serializer.fromJson<String>(json['school']),
+      data: serializer.fromJson<String>(json['data']),
+      notes: serializer.fromJson<String?>(json['notes']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'name': serializer.toJson<String>(name),
+      'source': serializer.toJson<String>(source),
+      'level': serializer.toJson<int>(level),
+      'school': serializer.toJson<String>(school),
+      'data': serializer.toJson<String>(data),
+      'notes': serializer.toJson<String?>(notes),
+    };
+  }
+
+  SpellRow copyWith({
+    int? id,
+    String? name,
+    String? source,
+    int? level,
+    String? school,
+    String? data,
+    Value<String?> notes = const Value.absent(),
+  }) => SpellRow(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    source: source ?? this.source,
+    level: level ?? this.level,
+    school: school ?? this.school,
+    data: data ?? this.data,
+    notes: notes.present ? notes.value : this.notes,
+  );
+  SpellRow copyWithCompanion(SpellsCompanion data) {
+    return SpellRow(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      source: data.source.present ? data.source.value : this.source,
+      level: data.level.present ? data.level.value : this.level,
+      school: data.school.present ? data.school.value : this.school,
+      data: data.data.present ? data.data.value : this.data,
+      notes: data.notes.present ? data.notes.value : this.notes,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SpellRow(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('source: $source, ')
+          ..write('level: $level, ')
+          ..write('school: $school, ')
+          ..write('data: $data, ')
+          ..write('notes: $notes')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, name, source, level, school, data, notes);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SpellRow &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.source == this.source &&
+          other.level == this.level &&
+          other.school == this.school &&
+          other.data == this.data &&
+          other.notes == this.notes);
+}
+
+class SpellsCompanion extends UpdateCompanion<SpellRow> {
+  final Value<int> id;
+  final Value<String> name;
+  final Value<String> source;
+  final Value<int> level;
+  final Value<String> school;
+  final Value<String> data;
+  final Value<String?> notes;
+  const SpellsCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.source = const Value.absent(),
+    this.level = const Value.absent(),
+    this.school = const Value.absent(),
+    this.data = const Value.absent(),
+    this.notes = const Value.absent(),
+  });
+  SpellsCompanion.insert({
+    this.id = const Value.absent(),
+    required String name,
+    required String source,
+    required int level,
+    required String school,
+    required String data,
+    this.notes = const Value.absent(),
+  }) : name = Value(name),
+       source = Value(source),
+       level = Value(level),
+       school = Value(school),
+       data = Value(data);
+  static Insertable<SpellRow> custom({
+    Expression<int>? id,
+    Expression<String>? name,
+    Expression<String>? source,
+    Expression<int>? level,
+    Expression<String>? school,
+    Expression<String>? data,
+    Expression<String>? notes,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (source != null) 'source': source,
+      if (level != null) 'level': level,
+      if (school != null) 'school': school,
+      if (data != null) 'data': data,
+      if (notes != null) 'notes': notes,
+    });
+  }
+
+  SpellsCompanion copyWith({
+    Value<int>? id,
+    Value<String>? name,
+    Value<String>? source,
+    Value<int>? level,
+    Value<String>? school,
+    Value<String>? data,
+    Value<String?>? notes,
+  }) {
+    return SpellsCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      source: source ?? this.source,
+      level: level ?? this.level,
+      school: school ?? this.school,
+      data: data ?? this.data,
+      notes: notes ?? this.notes,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (source.present) {
+      map['source'] = Variable<String>(source.value);
+    }
+    if (level.present) {
+      map['level'] = Variable<int>(level.value);
+    }
+    if (school.present) {
+      map['school'] = Variable<String>(school.value);
+    }
+    if (data.present) {
+      map['data'] = Variable<String>(data.value);
+    }
+    if (notes.present) {
+      map['notes'] = Variable<String>(notes.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SpellsCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('source: $source, ')
+          ..write('level: $level, ')
+          ..write('school: $school, ')
+          ..write('data: $data, ')
+          ..write('notes: $notes')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $CreatureSavesTable extends CreatureSaves
     with TableInfo<$CreatureSavesTable, CreatureSaveRow> {
   @override
@@ -9946,6 +10380,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $CreatureSpellcastingsTable creatureSpellcastings =
       $CreatureSpellcastingsTable(this);
   late final $CreatureSpellsTable creatureSpells = $CreatureSpellsTable(this);
+  late final $SpellsTable spells = $SpellsTable(this);
   late final $CreatureSavesTable creatureSaves = $CreatureSavesTable(this);
   late final $CreatureSkillsTable creatureSkills = $CreatureSkillsTable(this);
   late final $CreatureSensesTable creatureSenses = $CreatureSensesTable(this);
@@ -10015,6 +10450,14 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     'idx_spell_spellcasting',
     'CREATE INDEX idx_spell_spellcasting ON creature_spells (spellcasting_id)',
   );
+  late final Index idxSpellLevelSchool = Index(
+    'idx_spell_level_school',
+    'CREATE INDEX idx_spell_level_school ON spells (level, school)',
+  );
+  late final Index idxSpellName = Index(
+    'idx_spell_name',
+    'CREATE UNIQUE INDEX idx_spell_name ON spells (name)',
+  );
   late final Index idxLegendaryGroupNameSource = Index(
     'idx_legendary_group_name_source',
     'CREATE UNIQUE INDEX idx_legendary_group_name_source ON legendary_groups (name, source)',
@@ -10039,6 +10482,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     creatureTraits,
     creatureSpellcastings,
     creatureSpells,
+    spells,
     creatureSaves,
     creatureSkills,
     creatureSenses,
@@ -10060,6 +10504,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     idxTraitCreature,
     idxSpellcastingCreature,
     idxSpellSpellcasting,
+    idxSpellLevelSchool,
+    idxSpellName,
     idxLegendaryGroupNameSource,
     idxGroupEntryGroup,
   ];
@@ -16800,6 +17246,241 @@ typedef $$CreatureSpellsTableProcessedTableManager =
       CreatureSpellRow,
       PrefetchHooks Function({bool spellcastingId})
     >;
+typedef $$SpellsTableCreateCompanionBuilder =
+    SpellsCompanion Function({
+      Value<int> id,
+      required String name,
+      required String source,
+      required int level,
+      required String school,
+      required String data,
+      Value<String?> notes,
+    });
+typedef $$SpellsTableUpdateCompanionBuilder =
+    SpellsCompanion Function({
+      Value<int> id,
+      Value<String> name,
+      Value<String> source,
+      Value<int> level,
+      Value<String> school,
+      Value<String> data,
+      Value<String?> notes,
+    });
+
+class $$SpellsTableFilterComposer
+    extends Composer<_$AppDatabase, $SpellsTable> {
+  $$SpellsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get source => $composableBuilder(
+    column: $table.source,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get level => $composableBuilder(
+    column: $table.level,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get school => $composableBuilder(
+    column: $table.school,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get data => $composableBuilder(
+    column: $table.data,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SpellsTableOrderingComposer
+    extends Composer<_$AppDatabase, $SpellsTable> {
+  $$SpellsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get source => $composableBuilder(
+    column: $table.source,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get level => $composableBuilder(
+    column: $table.level,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get school => $composableBuilder(
+    column: $table.school,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get data => $composableBuilder(
+    column: $table.data,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SpellsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SpellsTable> {
+  $$SpellsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get source =>
+      $composableBuilder(column: $table.source, builder: (column) => column);
+
+  GeneratedColumn<int> get level =>
+      $composableBuilder(column: $table.level, builder: (column) => column);
+
+  GeneratedColumn<String> get school =>
+      $composableBuilder(column: $table.school, builder: (column) => column);
+
+  GeneratedColumn<String> get data =>
+      $composableBuilder(column: $table.data, builder: (column) => column);
+
+  GeneratedColumn<String> get notes =>
+      $composableBuilder(column: $table.notes, builder: (column) => column);
+}
+
+class $$SpellsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SpellsTable,
+          SpellRow,
+          $$SpellsTableFilterComposer,
+          $$SpellsTableOrderingComposer,
+          $$SpellsTableAnnotationComposer,
+          $$SpellsTableCreateCompanionBuilder,
+          $$SpellsTableUpdateCompanionBuilder,
+          (SpellRow, BaseReferences<_$AppDatabase, $SpellsTable, SpellRow>),
+          SpellRow,
+          PrefetchHooks Function()
+        > {
+  $$SpellsTableTableManager(_$AppDatabase db, $SpellsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SpellsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SpellsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SpellsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String> source = const Value.absent(),
+                Value<int> level = const Value.absent(),
+                Value<String> school = const Value.absent(),
+                Value<String> data = const Value.absent(),
+                Value<String?> notes = const Value.absent(),
+              }) => SpellsCompanion(
+                id: id,
+                name: name,
+                source: source,
+                level: level,
+                school: school,
+                data: data,
+                notes: notes,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String name,
+                required String source,
+                required int level,
+                required String school,
+                required String data,
+                Value<String?> notes = const Value.absent(),
+              }) => SpellsCompanion.insert(
+                id: id,
+                name: name,
+                source: source,
+                level: level,
+                school: school,
+                data: data,
+                notes: notes,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$SpellsTable, SpellRow>(table),
+                  BaseReferences<_$AppDatabase, $SpellsTable, SpellRow>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SpellsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SpellsTable,
+      SpellRow,
+      $$SpellsTableFilterComposer,
+      $$SpellsTableOrderingComposer,
+      $$SpellsTableAnnotationComposer,
+      $$SpellsTableCreateCompanionBuilder,
+      $$SpellsTableUpdateCompanionBuilder,
+      (SpellRow, BaseReferences<_$AppDatabase, $SpellsTable, SpellRow>),
+      SpellRow,
+      PrefetchHooks Function()
+    >;
 typedef $$CreatureSavesTableCreateCompanionBuilder =
     CreatureSavesCompanion Function({
       required int creatureId,
@@ -18602,6 +19283,8 @@ class $AppDatabaseManager {
       $$CreatureSpellcastingsTableTableManager(_db, _db.creatureSpellcastings);
   $$CreatureSpellsTableTableManager get creatureSpells =>
       $$CreatureSpellsTableTableManager(_db, _db.creatureSpells);
+  $$SpellsTableTableManager get spells =>
+      $$SpellsTableTableManager(_db, _db.spells);
   $$CreatureSavesTableTableManager get creatureSaves =>
       $$CreatureSavesTableTableManager(_db, _db.creatureSaves);
   $$CreatureSkillsTableTableManager get creatureSkills =>

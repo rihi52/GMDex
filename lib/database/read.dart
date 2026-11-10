@@ -333,6 +333,12 @@ String parseEntries(List entries) {
     (match) => '+${match.group(1)}',
   );
 
+  // Scaled dice markup stores the displayed dice before its scaling data.
+  text = text.replaceAllMapped(
+    RegExp(r'\{@scaledice ([^|}]+)(?:\|[^}]*)?\}'),
+    (match) => match.group(1)!.trim(),
+  );
+
   // Hit result
   text = text.replaceAllMapped(
     RegExp(r'\{@h\}(\d+)'),

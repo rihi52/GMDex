@@ -15,6 +15,7 @@ const _insertTableOrder = [
   'creature_traits',
   'creature_spellcastings',
   'creature_spells',
+  'spells',
   'creature_saves',
   'creature_skills',
   'creature_senses',
@@ -122,7 +123,7 @@ Future<DatabaseBackupImportResult> importDatabaseBackupJson(
         .map((row) => row.read<String>('name'))
         .get();
     final columns = columnNames.toSet();
-    tableRows[tableName] = [
+    var rows = [
       for (var index = 0; index < rawRows.length; index++)
         _decodeRow(
           rawRows[index],
@@ -131,6 +132,30 @@ Future<DatabaseBackupImportResult> importDatabaseBackupJson(
           validColumns: columns,
         ),
     ];
+    if (tableName == 'spells') {
+      final preferredByName = <String, Map<String, Object?>>{};
+      for (final row in rows) {
+        final name = row['name'];
+        if (name is! String) continue;
+
+        final previous = preferredByName[name];
+        final source = row['source'];
+        final previousSource = previous?['source'];
+        final rowId = row['id'];
+        final previousId = previous?['id'];
+        final rowWins =
+            previous == null ||
+            (previousSource == 'SRD' && source != 'SRD') ||
+            (previousSource != 'SRD' &&
+                source != 'SRD' &&
+                rowId is int &&
+                previousId is int &&
+                rowId > previousId);
+        if (rowWins) preferredByName[name] = row;
+      }
+      rows = preferredByName.values.toList();
+    }
+    tableRows[tableName] = rows;
   }
 
   final currentTableNames = tableNames;

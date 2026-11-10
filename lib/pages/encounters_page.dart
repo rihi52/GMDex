@@ -47,7 +47,11 @@ class _EncountersPageState extends State<EncountersPage> {
       items: [
         NavigationSidebarItem(title: 'Home', onTap: _returnHome),
         const NavigationSidebarItem(title: 'Browse', selected: true),
-        NavigationSidebarItem(title: 'Create', onTap: _openCreate, showDividerAfter: true,),
+        NavigationSidebarItem(
+          title: 'Create',
+          onTap: _openCreate,
+          showDividerAfter: true,
+        ),
         NavigationSidebarItem(
           title: 'Players',
           onTap: () {
@@ -59,6 +63,10 @@ class _EncountersPageState extends State<EncountersPage> {
           onTap: () {
             Navigator.pushNamed(context, '/creatures');
           },
+        ),
+        NavigationSidebarItem(
+          title: 'Spells',
+          onTap: () => Navigator.pushNamed(context, '/spells'),
         ),
       ],
       body: BrowseEncountersWidget(key: ValueKey(_refreshVersion)),
@@ -194,48 +202,48 @@ class _BrowseEncountersWidgetState extends State<BrowseEncountersWidget> {
   }
 
   Future<void> _startEncounter(SavedEncounter encounter) async {
-  final messenger = ScaffoldMessenger.of(context);
+    final messenger = ScaffoldMessenger.of(context);
 
-  try {
-    debugPrint('Starting encounter: ${encounter.id}');
+    try {
+      debugPrint('Starting encounter: ${encounter.id}');
 
-    _scaffoldKey.currentState?.closeEndDrawer();
+      _scaffoldKey.currentState?.closeEndDrawer();
 
-    debugPrint('Loading encounter...');
-    final loaded = await loadEncounter(database, encounter.id);
+      debugPrint('Loading encounter...');
+      final loaded = await loadEncounter(database, encounter.id);
 
-    debugPrint('Encounter loaded: ${loaded != null}');
+      debugPrint('Encounter loaded: ${loaded != null}');
 
-    if (!mounted) return;
+      if (!mounted) return;
 
-    if (loaded == null) {
-      messenger.showSnackBar(
-        const SnackBar(content: Text('Encounter could not be found.')),
+      if (loaded == null) {
+        messenger.showSnackBar(
+          const SnackBar(content: Text('Encounter could not be found.')),
+        );
+        await _loadEncounters();
+        return;
+      }
+
+      debugPrint('Has started: ${loaded.hasStarted}');
+      debugPrint('Combatants: ${loaded.combatants.length}');
+      debugPrint('Opening RunCombatPage...');
+
+      await Navigator.of(context).push<void>(
+        MaterialPageRoute<void>(
+          builder: (_) => RunCombatPage(encounter: loaded),
+        ),
       );
-      await _loadEncounters();
-      return;
-    }
+    } catch (error, stackTrace) {
+      debugPrint('Could not start encounter: $error');
+      debugPrintStack(stackTrace: stackTrace);
 
-    debugPrint('Has started: ${loaded.hasStarted}');
-    debugPrint('Combatants: ${loaded.combatants.length}');
-    debugPrint('Opening RunCombatPage...');
-
-    await Navigator.of(context).push<void>(
-      MaterialPageRoute<void>(
-        builder: (_) => RunCombatPage(encounter: loaded),
-      ),
-    );
-  } catch (error, stackTrace) {
-    debugPrint('Could not start encounter: $error');
-    debugPrintStack(stackTrace: stackTrace);
-
-    if (mounted) {
-      messenger.showSnackBar(
-        SnackBar(content: Text('Could not start encounter: $error')),
-      );
+      if (mounted) {
+        messenger.showSnackBar(
+          SnackBar(content: Text('Could not start encounter: $error')),
+        );
+      }
     }
   }
-}
 
   Future<void> _saveNotes(int encounterId, String notes) async {
     final messenger = ScaffoldMessenger.of(context);

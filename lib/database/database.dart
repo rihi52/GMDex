@@ -251,6 +251,20 @@ class CreatureSpells extends Table {
   IntColumn get sortOrder => integer()();
 }
 
+/// SRD spell definitions, with the original JSON retained for full fidelity.
+@DataClassName('SpellRow')
+@TableIndex(name: 'idx_spell_level_school', columns: {#level, #school})
+@TableIndex(name: 'idx_spell_name', columns: {#name}, unique: true)
+class Spells extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get name => text()();
+  TextColumn get source => text()();
+  IntColumn get level => integer()();
+  TextColumn get school => text()();
+  TextColumn get data => text()();
+  TextColumn get notes => text().nullable()();
+}
+
 /// Per-ability saving-throw bonuses for each creature.
 @DataClassName('CreatureSaveRow')
 class CreatureSaves extends Table {
@@ -352,6 +366,7 @@ class LegendaryGroupEntries extends Table {
     CreatureTraits,
     CreatureSpellcastings,
     CreatureSpells,
+    Spells,
     CreatureSaves,
     CreatureSkills,
     CreatureSenses,
@@ -376,7 +391,7 @@ class AppDatabase extends _$AppDatabase {
   }
 
   @override
-  int get schemaVersion => 15;
+  int get schemaVersion => 18;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -592,6 +607,30 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from >= 3 && from < 15) {
         await m.addColumn(encounterCreatures, encounterCreatures.nameOverride);
+      }
+      if (from >= 2 && from < 16) {
+        await m.create(spells);
+      }
+      if (from >= 16 && from < 17) {
+        await customStatement('''
+          DELETE FROM spells
+          WHERE id != (
+            SELECT candidate.id
+            FROM spells AS candidate
+            WHERE candidate.name = spells.name
+            ORDER BY
+              CASE WHEN candidate.source = 'SRD' THEN 1 ELSE 0 END,
+              candidate.id DESC
+            LIMIT 1
+          )
+        ''');
+        await customStatement('DROP INDEX IF EXISTS idx_spell_name_source');
+        await customStatement('''
+          CREATE UNIQUE INDEX IF NOT EXISTS idx_spell_name ON spells (name)
+        ''');
+      }
+      if (from >= 16 && from < 18) {
+        await m.addColumn(spells, spells.notes);
       }
     },
     beforeOpen: (details) async {
