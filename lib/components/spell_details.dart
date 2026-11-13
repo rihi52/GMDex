@@ -1,6 +1,7 @@
 // Read-only spell details panel matching the player details presentation.
 import 'package:flutter/material.dart';
 import 'package:gmdex/components/dividers.dart';
+import 'package:gmdex/components/notes_drawer.dart';
 import 'package:gmdex/database/database.dart';
 import 'package:gmdex/models/spell.dart';
 import 'package:gmdex/theme/apptheme.dart';
@@ -36,8 +37,11 @@ class SpellDetails extends StatelessWidget {
                   width: 110,
                   child: ElevatedButton(
                     onPressed: onNotesPressed,
-                    child: Text(
-                      'Notes',
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                    ),
+                    child: NotesLabel(
+                      hasNotes: selectedSpell.notes?.trim().isNotEmpty == true,
                       style: Theme.of(context).textTheme.bodyLarge,
                     ),
                   ),

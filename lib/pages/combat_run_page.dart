@@ -888,8 +888,11 @@ class _EncounterNotesEditor extends StatelessWidget {
       expands: true,
       maxLines: null,
       textAlignVertical: TextAlignVertical.top,
-      decoration: const InputDecoration(
-        labelText: 'Encounter Notes',
+      decoration: InputDecoration(
+        label: NotesLabel(
+          label: 'Encounter Notes',
+          hasNotes: controller.text.trim().isNotEmpty,
+        ),
         alignLabelWithHint: true,
         border: OutlineInputBorder(),
       ),

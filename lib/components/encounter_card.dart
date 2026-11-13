@@ -3,6 +3,7 @@
 // Encounter actions are injected by the page so this component remains
 // independent of database writes and route management.
 import 'package:flutter/material.dart';
+import 'package:gmdex/components/notes_drawer.dart';
 import 'package:gmdex/models/combat.dart';
 import 'package:gmdex/theme/apptheme.dart';
 
@@ -124,8 +125,11 @@ class EncounterDetails extends StatelessWidget {
                     width: topButtonWidth,
                     child: ElevatedButton(
                       onPressed: onNotesPressed,
-                      child: Text(
-                        'Notes',
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                      ),
+                      child: NotesLabel(
+                        hasNotes: encounter.notes.trim().isNotEmpty,
                         style: Theme.of(context).textTheme.bodyLarge,
                       ),
                     ),
@@ -142,9 +146,12 @@ class EncounterDetails extends StatelessWidget {
               'Creatures: ${encounter.creatureCount}',
               style: Theme.of(context).textTheme.bodySmall,
             ),
-            if (encounter.notes.isNotEmpty) ...[
+            if (encounter.notes.trim().isNotEmpty) ...[
               const SizedBox(height: AppSpacing.spacingMedium),
-              Text('Notes', style: Theme.of(context).textTheme.titleSmall),
+              NotesLabel(
+                hasNotes: encounter.notes.trim().isNotEmpty,
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
               Text(
                 encounter.notes,
                 style: Theme.of(context).textTheme.bodySmall,

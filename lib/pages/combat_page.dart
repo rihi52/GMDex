@@ -15,6 +15,7 @@ import 'package:gmdex/database/encounter_writer.dart';
 import 'package:gmdex/database/database_initialize.dart';
 import 'package:gmdex/pages/combat_run_page.dart';
 import 'package:gmdex/components/difficulty_calculator.dart';
+import 'package:gmdex/components/notes_drawer.dart';
 import 'package:gmdex/components/creature_calculations.dart'
     show tryParseFraction;
 import 'package:gmdex/models/creature.dart' show crToXp;
@@ -833,8 +834,15 @@ class _EncounterBuildPageState extends State<EncounterBuildPage> {
                       textAlignVertical: TextAlignVertical.top,
                       initialValue: currentEncounter.encounterNotes,
                       onSaved: _saveEncounterNotes,
-                      decoration: const InputDecoration(
-                        labelText: 'Encounter Notes',
+                      decoration: InputDecoration(
+                        label: NotesLabel(
+                          label: 'Encounter Notes',
+                          hasNotes:
+                              currentEncounter.encounterNotes
+                                  ?.trim()
+                                  .isNotEmpty ==
+                              true,
+                        ),
                         alignLabelWithHint: true,
                         filled: true,
                         fillColor: AppColors.appBlack,
@@ -1071,8 +1079,13 @@ class _EncounterBuildPageState extends State<EncounterBuildPage> {
                   textAlignVertical: TextAlignVertical.top,
                   initialValue: currentEncounter.encounterNotes,
                   onSaved: _saveEncounterNotes,
-                  decoration: const InputDecoration(
-                    labelText: 'Encounter Notes',
+                  decoration: InputDecoration(
+                    label: NotesLabel(
+                      label: 'Encounter Notes',
+                      hasNotes:
+                          currentEncounter.encounterNotes?.trim().isNotEmpty ==
+                          true,
+                    ),
                     alignLabelWithHint: true,
                     filled: true,
                     fillColor: AppColors.appBlack,

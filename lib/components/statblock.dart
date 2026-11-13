@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:gmdex/models/creature.dart';
 import 'package:gmdex/components/creature_calculations.dart';
+import 'package:gmdex/components/notes_drawer.dart';
 import 'package:gmdex/components/responsive_layout.dart';
 import 'package:gmdex/components/spell_reference.dart';
 import 'package:gmdex/database/database.dart';
@@ -182,8 +183,11 @@ class CreatureStatBlock extends StatelessWidget {
                       width: topButtonWidth,
                       child: ElevatedButton(
                         onPressed: onNotesPressed,
-                        child: Text(
-                          'Notes',
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                        ),
+                        child: NotesLabel(
+                          hasNotes: creature!.notes?.trim().isNotEmpty == true,
                           style: Theme.of(context).textTheme.bodyLarge,
                         ),
                       ),

@@ -98,6 +98,8 @@ Each table value is an array of database rows. The example lists every table; th
 
 ![image](assets/playercreator.png)
 
+![image](assets/spelldatabase.png)
+
 ## Mobile Screenshots
 
 <table>
@@ -112,6 +114,12 @@ Each table value is an array of database rows. The example lists every table; th
     <td><img src="assets/mobileencounterdb.png" width="160" alt="Mobile encounter database"></td>
     <td><img src="assets/mobileruncombat.png" width="160" alt="Mobile combat runner"></td>
     <td><img src="assets/mobilesettings.png" width="160" alt="Mobile settings"></td>
+  </tr>
+  <tr>
+    <td><img src="assets/mobilestatblockcombat.png" width="160" alt="Mobile encounter builder"></td>
+    <td><img src="assets/mobileplayercreate.png" width="160" alt="Mobile encounter database"></td>
+    <td><img src="assets/mobilespell.png" width="160" alt="Mobile combat runner"></td>
+    <td><img src="assets/mobilespelldb.png" width="160" alt="Mobile settings"></td>
   </tr>
 </table>
 

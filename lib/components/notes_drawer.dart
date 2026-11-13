@@ -4,6 +4,38 @@
 // same notes editor, while NotesEditor owns form state and save feedback.
 import 'package:flutter/material.dart';
 
+class NotesLabel extends StatelessWidget {
+  const NotesLabel({
+    super.key,
+    required this.hasNotes,
+    this.label = 'Notes',
+    this.style,
+  });
+
+  final bool hasNotes;
+  final String label;
+  final TextStyle? style;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(label, style: style),
+        if (hasNotes) ...[
+          const SizedBox(width: 4),
+          Icon(
+            Icons.priority_high,
+            size: 16,
+            color: style?.color,
+            semanticLabel: 'Notes exist',
+          ),
+        ],
+      ],
+    );
+  }
+}
+
 class NotesDrawer extends StatelessWidget {
   /// Shows the notes editor directly in a standard navigation drawer.
   const NotesDrawer({
@@ -78,7 +110,12 @@ class _NotesPageViewDrawerState extends State<NotesPageViewDrawer> {
               child: SegmentedButton<int>(
                 segments: [
                   ButtonSegment(value: 0, label: Text(widget.detailsLabel)),
-                  const ButtonSegment(value: 1, label: Text('Notes')),
+                  ButtonSegment(
+                    value: 1,
+                    label: NotesLabel(
+                      hasNotes: widget.initialValue.trim().isNotEmpty,
+                    ),
+                  ),
                 ],
                 selected: {_pageIndex},
                 onSelectionChanged: (selection) {
@@ -166,8 +203,10 @@ class _NotesEditorState extends State<NotesEditor> {
                 expands: true,
                 maxLines: null,
                 textAlignVertical: TextAlignVertical.top,
-                decoration: const InputDecoration(
-                  labelText: 'Notes',
+                decoration: InputDecoration(
+                  label: NotesLabel(
+                    hasNotes: widget.initialValue.trim().isNotEmpty,
+                  ),
                   alignLabelWithHint: true,
                   border: OutlineInputBorder(),
                 ),
@@ -179,7 +218,10 @@ class _NotesEditorState extends State<NotesEditor> {
               alignment: Alignment.centerRight,
               child: ElevatedButton(
                 onPressed: _isSaving ? null : _save,
-                child: Text('Save', style: Theme.of(context).textTheme.bodyLarge,),
+                child: Text(
+                  'Save',
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
               ),
             ),
           ],
