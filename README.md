@@ -42,7 +42,7 @@ GMDex is a tool to help GM's of Dungeons and Dragons 5th Edition manage their ta
 
 ## Database backups
 
-Use **Export Entire Database** in Settings to create a portable JSON backup, and **Import Entire Database** to replace the current local data from that backup. The backup includes players, creatures, encounters, notes, and all related records. Importing replaces all current database records; export a backup before importing if you may need to restore them.
+Use **Export Entire Database** in Settings to create a portable JSON backup named with its export date (`YYYYMMDD`), and **Import Entire Database** to replace the current local data from that backup. The backup includes players, creatures, encounters, notes, and all related records. Importing replaces all current database records; export a backup before importing if you may need to restore them. If a backup's export time is older than the current database snapshot time, the app displays both times and asks for confirmation before replacing data.
 
 The JSON format is versioned and retains record IDs so encounter references remain intact:
 
@@ -50,7 +50,7 @@ The JSON format is versioned and retains record IDs so encounter references rema
 {
   "format": "gmdex-database-backup",
   "version": 1,
-  "databaseSchemaVersion": 12,
+  "databaseSchemaVersion": 19,
   "exportedAt": "2026-11-01T10:18:55.141Z",
   "tables": {
     "legendary_groups": [],

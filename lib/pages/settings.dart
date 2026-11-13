@@ -197,11 +197,19 @@ class _SettingsPageState extends State<SettingsPage> {
   Future<void> _exportEntireDatabase() async {
     setState(() => _isExporting = true);
     try {
-      final json = await exportDatabaseBackupJson(database);
+      final exportedAt = DateTime.now().toUtc();
+      final json = await exportDatabaseBackupJson(
+        database,
+        exportedAt: exportedAt,
+      );
       if (!mounted) return;
 
+      final date =
+          '${exportedAt.year.toString().padLeft(4, '0')}'
+          '${exportedAt.month.toString().padLeft(2, '0')}'
+          '${exportedAt.day.toString().padLeft(2, '0')}';
       final fileUri = await FilePicker.saveFile(
-        fileName: 'gmdex-database-backup.json',
+        fileName: 'gmdex-database-backup-$date.json',
         bytes: Uint8List.fromList(utf8.encode(json)),
         mimeType: 'application/json',
         dialogTitle: 'Export entire database',
@@ -282,8 +290,34 @@ class _SettingsPageState extends State<SettingsPage> {
       final result = await importDatabaseBackupJson(
         database,
         utf8.decode(bytesBuilder.takeBytes()),
+        confirmOlderBackup: (current, pending) async {
+          if (!mounted) return false;
+          final confirmed = await showDialog<bool>(
+            context: context,
+            builder: (dialogContext) => AlertDialog(
+              title: const Text('Import an older database backup?'),
+              content: Text(
+                'The selected backup is older than the current database. '
+                'Importing it will replace the current data.\n\n'
+                'Current database: ${current.toLocal()}\n'
+                'Pending backup: ${pending.toLocal()}',
+              ),
+              actions: [
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(dialogContext, false),
+                  child: const Text('Cancel'),
+                ),
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(dialogContext, true),
+                  child: const Text('Import anyway'),
+                ),
+              ],
+            ),
+          );
+          return confirmed == true;
+        },
       );
-      if (!mounted) return;
+      if (!mounted || result.cancelled) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(

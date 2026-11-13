@@ -88,7 +88,9 @@ void main() {
     final decoded = jsonDecode(json) as Map<String, dynamic>;
     expect(decoded['format'], databaseBackupFormat);
     expect(decoded['version'], databaseBackupVersion);
+    expect(DateTime.parse(decoded['exportedAt'] as String).isUtc, isTrue);
     final tables = decoded['tables'] as Map<String, dynamic>;
+    expect(tables, isNot(contains('database_metadata')));
     expect((tables['notes'] as List).single['created_at'], isA<String>());
     final backedUpCreature =
         (tables['creatures'] as List).single as Map<String, dynamic>;
@@ -129,6 +131,60 @@ void main() {
     expect(encounterCreatures.single.currentHitpoints, 5);
     expect(encounterCreatures.single.isPoisoned, isTrue);
     expect(encounterCreatures.single.isTurn, isTrue);
+  });
+
+  test('requires confirmation before replacing a newer database', () async {
+    await db
+        .into(db.players)
+        .insert(PlayersCompanion.insert(pName: 'Keep me', pClass: 'Bard'));
+    final decoded =
+        jsonDecode(await exportDatabaseBackupJson(db)) as Map<String, dynamic>;
+    final pendingAt = DateTime.utc(2000);
+    decoded['exportedAt'] = pendingAt.toIso8601String();
+    final json = jsonEncode(decoded);
+    final currentAt = await db.getDatabaseCreatedAt();
+
+    await expectLater(
+      importDatabaseBackupJson(db, json),
+      throwsA(isA<DatabaseBackupOlderThanCurrentException>()),
+    );
+
+    final cancelled = await importDatabaseBackupJson(
+      db,
+      json,
+      confirmOlderBackup: (current, pending) async {
+        expect(current, currentAt);
+        expect(pending, pendingAt);
+        return false;
+      },
+    );
+    expect(cancelled.cancelled, isTrue);
+    expect((await db.select(db.players).get()).single.pName, 'Keep me');
+
+    final imported = await importDatabaseBackupJson(
+      db,
+      json,
+      confirmOlderBackup: (_, _) async => true,
+    );
+    expect(imported.cancelled, isFalse);
+    expect(await db.getDatabaseCreatedAt(), pendingAt);
+    final importedAt = await db
+        .customSelect(
+          "SELECT value FROM database_metadata WHERE key = 'last_imported_at'",
+        )
+        .getSingle();
+    expect(DateTime.parse(importedAt.read<String>('value')).isUtc, isTrue);
+  });
+
+  test('imports older backups without exportedAt for compatibility', () async {
+    final decoded =
+        jsonDecode(await exportDatabaseBackupJson(db)) as Map<String, dynamic>
+          ..remove('exportedAt');
+
+    final result = await importDatabaseBackupJson(db, jsonEncode(decoded));
+
+    expect(result.cancelled, isFalse);
+    expect(await db.getDatabaseCreatedAt(), isNotNull);
   });
 
   test('round-trips spell catalog data and accepts older backups', () async {

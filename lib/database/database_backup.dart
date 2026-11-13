@@ -31,14 +31,34 @@ class DatabaseBackupImportResult {
   const DatabaseBackupImportResult({
     required this.playerCount,
     required this.encounterCount,
+    this.cancelled = false,
   });
 
   final int playerCount;
   final int encounterCount;
+  final bool cancelled;
+}
+
+class DatabaseBackupOlderThanCurrentException implements Exception {
+  const DatabaseBackupOlderThanCurrentException({
+    required this.currentDatabaseAt,
+    required this.pendingBackupAt,
+  });
+
+  final DateTime currentDatabaseAt;
+  final DateTime pendingBackupAt;
+
+  @override
+  String toString() =>
+      'The backup is older than the current database and requires confirmation.';
 }
 
 /// Encodes every application table as portable JSON while retaining row IDs.
-Future<String> exportDatabaseBackupJson(AppDatabase db) async {
+Future<String> exportDatabaseBackupJson(
+  AppDatabase db, {
+  DateTime? exportedAt,
+}) async {
+  final exportTime = (exportedAt ?? DateTime.now()).toUtc();
   final tables = <String, List<Map<String, Object?>>>{};
   await db.transaction(() async {
     for (final table in db.allTables) {
@@ -52,7 +72,7 @@ Future<String> exportDatabaseBackupJson(AppDatabase db) async {
     'format': databaseBackupFormat,
     'version': databaseBackupVersion,
     'databaseSchemaVersion': db.schemaVersion,
-    'exportedAt': DateTime.now().toUtc().toIso8601String(),
+    'exportedAt': exportTime.toIso8601String(),
     'tables': tables,
   });
   if (utf8.encode(json).length > maxDatabaseBackupSizeBytes) {
@@ -64,8 +84,9 @@ Future<String> exportDatabaseBackupJson(AppDatabase db) async {
 /// Replaces all database data from a validated GMDex backup in one transaction.
 Future<DatabaseBackupImportResult> importDatabaseBackupJson(
   AppDatabase db,
-  String jsonContent,
-) async {
+  String jsonContent, {
+  Future<bool> Function(DateTime current, DateTime pending)? confirmOlderBackup,
+}) async {
   if (utf8.encode(jsonContent).length > maxDatabaseBackupSizeBytes) {
     throw const FormatException('Database backups must be 256 MiB or smaller.');
   }
@@ -78,6 +99,8 @@ Future<DatabaseBackupImportResult> importDatabaseBackupJson(
       'This is not a supported GMDex database backup.',
     );
   }
+
+  final exportedAt = _decodeExportedAt(decoded['exportedAt']);
 
   final schemaVersion = decoded['databaseSchemaVersion'];
   if (schemaVersion is! int ||
@@ -166,6 +189,26 @@ Future<DatabaseBackupImportResult> importDatabaseBackupJson(
     );
   }
 
+  if (exportedAt != null) {
+    final currentDatabaseAt = await db.getDatabaseCreatedAt();
+    if (exportedAt.isBefore(currentDatabaseAt)) {
+      if (confirmOlderBackup == null) {
+        throw DatabaseBackupOlderThanCurrentException(
+          currentDatabaseAt: currentDatabaseAt,
+          pendingBackupAt: exportedAt,
+        );
+      }
+      final confirmed = await confirmOlderBackup(currentDatabaseAt, exportedAt);
+      if (!confirmed) {
+        return DatabaseBackupImportResult(
+          playerCount: tableRows['players']?.length ?? 0,
+          encounterCount: tableRows['encounters']?.length ?? 0,
+          cancelled: true,
+        );
+      }
+    }
+  }
+
   await db.transaction(() async {
     for (final table in db.allTables.toList().reversed) {
       await db.delete(table).go();
@@ -186,12 +229,29 @@ Future<DatabaseBackupImportResult> importDatabaseBackupJson(
         );
       }
     }
+    await db.recordDatabaseImport(exportedAt);
   });
 
   return DatabaseBackupImportResult(
     playerCount: tableRows['players']?.length ?? 0,
     encounterCount: tableRows['encounters']?.length ?? 0,
   );
+}
+
+DateTime? _decodeExportedAt(Object? value) {
+  if (value == null) return null;
+  if (value is! String) {
+    throw const FormatException(
+      'Database backup "exportedAt" must be an ISO-8601 string.',
+    );
+  }
+  try {
+    return DateTime.parse(value).toUtc();
+  } on FormatException {
+    throw const FormatException(
+      'Database backup "exportedAt" must be a valid ISO-8601 date/time.',
+    );
+  }
 }
 
 Map<String, Object?> _encodeRow(Map<String, Object?> row) => {

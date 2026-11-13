@@ -390,11 +390,43 @@ class AppDatabase extends _$AppDatabase {
     });
   }
 
+  Future<DateTime> getDatabaseCreatedAt() async {
+    final rows = await customSelect(
+      "SELECT value FROM database_metadata WHERE key = 'database_created_at'",
+    ).get();
+    if (rows.isEmpty) {
+      await _ensureDatabaseMetadata();
+      return getDatabaseCreatedAt();
+    }
+    return DateTime.parse(rows.single.read<String>('value'));
+  }
+
+  Future<void> recordDatabaseImport(DateTime? snapshotAt) async {
+    final importedAt = DateTime.now().toUtc();
+    final createdAt = (snapshotAt ?? importedAt).toUtc().toIso8601String();
+    await customStatement(
+      "INSERT OR REPLACE INTO database_metadata (key, value) "
+      "VALUES ('database_created_at', ?)",
+      [createdAt],
+    );
+    await customStatement(
+      "INSERT OR REPLACE INTO database_metadata (key, value) "
+      "VALUES ('last_imported_at', ?)",
+      [importedAt.toIso8601String()],
+    );
+  }
+
   @override
-  int get schemaVersion => 18;
+  int get schemaVersion => 19;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
+    onCreate: (m) async {
+      for (final entity in allSchemaEntities) {
+        await m.create(entity);
+      }
+      await _ensureDatabaseMetadata();
+    },
     // Apply each schema transition in version order for existing installations.
     onUpgrade: (m, from, to) async {
       if (from < 2) {
@@ -632,6 +664,9 @@ class AppDatabase extends _$AppDatabase {
       if (from >= 16 && from < 18) {
         await m.addColumn(spells, spells.notes);
       }
+      if (to >= 19) {
+        await _ensureDatabaseMetadata();
+      }
     },
     beforeOpen: (details) async {
       // SQLite ignores foreign keys unless this is on, so the
@@ -639,4 +674,18 @@ class AppDatabase extends _$AppDatabase {
       await customStatement('PRAGMA foreign_keys = ON');
     },
   );
+
+  Future<void> _ensureDatabaseMetadata() async {
+    await customStatement('''
+      CREATE TABLE IF NOT EXISTS database_metadata (
+        key TEXT NOT NULL PRIMARY KEY,
+        value TEXT NOT NULL
+      )
+    ''');
+    await customStatement(
+      "INSERT OR IGNORE INTO database_metadata (key, value) "
+      "VALUES ('database_created_at', ?)",
+      [DateTime.now().toUtc().toIso8601String()],
+    );
+  }
 }
