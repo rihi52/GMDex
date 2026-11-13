@@ -46,7 +46,7 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
         content: SingleChildScrollView(
           child: SelectableText(
-            'v1.0.0\n'
+            'v1.1.0\n'
             'GMDex is a free and open source tool for managing Dungeons & Dragons 5e '
             '2014 encounters. It is not affiliated with Wizards of the Coast or '
             'any other company. All trademarks are property of their respective owners.'
