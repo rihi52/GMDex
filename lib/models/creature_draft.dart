@@ -18,6 +18,10 @@ class CreatureDraft {
   CreatureSpeedDraft speed;
   CreatureAbilityScoresDraft abilityScores;
   CreatureSkillsDraft? skills;
+  String? damageVulnerable;
+  String? damageResist;
+  String? damageImmune;
+  String? conditionImmune;
   String? senses;
   String? languages;
   CreatureSavingThrowsDraft savingThrows;
@@ -104,6 +108,10 @@ class CreatureDraft {
         persuasion: skills?.persuasion,
         isPersuasionProf: skills?.isPersuasionProf,
       ),
+      damageVulnerable: damageVulnerable,
+      damageResist: damageResist,
+      damageImmune: damageImmune,
+      conditionImmune: conditionImmune,
       senses: senses,
       languages: languages,
       savingThrows: CreatureSavingThrows(
@@ -177,6 +185,10 @@ class CreatureDraft {
     required this.speed,
     required this.abilityScores,
     this.skills,
+    this.damageVulnerable,
+    this.damageResist,
+    this.damageImmune,
+    this.conditionImmune,
     this.senses = '',
     this.languages = '',
     required this.savingThrows,

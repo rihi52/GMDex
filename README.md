@@ -4,7 +4,7 @@
 <img src="assets/images/GMDex.png" alt="GMDex logo" width="200">
 </p>
 
-GMDex is a tool to help GM's of Dungeons and Dragons 5th Edition manage their tables. It features a creature database preloaded with the SRD creatures, a custom creature creator, a player creator and database, an encounter builder, a combat tracker, and a json importer so you can bring your own monster library. It is built primarily for Windows, but does feature a mobile version, Linux and Mac to come. It is completely offline and stores the database locally so you always have access to your data. <br><br>
+GMDex is a tool to help GM's of Dungeons and Dragons 5th Edition manage their tables. It features a bestiary database preloaded with the SRD creatures and spells, a custom creature creator, a player creator and database, an encounter builder, a combat tracker, and a json importer so you can bring your own monster library. It is built primarily for Windows, but does feature a mobile version, Linux version, and a Mac version (untested as I do not have a MacOS Device). It is completely offline and stores the database locally so you always have access to your data. <br><br>
 
 ## Features
 
@@ -44,9 +44,42 @@ GMDex is a tool to help GM's of Dungeons and Dragons 5th Edition manage their ta
   - Can be pulled up from a creature's statblock in the database or in an encounter
   - Newly created creatures with spells will be linked to database spells if they exist
 
+## Install and Update
+
+### Android
+
+ 1. Download GMDex_vX_X_X.apk
+ 2. Open downloads folder
+ 3. Tap on the APK file
+ 4. Tap install or update
+You may have to grant permission to install as android defaults to only allowing installs from the play store. Your database will be preserved on updating.
+
+### Windows
+
+ 1. Download GMDex_windows-x86_64_vX_X_X.zip
+ 2. Extract the files to your desktop, documents, or wherever you want to store the program.
+ 3. Execute GMDex.exe (if you have extensions hidden it will just show as GMDex)
+You may have to turn off Smart App Control on first execution if it is enabled.
+I would recommend making a shortcut to the executable on your desktop.
+To update, follow the same steps as to install and overwrite all of the old files. Your database will be preserved. Your shortcut and/or pin will still work as long as the update is in the same location.
+
+### Linux
+
+ 1. Download GMDex-linux-x86_64_vX_X_X.tar.gz
+ 2. Extract the files to a location of your choice
+ 3. Execute the file named GMDex
+To update, just replace all of the old files. Your database will be preserved.
+My testing has been on Ubuntu 24.04.5 LTS
+
+### Mac
+
+Instructions to come pending me gaining access to a Mac device
+
 ## Database backups
 
 Use **Export Entire Database** in Settings to create a portable JSON backup named with its export date (`YYYYMMDD`), and **Import Entire Database** to replace the current local data from that backup. The backup includes players, creatures, encounters, notes, and all related records. Importing replaces all current database records; export a backup before importing if you may need to restore them. If a backup's export time is older than the current database snapshot time, the app displays both times and asks for confirmation before replacing data.
+
+Database backups can be moved from platform to platform. For example, I use the windows, linux, and android version. When I am done working in one version, I export the entire database and upload it to my google drive. I then download that to the next device I use GMDex on and import the database.
 
 The JSON format is versioned and retains record IDs so encounter references remain intact:
 
@@ -145,7 +178,6 @@ See [spell-template.json](spell-template.json) for an editable example in the sa
 
 - Possibly allow user specified location for database syncing across platforms
   - Right now you have to export your entire database and move that across platforms manually and import it
-  - 
 
 ### SRD License Information
 

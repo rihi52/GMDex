@@ -26,7 +26,106 @@ void main() {
     expect(creatures, isNotEmpty);
     expect(creatures.every((creature) => creature.source == 'SRD'), isTrue);
     expect(groups, isEmpty);
+
+    final creatureWithImmunities = creatures.firstWhere(
+      (creature) => creature.damageImmunities != null,
+    );
+    final loadedCreature = await loadCreature(db, creatureWithImmunities.id);
+    expect(
+      loadedCreature?.damageImmune,
+      creatureWithImmunities.damageImmunities,
+    );
   });
+
+  test(
+    'imports damage defenses and maps them onto the creature model',
+    () async {
+      const json = '''
+      {
+        "monster": [
+          {
+            "name": "Defended Creature",
+            "source": "TST",
+            "ac": [12],
+            "hp": {"average": 5},
+            "vulnerable": ["fire", "cold"],
+            "resist": ["lightning"],
+            "immune": ["poison"],
+            "conditionImmune": ["charmed", "frightened"]
+          }
+        ]
+      }
+    ''';
+
+      await importBestiaryJson(db, json);
+      final row = await db.select(db.creatures).getSingle();
+      final creature = await loadCreature(db, row.id);
+
+      expect(row.damageVulnerabilities, 'fire, cold');
+      expect(row.damageResistances, 'lightning');
+      expect(row.damageImmunities, 'poison');
+      expect(row.conditionImmunities, 'charmed, frightened');
+      expect(creature?.damageVulnerable, row.damageVulnerabilities);
+      expect(creature?.damageResist, row.damageResistances);
+      expect(creature?.damageImmune, row.damageImmunities);
+      expect(creature?.conditionImmune, row.conditionImmunities);
+    },
+  );
+
+  test(
+    'reimport fills only missing defenses on an existing creature',
+    () async {
+      const initialJson = '''
+      {
+        "monster": [
+          {
+            "name": "Backfill Creature",
+            "source": "TST",
+            "ac": [12],
+            "hp": {"average": 5},
+            "vulnerable": ["fire"]
+          }
+        ]
+      }
+    ''';
+      const reimportJson = '''
+      {
+        "monster": [
+          {
+            "name": "Backfill Creature",
+            "source": "TST",
+            "ac": [20],
+            "hp": {"average": 99},
+            "vulnerable": ["cold"],
+            "resist": ["lightning"],
+            "immune": ["poison"],
+            "conditionImmune": ["charmed"]
+          }
+        ]
+      }
+    ''';
+
+      await importBestiaryJson(db, initialJson);
+      final result = await importBestiaryJson(db, reimportJson);
+      final row = await db.select(db.creatures).getSingle();
+
+      expect(result.imported, 1);
+      expect(row.armorClass, 12);
+      expect(row.hitPoints, 5);
+      expect(row.damageVulnerabilities, 'fire');
+      expect(row.damageResistances, 'lightning');
+      expect(row.damageImmunities, 'poison');
+      expect(row.conditionImmunities, 'charmed');
+
+      final secondReimport = await importBestiaryJson(db, reimportJson);
+      expect(secondReimport.imported, 0);
+      expect(secondReimport.skipped, 1);
+      expect(
+        (await db.select(db.creatures).getSingle()).damageVulnerabilities,
+        'fire',
+      );
+    },
+  );
 
   test('imports creatures from bestiary JSON and skips duplicates', () async {
     const json = '''

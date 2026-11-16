@@ -219,6 +219,10 @@ Future<Creature?> loadCreature(AppDatabase db, int id) async {
       performance: sk('performance'),
       isPerformanceProf: hasSkill('performance'),
     ),
+    damageVulnerable: row.damageVulnerabilities,
+    damageResist: row.damageResistances,
+    damageImmune: row.damageImmunities,
+    conditionImmune: row.conditionImmunities,
     senses: [
       for (final sense in senseRows) sense.sense,
       if (row.passivePerception != null)

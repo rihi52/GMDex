@@ -45,9 +45,8 @@ const _saveKeys = {'str', 'dex', 'con', 'int', 'wis', 'cha'};
 
 const maxBestiaryImportSizeBytes = 16 * 1024 * 1024;
 
-/// Safe to run more than once: creatures and groups already in the
-/// database (matched on name + source) are skipped. MM creatures replace a
-/// matching SRD creature and combine their source labels.
+/// Safe to run more than once: duplicate creatures only receive missing damage
+/// defenses. MM creatures replace a matching SRD creature and combine sources.
 /// Imports the configured bundled bestiary and optional legendary-group asset.
 Future<ImportResult> importBestiary(
   AppDatabase db, {
@@ -212,8 +211,7 @@ Future<void> _importMonsters(
     _ExistingCreature? match;
     _ExistingCreature? srdCreatureToUpdate;
     for (final creature in namedCreatures) {
-      if (_sameSource(creature.source, source) ||
-          (_isMmSource(source) && _hasSource(creature.source, 'mm'))) {
+      if (_hasSource(creature.source, source)) {
         match = creature;
         break;
       }
@@ -223,7 +221,15 @@ Future<void> _importMonsters(
     }
 
     if (match != null) {
-      result.skipped++;
+      try {
+        if (await _backfillMissingCreatureDefenses(db, match.id, raw)) {
+          result.imported++;
+        } else {
+          result.skipped++;
+        }
+      } catch (error) {
+        result.failed.add('$name ($source): $error');
+      }
       continue;
     }
 
@@ -518,6 +524,11 @@ Future<int> _insertCreature(
   final groupName = _nonEmptyString(group is Map ? group['name'] : null);
   final groupSource = _nonEmptyString(group is Map ? group['source'] : null);
   final hasGroupReference = groupName != null && groupSource != null;
+  final existing = existingId == null
+      ? null
+      : await (db.select(
+          db.creatures,
+        )..where((row) => row.id.equals(existingId))).getSingle();
 
   final creature = CreaturesCompanion(
     name: Value(name),
@@ -557,10 +568,24 @@ Future<int> _insertCreature(
     challengeRatingLair: Value(cr is Map ? cr['lair']?.toString() : null),
     challengeRatingCoven: Value(cr is Map ? cr['coven']?.toString() : null),
     xpOverride: Value(cr is Map ? _int(cr['xp']) : null),
-    damageVulnerabilities: Value(_damage(d['vulnerable'])),
-    damageResistances: Value(_damage(d['resist'])),
-    damageImmunities: Value(_damage(d['immune'])),
-    conditionImmunities: Value(_damage(d['conditionImmune'])),
+    damageVulnerabilities: Value(
+      _existingOrImportedDefense(
+        existing?.damageVulnerabilities,
+        d['vulnerable'],
+      ),
+    ),
+    damageResistances: Value(
+      _existingOrImportedDefense(existing?.damageResistances, d['resist']),
+    ),
+    damageImmunities: Value(
+      _existingOrImportedDefense(existing?.damageImmunities, d['immune']),
+    ),
+    conditionImmunities: Value(
+      _existingOrImportedDefense(
+        existing?.conditionImmunities,
+        d['conditionImmune'],
+      ),
+    ),
     legendaryGroupId: Value(
       hasGroupReference
           ? groupIds[_legendaryGroupKey(groupName, groupSource)]
@@ -729,6 +754,56 @@ Future<int> _insertCreature(
     await db.batch((bt) => bt.insertAll(db.creatureSpells, spells));
   }
   return id;
+}
+
+Future<bool> _backfillMissingCreatureDefenses(
+  AppDatabase db,
+  int id,
+  Map<String, dynamic> data,
+) async {
+  final row = await (db.select(
+    db.creatures,
+  )..where((creature) => creature.id.equals(id))).getSingle();
+  final vulnerabilities = _existingOrImportedDefense(
+    row.damageVulnerabilities,
+    data['vulnerable'],
+  );
+  final resistances = _existingOrImportedDefense(
+    row.damageResistances,
+    data['resist'],
+  );
+  final immunities = _existingOrImportedDefense(
+    row.damageImmunities,
+    data['immune'],
+  );
+  final conditionImmunities = _existingOrImportedDefense(
+    row.conditionImmunities,
+    data['conditionImmune'],
+  );
+  if (vulnerabilities == row.damageVulnerabilities &&
+      resistances == row.damageResistances &&
+      immunities == row.damageImmunities &&
+      conditionImmunities == row.conditionImmunities) {
+    return false;
+  }
+
+  await (db.update(
+    db.creatures,
+  )..where((creature) => creature.id.equals(id))).write(
+    CreaturesCompanion(
+      damageVulnerabilities: Value(vulnerabilities),
+      damageResistances: Value(resistances),
+      damageImmunities: Value(immunities),
+      conditionImmunities: Value(conditionImmunities),
+    ),
+  );
+  return true;
+}
+
+String? _existingOrImportedDefense(String? existing, dynamic imported) {
+  if (existing?.trim().isNotEmpty == true) return existing;
+  final value = _damage(imported);
+  return value?.trim().isNotEmpty == true ? value : existing;
 }
 
 Future<void> _deleteImportedCreatureChildren(AppDatabase db, int id) async {

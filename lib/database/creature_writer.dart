@@ -76,8 +76,8 @@ Future<int> saveCreature(
             .getSingleOrNull();
     if (clash != null) throw CreatureNameTaken(name);
 
-    // Only the columns the editor knows about. On update, everything else
-    // (source, page, damage lists, group link, ...) is left as it was.
+    // Only the columns the editor knows about. On update, import-only metadata
+    // (source, page, group link, ...) is left as it was.
     final fields = CreaturesCompanion(
       name: Value(name),
       size: Value(_blank(c.size)),
@@ -101,6 +101,10 @@ Future<int> saveCreature(
       challengeRating: Value(_blank(c.challengeRating.cr)),
       challengeRatingLair: Value(_blank(c.challengeRating.lair)),
       challengeRatingCoven: Value(_blank(c.challengeRating.coven)),
+      damageVulnerabilities: Value(_blank(c.damageVulnerable)),
+      damageResistances: Value(_blank(c.damageResist)),
+      damageImmunities: Value(_blank(c.damageImmune)),
+      conditionImmunities: Value(_blank(c.conditionImmune)),
     );
 
     final int id;
