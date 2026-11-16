@@ -113,6 +113,10 @@ class _StatblockEditorForm extends State<StatblockEditorForm> {
         ac: armorClass?.ac,
         type: armorClass?.type ?? '',
       ),
+      damageVulnerable: widget.creature?.damageVulnerable,
+      damageResist: widget.creature?.damageResist,
+      damageImmune: widget.creature?.damageImmune,
+      conditionImmune: widget.creature?.conditionImmune,
       challengeRating: CreatureCRDraft(cr: challengeRating?.cr ?? ''),
       abilityScores: CreatureAbilityScoresDraft(
         strength: abilityScore?.strength ?? 10,
@@ -513,7 +517,7 @@ class _StatblockEditorForm extends State<StatblockEditorForm> {
 
                     // Width left over after three fixed columns and their gaps.
                     final double remaining =
-                        constraints.maxWidth - (columnWidth * 3) - (gap * 3);
+                        constraints.maxWidth - (columnWidth * 3) - (gap * 2);
 
                     // If the senses block fits on the same line, let it fill
                     // the rest. Otherwise it wraps and gets a normal column
@@ -522,7 +526,7 @@ class _StatblockEditorForm extends State<StatblockEditorForm> {
                         constraints.maxWidth < columnWidth
                         ? constraints.maxWidth
                         : columnWidth;
-                    final double sensesWidth = remaining >= columnWidth
+                    final double sensesWidth = remaining >= columnWidth * 2
                         ? remaining - 50
                         : maxAvailable;
 
@@ -916,7 +920,6 @@ class _StatblockEditorForm extends State<StatblockEditorForm> {
                                   }),
                                 ),
                               ],
-                              if (isNarrow) HorizontalDivider(),
                             ],
                           ),
                         ),
@@ -1026,12 +1029,66 @@ class _StatblockEditorForm extends State<StatblockEditorForm> {
                               ],
                             ),
                           ),
-                        if (remaining >= columnWidth)
+                        if (!isNarrow)
                           StatblockVerticalDivider(height: checkBoxTableHeight),
-                        // ----- Block 4: senses / languages / CR -----
+                        HorizontalDivider(),
+                        // ----- Block 4: Damage vulnerability / resist / immune / condition immune -----
                         SizedBox(
                           height: checkBoxTableHeight,
-                          width: isNarrow ? null : sensesWidth,
+                          width: isNarrow ? null : double.infinity,
+                          // width: isNarrow ? null : sensesWidth > remaining ? double.infinity : sensesWidth,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                flex: 4,
+                                child: StatblockEditSmallText(
+                                  labelText: 'Damage Vulnerabilities',
+                                  startingValue: c?.damageVulnerable,
+                                  onSaved: (value) =>
+                                      _draft.damageVulnerable = value,
+                                  maxLines: isNarrow ? 4 : 6,
+                                ),
+                              ),
+                              Expanded(
+                                flex: 4,
+                                child: StatblockEditSmallText(
+                                  labelText: 'Damage Resistances',
+                                  startingValue: c?.damageResist,
+                                  onSaved: (value) =>
+                                      _draft.damageResist = value,
+                                  maxLines: isNarrow ? 4 : 6,
+                                ),
+                              ),
+                              Expanded(
+                                flex: 2,
+                                child: StatblockEditSmallText(
+                                  labelText: 'Damage Immunities',
+                                  startingValue: c?.damageImmune,
+                                  onSaved: (value) =>
+                                      _draft.damageImmune = value,
+                                ),
+                              ),
+                              Expanded(
+                                flex: 2,
+                                child: StatblockEditSmallText(
+                                  labelText: 'Condition Immunities',
+                                  startingValue: c?.conditionImmune,
+                                  onSaved: (value) =>
+                                      _draft.conditionImmune = value,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        // if (remaining >= columnWidth)
+                        //   StatblockVerticalDivider(height: checkBoxTableHeight),
+                        HorizontalDivider(),
+                        // ----- Block 5: senses / languages / CR -----
+                        SizedBox(
+                          height: checkBoxTableHeight,
+                          width: isNarrow ? null : double.infinity,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisAlignment: MainAxisAlignment.start,
@@ -1060,9 +1117,11 @@ class _StatblockEditorForm extends State<StatblockEditorForm> {
                                   labelText: 'Challenge Rating',
                                   startingValue: c?.challengeRating.cr
                                       .toString(),
-                                  keyboardType: TextInputType.number,
+                                  keyboardType: TextInputType.text,
                                   inputFormatters: [
-                                    FilteringTextInputFormatter.digitsOnly,
+                                    FilteringTextInputFormatter.allow(
+                                      RegExp(r'[0-9/]'),
+                                    ),
                                   ],
                                   onSaved: (value) =>
                                       _draft.challengeRating.cr = value,

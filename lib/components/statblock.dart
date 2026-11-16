@@ -373,6 +373,78 @@ class CreatureStatBlock extends StatelessWidget {
                         ),
                       ],
                     ),
+                    if (creature?.damageVulnerable != null &&
+                        creature?.damageVulnerable != '')
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Damage Vulnerabilities: ',
+                            style: Theme.of(context).textTheme.titleSmall,
+                          ),
+                          if (creature?.damageVulnerable != null &&
+                              creature?.damageVulnerable != '')
+                            Expanded(
+                              child: StatblockSmallText(
+                                data: creature!.damageVulnerable!,
+                              ),
+                            ),
+                        ],
+                      ),
+                    if (creature?.damageResist != null &&
+                        creature?.damageResist != '')
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Damage Resistances: ',
+                            style: Theme.of(context).textTheme.titleSmall,
+                          ),
+                          if (creature?.damageResist != null &&
+                              creature?.damageResist != '')
+                            Expanded(
+                              child: StatblockSmallText(
+                                data: creature!.damageResist!,
+                              ),
+                            ),
+                        ],
+                      ),
+                    if (creature?.damageImmune != null &&
+                        creature?.damageImmune != '')
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Damage Immunities: ',
+                            style: Theme.of(context).textTheme.titleSmall,
+                          ),
+                          if (creature?.damageImmune != null &&
+                              creature?.damageImmune != '')
+                            Expanded(
+                              child: StatblockSmallText(
+                                data: creature!.damageImmune!,
+                              ),
+                            ),
+                        ],
+                      ),
+                    if (creature?.conditionImmune != null &&
+                        creature?.conditionImmune != '')
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Condition Immunities: ',
+                            style: Theme.of(context).textTheme.titleSmall,
+                          ),
+                          if (creature?.conditionImmune != null &&
+                              creature?.conditionImmune != '')
+                            Expanded(
+                              child: StatblockSmallText(
+                                data: creature!.conditionImmune!,
+                              ),
+                            ),
+                        ],
+                      ),
                     if (creature?.senses != null && creature?.senses != '')
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,

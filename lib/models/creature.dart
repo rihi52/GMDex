@@ -15,6 +15,10 @@ class Creature {
   final CreatureSpeed speed;
   final CreatureAbilityScores abilityScores;
   final CreatureSkills? skills;
+  final String? damageVulnerable;
+  final String? damageResist;
+  final String? damageImmune;
+  final String? conditionImmune;
   final String? senses;
   final String? languages;
   final CreatureSavingThrows savingThrows;
@@ -39,6 +43,10 @@ class Creature {
     required this.speed,
     required this.abilityScores,
     this.skills,
+    this.damageVulnerable,
+    this.damageResist,
+    this.damageImmune,
+    this.conditionImmune,
     this.senses,
     this.languages,
     required this.savingThrows,
