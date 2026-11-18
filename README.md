@@ -29,6 +29,7 @@ GMDex is a tool to help GM's of Dungeons and Dragons 5th Edition manage their ta
   - All SRD creatures are included, and you can import your own using the specified json format
   - Create your own custom creatures in the app
   - Copy and edit all creatures in the app, official and custom creatures
+  - Edit leveled spells and slots under Spellcasting, and at-will or daily spells under Innate Spellcasting. Add daily frequencies using the dropdown and separate spell names with commas.
   - Add creature specific notes to any creature
 - Player Database
   - Create and track players, including
@@ -41,6 +42,7 @@ GMDex is a tool to help GM's of Dungeons and Dragons 5th Edition manage their ta
   - Players can be edited, copied, and created new
 - Spells
   - All SRD spells are included, and you can import your own using the specified json format
+  - Create new custom spells
   - Can be pulled up from a creature's statblock in the database or in an encounter
   - Newly created creatures with spells will be linked to database spells if they exist
 

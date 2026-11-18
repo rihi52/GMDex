@@ -47,13 +47,18 @@ List<String> _split(String? s) => (s ?? '')
 /// Inserts or updates a creature and its editor-managed child data.
 ///
 /// A creature's name must be unique within its source. Existing records retain
-/// their source and import-only metadata; new records use [newSource].
+/// their source and import-only metadata; new records use [newSource]. When
+/// copying, [copyFromId] preserves spellcasting entries hidden by the importer.
 Future<int> saveCreature(
   AppDatabase db,
   Creature c, {
   int? existingId,
+  int? copyFromId,
   String newSource = 'Custom',
 }) {
+  if (existingId != null && copyFromId != null) {
+    throw ArgumentError('Cannot update and copy a creature at the same time.');
+  }
   return db.transaction(() async {
     final name = c.name.trim();
 
@@ -64,6 +69,10 @@ Future<int> saveCreature(
         db.creatures,
       )..where((r) => r.id.equals(existingId))).getSingle();
       source = current.source;
+    } else if (copyFromId != null) {
+      await (db.select(
+        db.creatures,
+      )..where((r) => r.id.equals(copyFromId))).getSingle();
     }
 
     final clash =
@@ -107,6 +116,11 @@ Future<int> saveCreature(
       conditionImmunities: Value(_blank(c.conditionImmune)),
     );
 
+    // Hidden frequency lists are omitted from the editor model.
+    final hiddenSourceId = existingId ?? copyFromId;
+    final hiddenSpellcasting = hiddenSourceId == null
+        ? <(CreatureSpellcastingRow, List<CreatureSpellRow>)>[]
+        : await _loadHiddenSpellcasting(db, hiddenSourceId);
     final int id;
     if (existingId == null) {
       id = await db
@@ -119,8 +133,67 @@ Future<int> saveCreature(
     }
 
     await _insertChildren(db, id, c);
+    await _restoreHiddenSpellcasting(db, id, hiddenSpellcasting);
     return id;
   });
+}
+
+Future<List<(CreatureSpellcastingRow, List<CreatureSpellRow>)>>
+_loadHiddenSpellcasting(AppDatabase db, int creatureId) async {
+  final blocks = await (db.select(
+    db.creatureSpellcastings,
+  )..where((block) => block.creatureId.equals(creatureId))).get();
+  final hiddenBlocks = <(CreatureSpellcastingRow, List<CreatureSpellRow>)>[];
+  for (final block in blocks) {
+    final hidden = (block.hiddenUses ?? '')
+        .split(',')
+        .map((uses) => uses.trim())
+        .where((uses) => uses.isNotEmpty)
+        .toSet();
+    if (hidden.isEmpty) continue;
+    final spells = await (db.select(
+      db.creatureSpells,
+    )..where((spell) => spell.spellcastingId.equals(block.id))).get();
+    final hiddenSpells = spells
+        .where(
+          (spell) =>
+              spell.spellLevel == null &&
+              spell.uses != null &&
+              hidden.contains(spell.uses),
+        )
+        .toList();
+    if (hiddenSpells.isNotEmpty) hiddenBlocks.add((block, hiddenSpells));
+  }
+  return hiddenBlocks;
+}
+
+Future<void> _restoreHiddenSpellcasting(
+  AppDatabase db,
+  int creatureId,
+  List<(CreatureSpellcastingRow, List<CreatureSpellRow>)> blocks,
+) async {
+  for (final (block, spells) in blocks) {
+    final blockId = await db
+        .into(db.creatureSpellcastings)
+        .insert(
+          block.toCompanion(false).copyWith(
+            id: const Value.absent(),
+            creatureId: Value(creatureId),
+          ),
+        );
+    await db.batch((batch) {
+      batch.insertAll(
+        db.creatureSpells,
+        [
+          for (final spell in spells)
+            spell.toCompanion(false).copyWith(
+              id: const Value.absent(),
+              spellcastingId: Value(blockId),
+            ),
+        ],
+      );
+    });
+  }
 }
 
 /// Deletes only the child rows rebuilt by the editor before reinserting them.

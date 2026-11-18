@@ -7,13 +7,24 @@ import 'package:gmdex/models/spell.dart';
 import 'package:gmdex/theme/apptheme.dart';
 
 class SpellDetails extends StatelessWidget {
-  const SpellDetails({super.key, required this.spell, this.onNotesPressed});
+  const SpellDetails({
+    super.key,
+    required this.spell,
+    this.onEditPressed,
+    this.onCopyPressed,
+    this.onDeletePressed,
+    this.onNotesPressed,
+  });
 
   final SpellRow? spell;
+  final VoidCallback? onEditPressed;
+  final VoidCallback? onCopyPressed;
+  final VoidCallback? onDeletePressed;
   final VoidCallback? onNotesPressed;
 
   @override
   Widget build(BuildContext context) {
+    final double topButtonWidth = 110;
     final selectedSpell = spell;
     if (selectedSpell == null) {
       return const Center(child: Text('Select a spell to view details.'));
@@ -30,23 +41,57 @@ class SpellDetails extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (onNotesPressed != null)
-              Align(
-                alignment: Alignment.centerRight,
-                child: SizedBox(
-                  width: 110,
+            Wrap(
+              spacing: AppSpacing.spacingMedium,
+              runSpacing: AppSpacing.spacingMedium,
+              children: [
+                SizedBox(
+                  width: topButtonWidth,
                   child: ElevatedButton(
-                    onPressed: onNotesPressed,
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                    ),
-                    child: NotesLabel(
-                      hasNotes: selectedSpell.notes?.trim().isNotEmpty == true,
+                    onPressed: onEditPressed,
+                    child: Text(
+                      'Edit',
                       style: Theme.of(context).textTheme.bodyLarge,
                     ),
                   ),
                 ),
-              ),
+                SizedBox(
+                  width: topButtonWidth,
+                  child: ElevatedButton(
+                    onPressed: onCopyPressed,
+                    child: Text(
+                      'Copy',
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: topButtonWidth,
+                  child: ElevatedButton(
+                    onPressed: onDeletePressed,
+                    child: Text(
+                      'Delete',
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
+                  ),
+                ),
+                if (onNotesPressed != null)
+                  SizedBox(
+                    width: 110,
+                    child: ElevatedButton(
+                      onPressed: onNotesPressed,
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                      ),
+                      child: NotesLabel(
+                        hasNotes:
+                            selectedSpell.notes?.trim().isNotEmpty == true,
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
             Text(details.name, style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: AppSpacing.spacingMedium),
             _detail(context, 'Level:', details.level),

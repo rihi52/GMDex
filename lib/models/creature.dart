@@ -132,6 +132,14 @@ const innateSpellLevelNames = {
   '9e': '9/day',
 };
 
+/// Formats imported innate spell-use keys, including per-spell daily limits.
+String innateSpellFrequencyName(String key) {
+  if (key == 'will') return 'At will';
+  final match = RegExp(r'^([1-9]\d*)(e?)$').firstMatch(key);
+  if (match == null) return innateSpellLevelNames[key] ?? key;
+  return '${match[1]}/day${match[2] == 'e' ? ' each' : ''}';
+}
+
 /// A creature's prepared and/or innate spellcasting data.
 class CreatureSpellcasting {
   final String name;

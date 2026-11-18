@@ -1,5 +1,6 @@
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gmdex/database/creature_mapper.dart';
 import 'package:gmdex/database/creature_writer.dart';
 import 'package:gmdex/database/database.dart';
 import 'package:gmdex/models/creature_draft.dart';
@@ -51,6 +52,28 @@ void main() {
     expect(row.damageImmunities, isNull);
     expect(row.conditionImmunities, 'frightened');
   });
+
+  test('persists leveled spell slots for statblock display', () async {
+    final creature = _draft(
+      name: 'Spellcasting Creature',
+      damageVulnerable: null,
+      damageResist: null,
+      damageImmune: null,
+      conditionImmune: null,
+      spellCasting: CreatureSpellcastingDraft(
+        spells: {
+          1: SpellLevelDraft(slots: 4, spells: ['Shield']),
+          2: SpellLevelDraft(slots: 2, spells: ['Misty Step']),
+        },
+      ),
+    ).toCreature();
+
+    final id = await saveCreature(db, creature);
+    final savedCreature = await loadCreature(db, id);
+
+    expect(savedCreature?.spellCasting?.spells?[1]?.slots, 4);
+    expect(savedCreature?.spellCasting?.spells?[2]?.slots, 2);
+  });
 }
 
 CreatureDraft _draft({
@@ -59,6 +82,7 @@ CreatureDraft _draft({
   required String? damageResist,
   required String? damageImmune,
   required String? conditionImmune,
+  CreatureSpellcastingDraft? spellCasting,
 }) {
   return CreatureDraft(
     name: name,
@@ -78,5 +102,6 @@ CreatureDraft _draft({
     damageResist: damageResist,
     damageImmune: damageImmune,
     conditionImmune: conditionImmune,
+    spellCasting: spellCasting,
   );
 }

@@ -1144,6 +1144,9 @@ class _StatblockEditorForm extends State<StatblockEditorForm> {
                 ),
               ),
               StatblockSection(
+                child: InnateSpellCastingTile(creatureDraft: _draft),
+              ),
+              StatblockSection(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -1501,51 +1504,193 @@ class SpellCastingTile extends StatefulWidget {
 class _SpellCastingTileState extends State<SpellCastingTile> {
   @override
   Widget build(BuildContext context) {
-    return ExpansionTile(
-      maintainState: true,
-      title: Text(
-        'Spellcasting',
-        style: Theme.of(context).textTheme.titleMedium,
-      ),
-      children: <Widget>[
-        for (var level = 0; level <= 9; level++)
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Padding(
-                padding: EdgeInsetsDirectional.only(
-                  start: AppSpacing.spacingSmall,
+    return Material(
+      type: MaterialType.transparency,
+      child: ExpansionTile(
+        maintainState: true,
+        title: Text(
+          'Spellcasting',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        children: <Widget>[
+          for (var level = 0; level <= 9; level++)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: EdgeInsetsDirectional.only(
+                        start: AppSpacing.spacingSmall,
+                      ),
+                      child: SizedBox(
+                        width: 95,
+                        child: StatblockSmallText(
+                          data: spellLevelNames[level]!,
+                          alignment: TextAlign.start,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: StatblockEditSmallText(
+                        labelText: 'Spell Names (comma-separated)',
+                        onSaved: (value) {
+                          widget
+                              .creatureDraft
+                              .spellCasting!
+                              .spells![level]!
+                              .spells = _splitSpellNames(value);
+                        },
+                        startingValue: widget
+                            .creatureDraft
+                            .spellCasting!
+                            .spells![level]!
+                            .spells
+                            ?.join(', '),
+                      ),
+                    ),
+                  ],
                 ),
-                child: SizedBox(
-                  width: 95,
-                  child: StatblockSmallText(
-                    data: spellLevelNames[level]!,
-                    alignment: TextAlign.start,
+                if (level > 0)
+                  Padding(
+                    padding: const EdgeInsetsDirectional.only(start: 95),
+                    child: StatblockEditSmallText(
+                      labelText: 'Number of Spell Slots',
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      onSaved: (value) {
+                        widget
+                            .creatureDraft
+                            .spellCasting!
+                            .spells![level]!
+                            .slots = int.tryParse(
+                          value,
+                        );
+                      },
+                      startingValue: widget
+                          .creatureDraft
+                          .spellCasting!
+                          .spells![level]!
+                          .slots
+                          ?.toString(),
+                    ),
+                  ),
+              ],
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+List<String> _splitSpellNames(String value) {
+  final names = <String>[];
+  // Imported spell conditions can contain commas inside parentheses.
+  var depth = 0;
+  var start = 0;
+  for (var index = 0; index < value.length; index++) {
+    final character = value[index];
+    if (character == '(') {
+      depth++;
+    } else if (character == ')' && depth > 0) {
+      depth--;
+    } else if (character == ',' && depth == 0) {
+      final name = value.substring(start, index).trim();
+      if (name.isNotEmpty) names.add(name);
+      start = index + 1;
+    }
+  }
+  final name = value.substring(start).trim();
+  if (name.isNotEmpty) names.add(name);
+  return names;
+}
+
+/// Edits spell lists grouped by innate casting frequency.
+class InnateSpellCastingTile extends StatefulWidget {
+  const InnateSpellCastingTile({super.key, required this.creatureDraft});
+
+  final CreatureDraft creatureDraft;
+
+  @override
+  State<InnateSpellCastingTile> createState() => _InnateSpellCastingTileState();
+}
+
+class _InnateSpellCastingTileState extends State<InnateSpellCastingTile> {
+  late final Map<String, List<String>> _spells;
+
+  @override
+  void initState() {
+    super.initState();
+    final casting = widget.creatureDraft.spellCasting!;
+    _spells = casting.innateSpell ??= {};
+    _spells.putIfAbsent('will', () => []);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final available = [
+      for (var count = 1; count <= 9; count++) ...['$count', '${count}e'],
+    ].where((key) => !_spells.containsKey(key)).toList();
+    return Material(
+      type: MaterialType.transparency,
+      child: ExpansionTile(
+        maintainState: true,
+        title: Text(
+          'Innate Spellcasting',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        children: [
+          for (final entry in _spells.entries)
+            Padding(
+              key: ValueKey('innate-${entry.key}'),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.spacingSmall,
+              ),
+              child: StatblockEditSmallText(
+                labelText:
+                    '${innateSpellFrequencyName(entry.key)} (comma-separated)',
+                startingValue: entry.value.join(', '),
+                onSaved: (value) {
+                  _spells[entry.key] = _splitSpellNames(value);
+                },
+              ),
+            ),
+          if (available.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.spacingSmall,
+              ),
+              child: InputDecorator(
+                decoration: const InputDecoration(border: OutlineInputBorder()),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    isExpanded: true,
+                    hint: Text(
+                      'Add daily spell frequency',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    items: [
+                      for (final key in available)
+                        DropdownMenuItem(
+                          value: key,
+                          child: Text(
+                            innateSpellFrequencyName(key),
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                        ),
+                    ],
+                    onChanged: (key) {
+                      if (key != null) {
+                        setState(() => _spells[key] = []);
+                      }
+                    },
                   ),
                 ),
               ),
-              Expanded(
-                child: StatblockEditSmallText(
-                  labelText: 'Spell Names (comma-separated)',
-                  onSaved: (value) {
-                    widget.creatureDraft.spellCasting!.spells![level]!.spells =
-                        value
-                            .split(',')
-                            .map((spell) => spell.trim())
-                            .where((spell) => spell.isNotEmpty)
-                            .toList();
-                  },
-                  startingValue: widget
-                      .creatureDraft
-                      .spellCasting!
-                      .spells![level]!
-                      .spells
-                      ?.join(', '),
-                ),
-              ),
-            ],
-          ),
-      ],
+            ),
+        ],
+      ),
     );
   }
 }

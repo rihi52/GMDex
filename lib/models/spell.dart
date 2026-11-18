@@ -34,6 +34,14 @@ class Spell {
     if (decoded is! Map<String, dynamic>) {
       throw const FormatException('Spell data must be a JSON object.');
     }
+    final editorData = decoded['_gmdexEditor'];
+    final editorFields = editorData is Map<String, dynamic>
+        ? editorData
+        : const <String, dynamic>{};
+    String editorText(String field, String fallback) {
+      final value = editorFields[field];
+      return value is String ? value : fallback;
+    }
 
     final entries = _flattenEntries(decoded['entries']);
     final higherLevel = _flattenEntries(
@@ -46,10 +54,16 @@ class Spell {
       source: row.source,
       level: levelName,
       school: spellSchoolName(row.school),
-      castingTime: _formatCastingTime(decoded['time']),
-      range: _formatRange(decoded['range']),
-      components: _formatComponents(decoded['components']),
-      duration: _formatDuration(decoded['duration']),
+      castingTime: editorText(
+        'castingTime',
+        _formatCastingTime(decoded['time']),
+      ),
+      range: editorText('range', _formatRange(decoded['range'])),
+      components: editorText(
+        'components',
+        _formatComponents(decoded['components']),
+      ),
+      duration: editorText('duration', _formatDuration(decoded['duration'])),
       description: entries,
       higherLevel: higherLevel.isEmpty ? null : higherLevel,
     );

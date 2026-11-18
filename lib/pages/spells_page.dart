@@ -8,25 +8,64 @@ import 'package:gmdex/components/notes_drawer.dart';
 import 'package:gmdex/components/responsive_layout.dart';
 import 'package:gmdex/components/spell_card.dart';
 import 'package:gmdex/components/spell_details.dart';
+import 'package:gmdex/components/spell_edit.dart';
 import 'package:gmdex/database/database.dart';
 import 'package:gmdex/database/database_initialize.dart';
 import 'package:gmdex/database/spell_writer.dart';
 import 'package:gmdex/models/spell.dart' show spellSchoolName;
+import 'package:gmdex/models/spell_draft.dart';
 import 'package:gmdex/theme/apptheme.dart';
 
-class SpellsPage extends StatelessWidget {
+class SpellsPage extends StatefulWidget {
   const SpellsPage({super.key});
+
+  @override
+  State<SpellsPage> createState() => _SpellsPageState();
+}
+
+class _SpellsPageState extends State<SpellsPage> {
+  int _selectedIndex = 0;
+  SpellRow? _spellToCopy;
+  bool _isEditing = false;
 
   @override
   Widget build(BuildContext context) {
     return ResponsiveNavigationScaffold(
       title: 'Spells',
+      addTooltip: 'Create spell',
+      onAddPressed: _selectedIndex == 0
+          ? () => setState(() {
+              _spellToCopy = null;
+              _isEditing = false;
+              _selectedIndex = 1;
+            })
+          : null,
       items: [
         NavigationSidebarItem(
           title: 'Home',
-          onTap: () => Navigator.of(
-            context,
-          ).pushNamedAndRemoveUntil('/home', (route) => false),
+          onTap: () {
+            setState(() {
+              _spellToCopy = null;
+              _isEditing = false;
+            });
+            Navigator.of(
+              context,
+            ).pushNamedAndRemoveUntil('/home', (route) => false);
+          },
+        ),
+        NavigationSidebarItem(
+          title: 'Browse',
+          selected: _selectedIndex == 0,
+          onTap: () => setState(() {
+            _selectedIndex = 0;
+            _spellToCopy = null;
+            _isEditing = false;
+          }),
+        ),
+        NavigationSidebarItem(
+          title: 'Create',
+          selected: _selectedIndex == 1,
+          onTap: () => setState(() => _selectedIndex = 1),
           showDividerAfter: true,
         ),
         NavigationSidebarItem(
@@ -41,15 +80,39 @@ class SpellsPage extends StatelessWidget {
           title: 'Encounters',
           onTap: () => Navigator.pushNamed(context, '/encounters'),
         ),
-        const NavigationSidebarItem(title: 'Spells', selected: true),
       ],
-      body: const BrowseSpellsWidget(),
+      body: _selectedIndex == 0
+          ? BrowseSpellsWidget(
+              onCopy: (spell) => setState(() {
+                _spellToCopy = spell;
+                _isEditing = false;
+                _selectedIndex = 1;
+              }),
+              onEdit: (spell) => setState(() {
+                _spellToCopy = spell;
+                _isEditing = true;
+                _selectedIndex = 1;
+              }),
+            )
+          : CreateSpellWidget(
+              key: ValueKey('$_isEditing:${_spellToCopy?.id ?? 'new'}'),
+              spell: _spellToCopy,
+              isEditing: _isEditing,
+              onSaved: () => setState(() {
+                _spellToCopy = null;
+                _isEditing = false;
+                _selectedIndex = 0;
+              }),
+            ),
     );
   }
 }
 
 class BrowseSpellsWidget extends StatefulWidget {
-  const BrowseSpellsWidget({super.key});
+  const BrowseSpellsWidget({super.key, this.onCopy, this.onEdit});
+
+  final ValueChanged<SpellRow>? onCopy;
+  final ValueChanged<SpellRow>? onEdit;
 
   @override
   State<BrowseSpellsWidget> createState() => _BrowseSpellsWidgetState();
@@ -173,6 +236,87 @@ class _BrowseSpellsWidgetState extends State<BrowseSpellsWidget> {
           SnackBar(content: Text('Could not save spell notes: $error')),
         );
       }
+    }
+  }
+
+  Future<void> _confirmDeleteSelectedSpell() async {
+    final spell = _selectedSpell;
+    if (spell == null) return;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(
+          'Delete spell?',
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        content: Text(
+          'Are you sure you want to delete "${spell.name}"? '
+          'This cannot be undone.',
+          style: Theme.of(context).textTheme.bodyLarge,
+        ),
+        actions: [
+          ElevatedButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (!mounted || confirmed != true) return;
+
+    final messenger = ScaffoldMessenger.of(context);
+    final int deleted;
+    try {
+      deleted = await (database.delete(
+        database.spells,
+      )..where((row) => row.id.equals(spell.id))).go();
+    } catch (error) {
+      if (mounted) {
+        messenger.showSnackBar(
+          SnackBar(content: Text('Could not delete ${spell.name}: $error')),
+        );
+      }
+      return;
+    }
+    if (!mounted) return;
+
+    _scaffoldKey.currentState?.closeEndDrawer();
+    setState(() {
+      _selectedSpell = null;
+      _spells = _spells.where((row) => row.id != spell.id).toList();
+    });
+
+    await _loadSpells();
+    if (_loadError != null) {
+      if (mounted) {
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(
+              'Deleted ${spell.name}, but could not reload: $_loadError',
+            ),
+          ),
+        );
+      }
+      return;
+    }
+    if (mounted) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            deleted == 0
+                ? 'Spell was already deleted.'
+                : 'Deleted ${spell.name}.',
+          ),
+        ),
+      );
     }
   }
 
@@ -336,6 +480,13 @@ class _BrowseSpellsWidgetState extends State<BrowseSpellsWidget> {
             ? const SizedBox.shrink()
             : SpellDetails(
                 spell: selectedSpell,
+                onEditPressed: widget.onEdit == null
+                    ? null
+                    : () => widget.onEdit!(selectedSpell),
+                onCopyPressed: widget.onCopy == null
+                    ? null
+                    : () => widget.onCopy!(selectedSpell),
+                onDeletePressed: _confirmDeleteSelectedSpell,
                 onNotesPressed: isWide
                     ? () => _scaffoldKey.currentState?.openEndDrawer()
                     : null,
@@ -414,7 +565,16 @@ class _BrowseSpellsWidgetState extends State<BrowseSpellsWidget> {
                   detailsLabel: 'Details',
                   details: Padding(
                     padding: const EdgeInsets.all(AppSpacing.spacingMedium),
-                    child: SpellDetails(spell: selectedSpell),
+                    child: SpellDetails(
+                      spell: selectedSpell,
+                      onEditPressed: widget.onEdit == null
+                          ? null
+                          : () => widget.onEdit!(selectedSpell),
+                      onCopyPressed: widget.onCopy == null
+                          ? null
+                          : () => widget.onCopy!(selectedSpell),
+                      onDeletePressed: _confirmDeleteSelectedSpell,
+                    ),
                   ),
                   initialValue: selectedSpell.notes ?? '',
                   maxWidth: min(constraints.maxWidth - 50, 500),
@@ -440,6 +600,86 @@ class _BrowseSpellsWidgetState extends State<BrowseSpellsWidget> {
           ),
         );
       },
+    );
+  }
+}
+
+/// Hosts the spell form and saves its changes to the spell database.
+class CreateSpellWidget extends StatefulWidget {
+  const CreateSpellWidget({
+    super.key,
+    this.spell,
+    this.isEditing = false,
+    this.onSaved,
+  });
+
+  final SpellRow? spell;
+  final bool isEditing;
+  final VoidCallback? onSaved;
+
+  @override
+  State<CreateSpellWidget> createState() => _CreateSpellWidgetState();
+}
+
+class _CreateSpellWidgetState extends State<CreateSpellWidget> {
+  Future<void> _save(SpellDraft draft) async {
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await saveSpell(
+        database,
+        draft,
+        existingId: widget.isEditing ? widget.spell?.id : null,
+      );
+      if (!mounted) return;
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            '${widget.isEditing ? 'Saved' : 'Created'} ${draft.name}.',
+          ),
+        ),
+      );
+      widget.onSaved?.call();
+    } on SpellNameTaken catch (error) {
+      if (mounted) {
+        messenger.showSnackBar(SnackBar(content: Text('$error')));
+      }
+    } catch (error) {
+      if (mounted) {
+        messenger.showSnackBar(
+          SnackBar(content: Text('Could not save spell: $error')),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        scrolledUnderElevation: 0,
+        automaticallyImplyLeading: false,
+        centerTitle: true,
+        title: widget.isEditing
+            ? Text(
+                'Editing ${widget.spell!.name}',
+                style: Theme.of(context).textTheme.headlineMedium,
+              )
+            : widget.spell != null
+            ? Text(
+                'Copying ${widget.spell!.name}',
+                style: Theme.of(context).textTheme.headlineMedium,
+              )
+            : null,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(AppSpacing.spacingLarge),
+        child: SpellEdit(
+          key: ValueKey('${widget.isEditing}:${widget.spell?.id ?? 'new'}'),
+          spell: widget.spell,
+          isEditing: widget.isEditing,
+          onSubmit: _save,
+        ),
+      ),
     );
   }
 }

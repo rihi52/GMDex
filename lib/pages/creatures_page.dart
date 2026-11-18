@@ -774,6 +774,7 @@ class _CreateCreatureWidgetState extends State<CreateCreatureWidget> {
         creature,
         // Editing updates that row; creating or copying inserts a new one.
         existingId: widget.isEditing ? widget.creature?.id : null,
+        copyFromId: widget.isEditing ? null : widget.creature?.id,
       );
       messenger.showSnackBar(SnackBar(content: Text('Saved ${creature.name}')));
       if (mounted) widget.onSaved?.call();

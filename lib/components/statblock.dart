@@ -540,7 +540,8 @@ class CreatureStatBlock extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               StatblockSmallText(
-                                data: '${innateSpellLevelNames[entry.key]}: ',
+                                data:
+                                    '${innateSpellFrequencyName(entry.key)}: ',
                               ),
                               Expanded(
                                 child: _spellNames(

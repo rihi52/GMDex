@@ -1,0 +1,104 @@
+import 'dart:convert';
+
+import 'package:drift/drift.dart' show Value;
+import 'package:drift/native.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:gmdex/database/database.dart';
+import 'package:gmdex/database/spell_writer.dart';
+import 'package:gmdex/models/spell.dart';
+import 'package:gmdex/models/spell_draft.dart';
+
+void main() {
+  late AppDatabase db;
+
+  setUp(() {
+    db = AppDatabase(NativeDatabase.memory());
+  });
+
+  tearDown(() async {
+    await db.close();
+  });
+
+  test('creates a custom spell and persists editor fields', () async {
+    final id = await saveSpell(db, _draft(name: 'New Spell'));
+    final row = await (db.select(
+      db.spells,
+    )..where((spell) => spell.id.equals(id))).getSingle();
+
+    expect(row.source, 'Custom');
+    expect(row.name, 'New Spell');
+    expect(row.level, 2);
+    expect(Spell.fromRow(row).castingTime, '1 action');
+    expect(Spell.fromRow(row).description, 'A useful spell.');
+  });
+
+  test(
+    'updates in place, retaining source, notes, and unsupported data',
+    () async {
+      final id = await db
+          .into(db.spells)
+          .insert(
+            SpellsCompanion.insert(
+              name: 'Old Spell',
+              source: 'TCE',
+              level: 1,
+              school: 'E',
+              notes: const Value('Keep this note'),
+              data: jsonEncode({
+                'name': 'Old Spell',
+                'source': 'TCE',
+                'level': 1,
+                'school': 'E',
+                'time': [
+                  {'number': 1, 'unit': 'action'},
+                ],
+                'extraMetadata': 'preserve',
+              }),
+            ),
+          );
+
+      await saveSpell(db, _draft(name: 'Updated Spell'), existingId: id);
+      final row = await (db.select(
+        db.spells,
+      )..where((spell) => spell.id.equals(id))).getSingle();
+      final data = jsonDecode(row.data) as Map<String, dynamic>;
+
+      expect(row.source, 'TCE');
+      expect(row.name, 'Updated Spell');
+      expect(row.notes, 'Keep this note');
+      expect(data['extraMetadata'], 'preserve');
+      expect(data['time'], isNotNull);
+      expect(Spell.fromRow(row).duration, '1 minute');
+    },
+  );
+
+  test(
+    'rejects duplicate names and allows copies only with a new name',
+    () async {
+      await saveSpell(db, _draft(name: 'Unique Spell'));
+
+      await expectLater(
+        saveSpell(db, _draft(name: 'Unique Spell')),
+        throwsA(isA<SpellNameTaken>()),
+      );
+
+      final id = await saveSpell(db, _draft(name: 'Unique Spell (Copy)'));
+      final copy = await (db.select(
+        db.spells,
+      )..where((spell) => spell.id.equals(id))).getSingle();
+      expect(copy.source, 'Custom');
+    },
+  );
+}
+
+SpellDraft _draft({required String name}) => SpellDraft(
+  name: name,
+  level: 2,
+  school: 'A',
+  castingTime: '1 action',
+  range: '60 feet',
+  components: 'V, S',
+  duration: '1 minute',
+  description: 'A useful spell.',
+  higherLevel: '',
+);
