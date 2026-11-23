@@ -6,7 +6,7 @@ import 'dart:io';
 
 import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show kIsWeb, visibleForTesting;
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
@@ -18,6 +18,9 @@ late AppDatabase _database;
 
 /// Shared database connection initialized by [initializeDatabase].
 AppDatabase get database => _database;
+
+@visibleForTesting
+void setDatabaseForTesting(AppDatabase db) => _database = db;
 
 /// Resolves and creates the directory used for the SQLite database file.
 Future<Directory> _databaseDirectory() async {
@@ -43,16 +46,17 @@ Future<AppDatabase> _openDatabase() async {
 /// Opens the database and seeds sample players and the bundled bestiary if empty.
 ///
 /// Web builds currently skip initialization because this implementation uses
-/// native file-backed SQLite. Initialization failures are currently swallowed
-/// to preserve the app's existing startup behavior.
+/// native file-backed SQLite. Starter-data initialization failures are currently
+/// swallowed to preserve the app's existing startup behavior.
 Future<void> initializeDatabase() async {
   if (kIsWeb) {
     return;
   }
 
-  try {
-    _database = await _openDatabase();
+  _database = await _openDatabase();
+  await _database.repairBestiaryRechargeTags();
 
+  try {
     // Only seed if the table is empty so we don't duplicate on every launch.
     final existing = await _database.select(_database.players).get();
     if (existing.isEmpty) {

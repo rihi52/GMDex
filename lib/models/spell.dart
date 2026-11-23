@@ -9,6 +9,7 @@ class Spell {
     required this.name,
     required this.source,
     required this.level,
+    required this.isRitual,
     required this.school,
     required this.castingTime,
     required this.range,
@@ -21,6 +22,7 @@ class Spell {
   final String name;
   final String source;
   final String level;
+  final bool isRitual;
   final String school;
   final String castingTime;
   final String range;
@@ -30,10 +32,7 @@ class Spell {
   final String? higherLevel;
 
   factory Spell.fromRow(SpellRow row) {
-    final decoded = jsonDecode(row.data);
-    if (decoded is! Map<String, dynamic>) {
-      throw const FormatException('Spell data must be a JSON object.');
-    }
+    final decoded = _decodeSpellData(row.data);
     final editorData = decoded['_gmdexEditor'];
     final editorFields = editorData is Map<String, dynamic>
         ? editorData
@@ -53,6 +52,7 @@ class Spell {
       name: row.name,
       source: row.source,
       level: levelName,
+      isRitual: _isRitual(decoded),
       school: spellSchoolName(row.school),
       castingTime: editorText(
         'castingTime',
@@ -68,6 +68,21 @@ class Spell {
       higherLevel: higherLevel.isEmpty ? null : higherLevel,
     );
   }
+}
+
+bool spellIsRitual(String data) => _isRitual(_decodeSpellData(data));
+
+Map<String, dynamic> _decodeSpellData(String data) {
+  final decoded = jsonDecode(data);
+  if (decoded is! Map<String, dynamic>) {
+    throw const FormatException('Spell data must be a JSON object.');
+  }
+  return decoded;
+}
+
+bool _isRitual(Map<String, dynamic> data) {
+  final meta = data['meta'];
+  return meta is Map && meta['ritual'] == true;
 }
 
 String _spellLevelName(int level) {
@@ -139,6 +154,8 @@ String _formatComponents(Object? raw) {
   final material = raw['m'];
   if (material == true) {
     parts.add('M');
+  } else if (material is Map && material['text'] is String) {
+    parts.add('M (${material['text']})');
   } else if (material != null && material != false) {
     parts.add('M ($material)');
   }
@@ -175,12 +192,22 @@ String _formatDuration(Object? raw) {
       .join(' or ');
 }
 
+final _spellTagMetadata = RegExp(r'\{@(\w+) ([^|{}]+)\|[^{}]*\}');
+
+String _parseSpellText(String value) {
+  final text = value.replaceAllMapped(
+    _spellTagMetadata,
+    (match) => '{@${match[1]} ${match[2]}}',
+  );
+  return parseEntries([text]).trim();
+}
+
 String _flattenEntries(Object? raw) {
   final parts = <String>[];
 
   void visit(Object? value) {
     if (value is String) {
-      final parsed = parseEntries([value]).trim();
+      final parsed = _parseSpellText(value);
       if (parsed.isNotEmpty) parts.add(parsed);
       return;
     }
@@ -192,7 +219,9 @@ String _flattenEntries(Object? raw) {
     }
     if (value is Map) {
       final name = value['name'];
-      if (name is String && name.isNotEmpty) parts.add('$name:');
+      if (name is String && name.isNotEmpty) {
+        parts.add('${_parseSpellText(name)}:');
+      }
       for (final key in ['entry', 'entries', 'items']) {
         visit(value[key]);
       }

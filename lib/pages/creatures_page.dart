@@ -8,6 +8,7 @@ import 'package:drift/drift.dart' show CustomExpression, OrderingTerm;
 import 'package:gmdex/models/creature.dart';
 import 'package:gmdex/theme/apptheme.dart';
 import 'package:gmdex/components/creature_card.dart';
+import 'package:gmdex/components/multi_select_filter.dart';
 import 'package:gmdex/components/statblock.dart';
 import 'package:gmdex/components/statblock_edit.dart';
 import 'package:gmdex/components/notes_drawer.dart';
@@ -166,19 +167,16 @@ class _BrowseCreatureWidgetState extends State<BrowseCreatureWidget> {
   Creature? _selectedCreature;
   String? searchTerm;
 
+  Set<String> _typeFilter = {};
   // '' = no filter
-  String _typeFilter = '';
   String _sizeFilter = '';
   String _sourceFilter = '';
   String _crMin = ''; // '' = no lower bound
   String _crMax = ''; // '' = no upper bound
 
   int get _activeFilterCount =>
-      [
-        _typeFilter,
-        _sizeFilter,
-        _sourceFilter,
-      ].where((f) => f.isNotEmpty).length +
+      [_sizeFilter, _sourceFilter].where((f) => f.isNotEmpty).length +
+      (_typeFilter.isNotEmpty ? 1 : 0) +
       (_crMin.isNotEmpty || _crMax.isNotEmpty ? 1 : 0);
 
   @override
@@ -210,9 +208,7 @@ class _BrowseCreatureWidgetState extends State<BrowseCreatureWidget> {
   /// Call after _allCreatures has been reassigned. The CR range needs no
   /// check, because its options come from the crToXp table, not the data.
   void _resetStaleFilters() {
-    if (_typeFilter.isNotEmpty && !_types.contains(_typeFilter)) {
-      _typeFilter = '';
-    }
+    _typeFilter.retainAll(_types);
     if (_sizeFilter.isNotEmpty && !_sizes.contains(_sizeFilter)) {
       _sizeFilter = '';
     }
@@ -417,7 +413,7 @@ class _BrowseCreatureWidgetState extends State<BrowseCreatureWidget> {
   /// Opens the filter dialog. The dialog edits local copies, so Cancel
   /// discards changes and Apply commits them to the real filter fields.
   Future<void> _showFilterDialog() async {
-    var type = _typeFilter;
+    var type = Set<String>.of(_typeFilter);
     var size = _sizeFilter;
     var source = _sourceFilter;
     var crMin = _crMin;
@@ -435,11 +431,11 @@ class _BrowseCreatureWidgetState extends State<BrowseCreatureWidget> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  _filterDropdown(
-                    'Type',
-                    type,
-                    _types,
-                    (v) => setLocal(() => type = v),
+                  MultiSelectFilter(
+                    label: 'Type',
+                    selected: type,
+                    options: _types,
+                    onChanged: (v) => setLocal(() => type = v),
                     labelFor: _capitalize,
                   ),
                   _filterDropdown(
@@ -486,7 +482,7 @@ class _BrowseCreatureWidgetState extends State<BrowseCreatureWidget> {
                 textStyle: Theme.of(context).textTheme.labelMedium,
               ),
               onPressed: () => setLocal(() {
-                type = '';
+                type = {};
                 size = '';
                 source = '';
                 crMin = '';
@@ -580,7 +576,7 @@ class _BrowseCreatureWidgetState extends State<BrowseCreatureWidget> {
     final visibleCreatures = _allCreatures.where((c) {
       final matchesName = term.isEmpty || c.name.toLowerCase().contains(term);
       final matchesType =
-          _typeFilter.isEmpty || _baseType(c.type) == _typeFilter;
+          _typeFilter.isEmpty || _typeFilter.contains(_baseType(c.type));
       final matchesSize =
           _sizeFilter.isEmpty || (c.size ?? '').toLowerCase() == _sizeFilter;
       final matchesSource = _sourceFilter.isEmpty || c.source == _sourceFilter;

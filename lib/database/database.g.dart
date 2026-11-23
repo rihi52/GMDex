@@ -3760,6 +3760,19 @@ class $EncounterCreaturesTable extends EncounterCreatures
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _isAllyMeta = const VerificationMeta('isAlly');
+  @override
+  late final GeneratedColumn<bool> isAlly = GeneratedColumn<bool>(
+    'is_ally',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_ally" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   static const VerificationMeta _nameOverrideMeta = const VerificationMeta(
     'nameOverride',
   );
@@ -3797,6 +3810,7 @@ class $EncounterCreaturesTable extends EncounterCreatures
     isUnconscious,
     isTurn,
     isUnmasked,
+    isAlly,
     nameOverride,
   ];
   @override
@@ -3990,6 +4004,12 @@ class $EncounterCreaturesTable extends EncounterCreatures
         isUnmasked.isAcceptableOrUnknown(data['is_unmasked']!, _isUnmaskedMeta),
       );
     }
+    if (data.containsKey('is_ally')) {
+      context.handle(
+        _isAllyMeta,
+        isAlly.isAcceptableOrUnknown(data['is_ally']!, _isAllyMeta),
+      );
+    }
     if (data.containsKey('name_override')) {
       context.handle(
         _nameOverrideMeta,
@@ -4104,6 +4124,10 @@ class $EncounterCreaturesTable extends EncounterCreatures
         DriftSqlType.bool,
         data['${effectivePrefix}is_unmasked'],
       )!,
+      isAlly: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_ally'],
+      )!,
       nameOverride: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}name_override'],
@@ -4143,6 +4167,7 @@ class EncounterCreaturesRow extends DataClass
   final bool isUnconscious;
   final bool isTurn;
   final bool isUnmasked;
+  final bool isAlly;
   final String? nameOverride;
   const EncounterCreaturesRow({
     required this.id,
@@ -4169,6 +4194,7 @@ class EncounterCreaturesRow extends DataClass
     required this.isUnconscious,
     required this.isTurn,
     required this.isUnmasked,
+    required this.isAlly,
     this.nameOverride,
   });
   @override
@@ -4198,6 +4224,7 @@ class EncounterCreaturesRow extends DataClass
     map['is_unconscious'] = Variable<bool>(isUnconscious);
     map['is_turn'] = Variable<bool>(isTurn);
     map['is_unmasked'] = Variable<bool>(isUnmasked);
+    map['is_ally'] = Variable<bool>(isAlly);
     if (!nullToAbsent || nameOverride != null) {
       map['name_override'] = Variable<String>(nameOverride);
     }
@@ -4230,6 +4257,7 @@ class EncounterCreaturesRow extends DataClass
       isUnconscious: Value(isUnconscious),
       isTurn: Value(isTurn),
       isUnmasked: Value(isUnmasked),
+      isAlly: Value(isAlly),
       nameOverride: nameOverride == null && nullToAbsent
           ? const Value.absent()
           : Value(nameOverride),
@@ -4266,6 +4294,7 @@ class EncounterCreaturesRow extends DataClass
       isUnconscious: serializer.fromJson<bool>(json['isUnconscious']),
       isTurn: serializer.fromJson<bool>(json['isTurn']),
       isUnmasked: serializer.fromJson<bool>(json['isUnmasked']),
+      isAlly: serializer.fromJson<bool>(json['isAlly']),
       nameOverride: serializer.fromJson<String?>(json['nameOverride']),
     );
   }
@@ -4297,6 +4326,7 @@ class EncounterCreaturesRow extends DataClass
       'isUnconscious': serializer.toJson<bool>(isUnconscious),
       'isTurn': serializer.toJson<bool>(isTurn),
       'isUnmasked': serializer.toJson<bool>(isUnmasked),
+      'isAlly': serializer.toJson<bool>(isAlly),
       'nameOverride': serializer.toJson<String?>(nameOverride),
     };
   }
@@ -4326,6 +4356,7 @@ class EncounterCreaturesRow extends DataClass
     bool? isUnconscious,
     bool? isTurn,
     bool? isUnmasked,
+    bool? isAlly,
     Value<String?> nameOverride = const Value.absent(),
   }) => EncounterCreaturesRow(
     id: id ?? this.id,
@@ -4352,6 +4383,7 @@ class EncounterCreaturesRow extends DataClass
     isUnconscious: isUnconscious ?? this.isUnconscious,
     isTurn: isTurn ?? this.isTurn,
     isUnmasked: isUnmasked ?? this.isUnmasked,
+    isAlly: isAlly ?? this.isAlly,
     nameOverride: nameOverride.present ? nameOverride.value : this.nameOverride,
   );
   EncounterCreaturesRow copyWithCompanion(EncounterCreaturesCompanion data) {
@@ -4412,6 +4444,7 @@ class EncounterCreaturesRow extends DataClass
       isUnmasked: data.isUnmasked.present
           ? data.isUnmasked.value
           : this.isUnmasked,
+      isAlly: data.isAlly.present ? data.isAlly.value : this.isAlly,
       nameOverride: data.nameOverride.present
           ? data.nameOverride.value
           : this.nameOverride,
@@ -4445,6 +4478,7 @@ class EncounterCreaturesRow extends DataClass
           ..write('isUnconscious: $isUnconscious, ')
           ..write('isTurn: $isTurn, ')
           ..write('isUnmasked: $isUnmasked, ')
+          ..write('isAlly: $isAlly, ')
           ..write('nameOverride: $nameOverride')
           ..write(')'))
         .toString();
@@ -4476,6 +4510,7 @@ class EncounterCreaturesRow extends DataClass
     isUnconscious,
     isTurn,
     isUnmasked,
+    isAlly,
     nameOverride,
   ]);
   @override
@@ -4506,6 +4541,7 @@ class EncounterCreaturesRow extends DataClass
           other.isUnconscious == this.isUnconscious &&
           other.isTurn == this.isTurn &&
           other.isUnmasked == this.isUnmasked &&
+          other.isAlly == this.isAlly &&
           other.nameOverride == this.nameOverride);
 }
 
@@ -4535,6 +4571,7 @@ class EncounterCreaturesCompanion
   final Value<bool> isUnconscious;
   final Value<bool> isTurn;
   final Value<bool> isUnmasked;
+  final Value<bool> isAlly;
   final Value<String?> nameOverride;
   const EncounterCreaturesCompanion({
     this.id = const Value.absent(),
@@ -4561,6 +4598,7 @@ class EncounterCreaturesCompanion
     this.isUnconscious = const Value.absent(),
     this.isTurn = const Value.absent(),
     this.isUnmasked = const Value.absent(),
+    this.isAlly = const Value.absent(),
     this.nameOverride = const Value.absent(),
   });
   EncounterCreaturesCompanion.insert({
@@ -4588,6 +4626,7 @@ class EncounterCreaturesCompanion
     this.isUnconscious = const Value.absent(),
     this.isTurn = const Value.absent(),
     this.isUnmasked = const Value.absent(),
+    this.isAlly = const Value.absent(),
     this.nameOverride = const Value.absent(),
   }) : encounterId = Value(encounterId),
        creatureId = Value(creatureId),
@@ -4618,6 +4657,7 @@ class EncounterCreaturesCompanion
     Expression<bool>? isUnconscious,
     Expression<bool>? isTurn,
     Expression<bool>? isUnmasked,
+    Expression<bool>? isAlly,
     Expression<String>? nameOverride,
   }) {
     return RawValuesInsertable({
@@ -4645,6 +4685,7 @@ class EncounterCreaturesCompanion
       if (isUnconscious != null) 'is_unconscious': isUnconscious,
       if (isTurn != null) 'is_turn': isTurn,
       if (isUnmasked != null) 'is_unmasked': isUnmasked,
+      if (isAlly != null) 'is_ally': isAlly,
       if (nameOverride != null) 'name_override': nameOverride,
     });
   }
@@ -4674,6 +4715,7 @@ class EncounterCreaturesCompanion
     Value<bool>? isUnconscious,
     Value<bool>? isTurn,
     Value<bool>? isUnmasked,
+    Value<bool>? isAlly,
     Value<String?>? nameOverride,
   }) {
     return EncounterCreaturesCompanion(
@@ -4701,6 +4743,7 @@ class EncounterCreaturesCompanion
       isUnconscious: isUnconscious ?? this.isUnconscious,
       isTurn: isTurn ?? this.isTurn,
       isUnmasked: isUnmasked ?? this.isUnmasked,
+      isAlly: isAlly ?? this.isAlly,
       nameOverride: nameOverride ?? this.nameOverride,
     );
   }
@@ -4780,6 +4823,9 @@ class EncounterCreaturesCompanion
     if (isUnmasked.present) {
       map['is_unmasked'] = Variable<bool>(isUnmasked.value);
     }
+    if (isAlly.present) {
+      map['is_ally'] = Variable<bool>(isAlly.value);
+    }
     if (nameOverride.present) {
       map['name_override'] = Variable<String>(nameOverride.value);
     }
@@ -4813,6 +4859,7 @@ class EncounterCreaturesCompanion
           ..write('isUnconscious: $isUnconscious, ')
           ..write('isTurn: $isTurn, ')
           ..write('isUnmasked: $isUnmasked, ')
+          ..write('isAlly: $isAlly, ')
           ..write('nameOverride: $nameOverride')
           ..write(')'))
         .toString();
@@ -13812,6 +13859,7 @@ typedef $$EncounterCreaturesTableCreateCompanionBuilder =
       Value<bool> isUnconscious,
       Value<bool> isTurn,
       Value<bool> isUnmasked,
+      Value<bool> isAlly,
       Value<String?> nameOverride,
     });
 typedef $$EncounterCreaturesTableUpdateCompanionBuilder =
@@ -13840,6 +13888,7 @@ typedef $$EncounterCreaturesTableUpdateCompanionBuilder =
       Value<bool> isUnconscious,
       Value<bool> isTurn,
       Value<bool> isUnmasked,
+      Value<bool> isAlly,
       Value<String?> nameOverride,
     });
 
@@ -14007,6 +14056,11 @@ class $$EncounterCreaturesTableFilterComposer
 
   ColumnFilters<bool> get isUnmasked => $composableBuilder(
     column: $table.isUnmasked,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isAlly => $composableBuilder(
+    column: $table.isAlly,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -14181,6 +14235,11 @@ class $$EncounterCreaturesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get isAlly => $composableBuilder(
+    column: $table.isAlly,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get nameOverride => $composableBuilder(
     column: $table.nameOverride,
     builder: (column) => ColumnOrderings(column),
@@ -14336,6 +14395,9 @@ class $$EncounterCreaturesTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<bool> get isAlly =>
+      $composableBuilder(column: $table.isAlly, builder: (column) => column);
+
   GeneratedColumn<String> get nameOverride => $composableBuilder(
     column: $table.nameOverride,
     builder: (column) => column,
@@ -14445,6 +14507,7 @@ class $$EncounterCreaturesTableTableManager
                 Value<bool> isUnconscious = const Value.absent(),
                 Value<bool> isTurn = const Value.absent(),
                 Value<bool> isUnmasked = const Value.absent(),
+                Value<bool> isAlly = const Value.absent(),
                 Value<String?> nameOverride = const Value.absent(),
               }) => EncounterCreaturesCompanion(
                 id: id,
@@ -14471,6 +14534,7 @@ class $$EncounterCreaturesTableTableManager
                 isUnconscious: isUnconscious,
                 isTurn: isTurn,
                 isUnmasked: isUnmasked,
+                isAlly: isAlly,
                 nameOverride: nameOverride,
               ),
           createCompanionCallback:
@@ -14499,6 +14563,7 @@ class $$EncounterCreaturesTableTableManager
                 Value<bool> isUnconscious = const Value.absent(),
                 Value<bool> isTurn = const Value.absent(),
                 Value<bool> isUnmasked = const Value.absent(),
+                Value<bool> isAlly = const Value.absent(),
                 Value<String?> nameOverride = const Value.absent(),
               }) => EncounterCreaturesCompanion.insert(
                 id: id,
@@ -14525,6 +14590,7 @@ class $$EncounterCreaturesTableTableManager
                 isUnconscious: isUnconscious,
                 isTurn: isTurn,
                 isUnmasked: isUnmasked,
+                isAlly: isAlly,
                 nameOverride: nameOverride,
               ),
           withReferenceMapper: (p0) => p0

@@ -3,6 +3,7 @@ class SpellDraft {
   const SpellDraft({
     required this.name,
     required this.level,
+    required this.isRitual,
     required this.school,
     required this.castingTime,
     required this.range,
@@ -14,6 +15,7 @@ class SpellDraft {
 
   final String name;
   final int level;
+  final bool isRitual;
   final String school;
   final String castingTime;
   final String range;

@@ -25,12 +25,15 @@ void main() {
       await db.close();
       db = AppDatabase(
         NativeDatabase.memory(
-          setup: (sqliteDb) => sqliteDb.execute('PRAGMA user_version = 15'),
+          setup: (sqliteDb) {
+            sqliteDb.execute('CREATE TABLE encounter_creatures (id INTEGER)');
+            sqliteDb.execute('PRAGMA user_version = 15');
+          },
         ),
       );
 
       expect(await db.select(db.spells).get(), isEmpty);
-      expect(db.schemaVersion, 18);
+      expect(db.schemaVersion, 20);
     },
   );
 
@@ -39,6 +42,7 @@ void main() {
     db = AppDatabase(
       NativeDatabase.memory(
         setup: (sqliteDb) {
+          sqliteDb.execute('CREATE TABLE encounter_creatures (id INTEGER)');
           sqliteDb.execute('''
             CREATE TABLE spells (
               id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
@@ -96,6 +100,7 @@ void main() {
     db = AppDatabase(
       NativeDatabase.memory(
         setup: (sqliteDb) {
+          sqliteDb.execute('CREATE TABLE encounter_creatures (id INTEGER)');
           sqliteDb.execute('''
             CREATE TABLE spells (
               id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
@@ -115,7 +120,7 @@ void main() {
     );
 
     expect(await db.select(db.spells).get(), isEmpty);
-    expect(db.schemaVersion, 18);
+    expect(db.schemaVersion, 20);
   });
 
   test(

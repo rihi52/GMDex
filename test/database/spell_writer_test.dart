@@ -33,6 +33,90 @@ void main() {
   });
 
   test(
+    'saves and updates ritual without losing other spell metadata',
+    () async {
+      final id = await db
+          .into(db.spells)
+          .insert(
+            SpellsCompanion.insert(
+              name: 'Ritual Spell',
+              source: 'PHB',
+              level: 2,
+              school: 'A',
+              data: jsonEncode({
+                'meta': {'ritual': true, 'other': 'keep'},
+              }),
+            ),
+          );
+
+      await saveSpell(db, _draft(name: 'Ritual Spell'), existingId: id);
+      var row = await (db.select(
+        db.spells,
+      )..where((spell) => spell.id.equals(id))).getSingle();
+      expect(Spell.fromRow(row).isRitual, isFalse);
+      expect(jsonDecode(row.data)['meta'], {'other': 'keep'});
+
+      await saveSpell(
+        db,
+        _draft(name: 'Ritual Spell', isRitual: true),
+        existingId: id,
+      );
+      row = await (db.select(
+        db.spells,
+      )..where((spell) => spell.id.equals(id))).getSingle();
+      expect(Spell.fromRow(row).isRitual, isTrue);
+      expect(jsonDecode(row.data)['meta'], {'other': 'keep', 'ritual': true});
+    },
+  );
+
+  test('creates ritual and nonritual spells from their drafts', () async {
+    final ritualId = await saveSpell(
+      db,
+      _draft(name: 'Ritual', isRitual: true),
+    );
+    final ordinaryId = await saveSpell(db, _draft(name: 'Ordinary'));
+    final rows = await db.select(db.spells).get();
+    expect(
+      Spell.fromRow(rows.singleWhere((row) => row.id == ritualId)).isRitual,
+      isTrue,
+    );
+    expect(
+      Spell.fromRow(rows.singleWhere((row) => row.id == ordinaryId)).isRitual,
+      isFalse,
+    );
+  });
+
+  test(
+    'does not overwrite invalid imported metadata when enabling ritual',
+    () async {
+      final id = await db
+          .into(db.spells)
+          .insert(
+            SpellsCompanion.insert(
+              name: 'Invalid Metadata',
+              source: 'PHB',
+              level: 2,
+              school: 'A',
+              data: '{"meta":"unexpected"}',
+            ),
+          );
+
+      await expectLater(
+        saveSpell(
+          db,
+          _draft(name: 'Invalid Metadata', isRitual: true),
+          existingId: id,
+        ),
+        throwsFormatException,
+      );
+      final row = await (db.select(
+        db.spells,
+      )..where((spell) => spell.id.equals(id))).getSingle();
+      expect(jsonDecode(row.data)['meta'], 'unexpected');
+    },
+  );
+
+  test(
     'updates in place, retaining source, notes, and unsupported data',
     () async {
       final id = await db
@@ -91,9 +175,10 @@ void main() {
   );
 }
 
-SpellDraft _draft({required String name}) => SpellDraft(
+SpellDraft _draft({required String name, bool isRitual = false}) => SpellDraft(
   name: name,
   level: 2,
+  isRitual: isRitual,
   school: 'A',
   castingTime: '1 action',
   range: '60 feet',

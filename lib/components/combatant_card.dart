@@ -19,6 +19,7 @@ class BuildCombatantCard extends StatelessWidget {
   final VoidCallback onDelete;
   final ValueChanged<int>? onQuantityChanged;
   final ValueChanged<bool>? onMaskedChanged;
+  final ValueChanged<bool>? onAllyChanged;
 
   final Combatant combatant;
 
@@ -31,6 +32,7 @@ class BuildCombatantCard extends StatelessWidget {
     required this.onDelete,
     this.onQuantityChanged,
     this.onMaskedChanged,
+    this.onAllyChanged,
   });
 
   @override
@@ -48,8 +50,12 @@ class BuildCombatantCard extends StatelessWidget {
               ? 2
               : AppSpacing.spacingMedium,
         ),
-        tileColor: isCreature ? AppColors.creatureCard : AppColors.playerCard,
-        selectedTileColor: AppColors.cardSelected,
+        tileColor: isCreature
+            ? (combatant.isAlly ? AppColors.cardAllyFill : AppColors.creatureCard)
+            : AppColors.playerCard,
+        selectedTileColor: isCreature && combatant.isAlly
+            ? AppColors.cardAllyFill
+            : AppColors.cardSelected,
         selectedColor: AppColors.accent,
         subtitle: Column(
           children: [
@@ -85,7 +91,7 @@ class BuildCombatantCard extends StatelessWidget {
                     height: ResponsiveLayout.isMobilePlatform ? 45 : 60,
                     child: TextFormField(
                       maxLines: 1,
-                      initialValue: combatant.initiative.toString(),
+                      initialValue: combatant.initiative?.toString() ?? '',
                       keyboardType: TextInputType.number,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       style: Theme.of(context).textTheme.labelSmall,
@@ -94,12 +100,18 @@ class BuildCombatantCard extends StatelessWidget {
                         labelText: 'Init',
                         labelStyle: Theme.of(context).textTheme.labelSmall,
                       ),
-                      validator: (value) =>
-                          (value == null || value.trim().isEmpty)
-                          ? 'Initiative is required'
-                          : null,
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Initiative is required';
+                        }
+                        return int.tryParse(value) == null
+                            ? 'Invalid initiative'
+                            : null;
+                      },
+                      onChanged: (value) =>
+                          combatant.initiative = int.tryParse(value),
                       onSaved: (value) =>
-                          combatant.initiative = int.tryParse(value!) ?? 0,
+                          combatant.initiative = int.tryParse(value ?? ''),
                     ),
                   ),
                 ),
@@ -150,20 +162,27 @@ class BuildCombatantCard extends StatelessWidget {
                 ),
               ],
             ),
-            if (isCreature && supportsMultiViewPlatform)
+            if (isCreature)
               Row(
                 children: [
-                  Checkbox(
-                    value: !combatant.isUnmasked,
-                    visualDensity: VisualDensity.compact,
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    onChanged: (masked) {
-                      if (masked == null) return;
-                      combatant.isUnmasked = !masked;
-                      onMaskedChanged?.call(masked);
-                    },
-                  ),
-                  const Text('Masked'),
+                  if (supportsMultiViewPlatform) ...[
+                    Checkbox(
+                      key: const ValueKey('combatant-masked-checkbox'),
+                      value: !combatant.isUnmasked,
+                      visualDensity: VisualDensity.compact,
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      onChanged: (masked) {
+                        if (masked == null) return;
+                        combatant.isUnmasked = !masked;
+                        onMaskedChanged?.call(masked);
+                      },
+                    ),
+                    const Text('Masked'),
+                  ],
+                  _allyControl(combatant, (ally) {
+                    combatant.isAlly = ally;
+                    onAllyChanged?.call(ally);
+                  }),
                 ],
               ),
             _CombatantStatusSection(combatant: combatant),
@@ -172,6 +191,24 @@ class BuildCombatantCard extends StatelessWidget {
       ),
     );
   }
+}
+
+Widget _allyControl(Combatant combatant, ValueChanged<bool> onChanged) {
+  return Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Checkbox(
+        key: const ValueKey('combatant-ally-checkbox'),
+        value: combatant.isAlly,
+        visualDensity: VisualDensity.compact,
+        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        onChanged: (value) {
+          if (value != null) onChanged(value);
+        },
+      ),
+      const Text('Ally'),
+    ],
+  );
 }
 
 const statuses = {
@@ -433,6 +470,11 @@ class _RunCombatantCardState extends State<RunCombatantCard> {
     super.dispose();
   }
 
+  void _setAlly(bool ally) {
+    setState(() => widget.combatant.isAlly = ally);
+    widget.onCombatantChanged?.call();
+  }
+
   void _normalizeHitPoints() {
     // Resolve a valid expression to one integer before storing it in combat.
     final value = _evaluateHitPointExpression(_hitPointsController.text);
@@ -470,9 +512,13 @@ class _RunCombatantCardState extends State<RunCombatantCard> {
           visualDensity: const VisualDensity(vertical: -1),
           minVerticalPadding: 0,
           tileColor: widget.isCreature
-              ? AppColors.creatureCard
+              ? (widget.combatant.isAlly
+                    ? AppColors.cardAllyFill
+                    : AppColors.creatureCard)
               : AppColors.playerCard,
-          selectedTileColor: AppColors.cardSelected,
+          selectedTileColor: widget.isCreature && widget.combatant.isAlly
+              ? AppColors.cardAllyFill
+              : AppColors.cardSelected,
           selectedColor: AppColors.accent,
           shape: RoundedRectangleBorder(
             side: BorderSide(
@@ -582,6 +628,7 @@ class _RunCombatantCardState extends State<RunCombatantCard> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Checkbox(
+                              key: const ValueKey('combatant-masked-checkbox'),
                               value: !widget.combatant.isUnmasked,
                               visualDensity: VisualDensity.compact,
                               materialTapTargetSize:
@@ -651,7 +698,8 @@ class _RunCombatantCardState extends State<RunCombatantCard> {
                   ),
                 ],
               ),
-
+              if (widget.isCreature)
+                Row(children: [_allyControl(widget.combatant, _setAlly)]),
               _CombatantStatusSection(
                 combatant: widget.combatant,
                 onChanged: widget.onCombatantChanged,

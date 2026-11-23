@@ -13,6 +13,7 @@ class PlayerViewRow {
     required this.initiative,
     required this.isActive,
     this.isCreature = false,
+    this.isAlly = false,
     this.currentHitPoints = 0,
     this.maxHitPoints = 0,
     this.conditions = const [],
@@ -22,6 +23,7 @@ class PlayerViewRow {
   final int? initiative;
   final bool isActive;
   final bool isCreature;
+  final bool isAlly;
   final int currentHitPoints;
   final int maxHitPoints;
   final List<String> conditions;
@@ -55,6 +57,7 @@ class PlayerViewRow {
       initiative: combatant.initiative,
       isActive: combatant.isTurn,
       isCreature: !combatant.isPlayer,
+      isAlly: combatant.isAlly,
       currentHitPoints: combatant.currentHitPoints ?? combatant.maxHitPoints,
       maxHitPoints: combatant.maxHitPoints,
       conditions: List.unmodifiable(conditions),
@@ -171,7 +174,7 @@ class _PlayerViewTile extends StatelessWidget {
       builder: (context, constraints) {
         final compact = constraints.maxWidth < 480;
         final backgroundColor = row.isCreature
-            ? AppColors.creatureCard
+            ? (row.isAlly ? AppColors.cardAllyFill : AppColors.creatureCard)
             : AppColors.playerCard;
         return Container(
           margin: const EdgeInsets.symmetric(vertical: AppSpacing.spacingSmall),

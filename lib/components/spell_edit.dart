@@ -25,6 +25,7 @@ class _SpellEditState extends State<SpellEdit> {
   final _formKey = GlobalKey<FormState>();
   late String _name;
   late int _level;
+  late bool _isRitual;
   late String _school;
   late String _castingTime;
   late String _range;
@@ -51,6 +52,7 @@ class _SpellEditState extends State<SpellEdit> {
     final details = row == null ? null : Spell.fromRow(row);
     _name = row?.name ?? '';
     _level = row?.level ?? 0;
+    _isRitual = details?.isRitual ?? false;
     _school = row?.school ?? 'A';
     _castingTime = details?.castingTime ?? '';
     _range = details?.range ?? '';
@@ -67,6 +69,7 @@ class _SpellEditState extends State<SpellEdit> {
       SpellDraft(
         name: _name.trim(),
         level: _level,
+        isRitual: _isRitual,
         school: _school,
         castingTime: _castingTime.trim(),
         range: _range.trim(),
@@ -99,15 +102,38 @@ class _SpellEditState extends State<SpellEdit> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Align(
-                alignment: Alignment.centerLeft,
-                child: ElevatedButton(
-                  onPressed: _submit,
-                  child: Text(
-                    widget.isEditing ? 'Save' : 'Create',
-                    style: Theme.of(context).textTheme.bodyMedium,
+              Row(
+                children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: ElevatedButton(
+                      onPressed: _submit,
+                      child: Text(
+                        widget.isEditing ? 'Save' : 'Create',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ),
                   ),
-                ),
+                  Row(
+                    children: [
+                      SizedBox(width: 50,),
+                      SizedBox(
+                        width: 50,
+                        child: RitualCheckbox(
+                          initialValue: _isRitual,
+                          onChanged: (value) => _isRitual = value,
+                        ),
+                      ),
+                      SizedBox(
+                        width: 100,
+                        child: Text(
+                          'Ritual',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
               const SizedBox(height: AppSpacing.spacingMedium),
               TextFormField(
@@ -126,7 +152,10 @@ class _SpellEditState extends State<SpellEdit> {
               const SizedBox(height: AppSpacing.spacingSmall),
               DropdownButtonFormField<int>(
                 // initialValue: _level,
-                hint: Text('Spell Level', style: Theme.of(context).textTheme.bodySmall,),
+                hint: Text(
+                  'Spell Level',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
                 decoration: InputDecoration(
                   border: OutlineInputBorder(),
                   labelText: 'Level',
@@ -136,7 +165,10 @@ class _SpellEditState extends State<SpellEdit> {
                   for (var level = 0; level <= 9; level++)
                     DropdownMenuItem(
                       value: level,
-                      child: Text(level == 0 ? 'Cantrip' : 'Level $level', style: Theme.of(context).textTheme.bodyMedium,),
+                      child: Text(
+                        level == 0 ? 'Cantrip' : 'Level $level',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
                     ),
                 ],
                 selectedItemBuilder: (context) => [
@@ -154,7 +186,10 @@ class _SpellEditState extends State<SpellEdit> {
               const SizedBox(height: AppSpacing.spacingSmall),
               DropdownButtonFormField<String>(
                 // initialValue: _school,
-                hint: Text('Spell School', style: Theme.of(context).textTheme.bodySmall,),
+                hint: Text(
+                  'Spell School',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
                 decoration: InputDecoration(
                   border: const OutlineInputBorder(),
                   labelText: 'School',
@@ -166,12 +201,18 @@ class _SpellEditState extends State<SpellEdit> {
                   if (!_schools.containsKey(_school))
                     DropdownMenuItem(
                       value: _school,
-                      child: Text(spellSchoolName(_school), style: Theme.of(context).textTheme.bodyMedium,),
+                      child: Text(
+                        spellSchoolName(_school),
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
                     ),
                   for (final entry in _schools.entries)
                     DropdownMenuItem(
                       value: entry.key,
-                      child: Text(entry.value, style: Theme.of(context).textTheme.bodyMedium,),
+                      child: Text(
+                        entry.value,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
                     ),
                 ],
                 selectedItemBuilder: (context) => [
@@ -249,6 +290,48 @@ class _SpellEditState extends State<SpellEdit> {
         ),
         onSaved: onSaved,
       ),
+    );
+  }
+}
+
+class RitualCheckbox extends StatefulWidget {
+  const RitualCheckbox({
+    super.key,
+    required this.initialValue,
+    required this.onChanged,
+  });
+
+  final bool initialValue;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  State<RitualCheckbox> createState() => _RitualCheckboxState();
+}
+
+class _RitualCheckboxState extends State<RitualCheckbox> {
+  late bool _checked;
+
+  @override
+  void initState() {
+    super.initState();
+    _checked = widget.initialValue;
+  }
+
+  bool get checked => _checked;
+
+  @override
+  Widget build(BuildContext context) {
+    return Checkbox(
+      activeColor: AppColors.primary,
+      checkColor: Colors.white,
+      value: _checked,
+      onChanged: (bool? value) {
+        if (value == null) return;
+        setState(() {
+          _checked = value;
+        });
+        widget.onChanged(_checked);
+      },
     );
   }
 }

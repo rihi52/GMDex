@@ -79,6 +79,7 @@ void main() {
             initiative: 12,
             quantity: 1,
             isPoisoned: true,
+            isAlly: true,
           ),
         ],
       ),
@@ -131,6 +132,15 @@ void main() {
     expect(encounterCreatures.single.currentHitpoints, 5);
     expect(encounterCreatures.single.isPoisoned, isTrue);
     expect(encounterCreatures.single.isTurn, isTrue);
+    expect(encounterCreatures.single.isAlly, isTrue);
+
+    decoded['databaseSchemaVersion'] = 19;
+    ((tables['encounter_creatures'] as List).single as Map).remove('is_ally');
+    await importDatabaseBackupJson(db, jsonEncode(decoded));
+    expect(
+      (await db.select(db.encounterCreatures).getSingle()).isAlly,
+      isFalse,
+    );
   });
 
   test('requires confirmation before replacing a newer database', () async {

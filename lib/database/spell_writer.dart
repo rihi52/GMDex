@@ -57,6 +57,18 @@ Future<int> saveSpell(
     final data = existing == null
         ? <String, dynamic>{}
         : jsonDecode(existing.data) as Map<String, dynamic>;
+    final meta = data['meta'];
+    if (meta == null) {
+      if (draft.isRitual) data['meta'] = {'ritual': true};
+    } else if (meta is Map<String, dynamic>) {
+      if (draft.isRitual) {
+        meta['ritual'] = true;
+      } else {
+        meta.remove('ritual');
+      }
+    } else if (draft.isRitual) {
+      throw const FormatException('Spell metadata must be a JSON object.');
+    }
     data
       ..['name'] = name
       ..['source'] = source

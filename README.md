@@ -19,6 +19,7 @@ GMDex is a tool to help GM's of Dungeons and Dragons 5th Edition manage their ta
 
 - Encounter building
   - The database includes all SRD creatures, and you can add your own. All creatures can be added to an encounter
+  - Filter creatures by one or more types
   - Add conditions in the encounter builder
   - Set intiative ahead of time
   - Up the quantity on a creature for multiple of the same creature to move on the same initiative or add multiple of the same creature for different initiative per creature
@@ -27,7 +28,9 @@ GMDex is a tool to help GM's of Dungeons and Dragons 5th Edition manage their ta
   - Add any notes you have for the encounter directly to it
 - Bestiary
   - All SRD creatures are included, and you can import your own using the specified json format
+  - Filter creatures by one or more types
   - Create your own custom creatures in the app
+  - Add a prefilled Multiattack action using the creature editor checkbox
   - Copy and edit all creatures in the app, official and custom creatures
   - Edit leveled spells and slots under Spellcasting, and at-will or daily spells under Innate Spellcasting. Add daily frequencies using the dropdown and separate spell names with commas.
   - Add creature specific notes to any creature
@@ -42,7 +45,9 @@ GMDex is a tool to help GM's of Dungeons and Dragons 5th Edition manage their ta
   - Players can be edited, copied, and created new
 - Spells
   - All SRD spells are included, and you can import your own using the specified json format
+  - Filter spells by one or more schools or show only ritual spells
   - Create new custom spells
+  - Set or remove the ritual tag when creating, copying, or editing a spell
   - Can be pulled up from a creature's statblock in the database or in an encounter
   - Newly created creatures with spells will be linked to database spells if they exist
 
@@ -69,7 +74,7 @@ To update, follow the same steps as to install and overwrite all of the old file
 
  1. Download GMDex-linux-x86_64_vX_X_X.tar.gz
  2. Extract the files to a location of your choice
- 3. Execute the file named GMDex
+ 3. Execute the file named GMDex or run install.sh to install the app
 To update, just replace all of the old files. Your database will be preserved.
 My testing has been on Ubuntu 24.04.5 LTS
 
@@ -80,6 +85,8 @@ Instructions to come pending me gaining access to a Mac device
 ## Database backups
 
 Use **Export Entire Database** in Settings to create a portable JSON backup named with its export date (`YYYYMMDD`), and **Import Entire Database** to replace the current local data from that backup. The backup includes players, creatures, encounters, notes, and all related records. Importing replaces all current database records; export a backup before importing if you may need to restore them. If a backup's export time is older than the current database snapshot time, the app displays both times and asks for confirmation before replacing data.
+
+On startup and when restoring a backup, the app automatically replaces bare `{@recharge}` tags left by older bestiary imports with `Recharge 6` in bestiary display fields. Notes and original spell data are unchanged.
 
 Database backups can be moved from platform to platform. For example, I use the windows, linux, and android version. When I am done working in one version, I export the entire database and upload it to my google drive. I then download that to the next device I use GMDex on and import the database.
 

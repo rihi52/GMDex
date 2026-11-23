@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gmdex/models/combat.dart';
 import 'package:gmdex/pages/player_face_combat.dart';
+import 'package:gmdex/theme/apptheme.dart';
 
 void main() {
   testWidgets('player initiative view rebuilds from shared combat updates', (
@@ -104,5 +105,59 @@ void main() {
     final activeRowRect = tester.getRect(find.text('Combatant 19'));
     expect(activeRowRect.top, greaterThanOrEqualTo(listRect.top));
     expect(activeRowRect.bottom, lessThanOrEqualTo(listRect.bottom));
+  });
+
+  testWidgets('active allies retain the active-turn highlight', (tester) async {
+    final ally = Combatant(
+      name: 'Goblin',
+      isPlayer: false,
+      maxHitPoints: 7,
+      initiative: 9,
+      quantity: 1,
+      isAlly: true,
+      isTurn: true,
+    );
+    final player = Combatant(
+      name: 'Ravi',
+      isPlayer: true,
+      maxHitPoints: 20,
+      initiative: 10,
+      quantity: 1,
+      isAlly: true,
+    );
+    updatePlayerFacingCombat([
+      PlayerViewRow.fromCombatant(ally, maskedName: 'Enemy 1'),
+      PlayerViewRow.fromCombatant(player),
+    ]);
+    addTearDown(() => updatePlayerFacingCombat(const []));
+    await tester.pumpWidget(const MaterialApp(home: PlayerFacingCombatPage()));
+
+    BoxDecoration decorationFor(String name) {
+      final tile = find.ancestor(
+        of: find.text(name),
+        matching: find.byWidgetPredicate(
+          (widget) =>
+              widget is Container &&
+              widget.decoration is BoxDecoration &&
+              (widget.decoration as BoxDecoration).border != null,
+        ),
+      );
+      return tester.widget<Container>(tile.first).decoration! as BoxDecoration;
+    }
+
+    final allyDecoration = decorationFor('Enemy 1');
+    expect(
+      allyDecoration.color,
+      Color.alphaBlend(
+        Colors.white.withValues(alpha: 0.3),
+        AppColors.cardAllyFill,
+      ),
+    );
+    expect(
+      (allyDecoration.border! as Border).top.color,
+      AppColors.cardHighlight,
+    );
+    expect(decorationFor('Ravi').color, AppColors.playerCard);
+    expect(find.text('Goblin'), findsNothing);
   });
 }

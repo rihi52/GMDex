@@ -229,6 +229,7 @@ Future<DatabaseBackupImportResult> importDatabaseBackupJson(
         );
       }
     }
+    await db.repairBestiaryRechargeTags();
     await db.recordDatabaseImport(exportedAt);
   });
 

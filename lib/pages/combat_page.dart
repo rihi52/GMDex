@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:drift/drift.dart' show OrderingTerm;
 import 'package:gmdex/theme/apptheme.dart';
 import 'package:gmdex/components/creature_card.dart';
+import 'package:gmdex/components/multi_select_filter.dart';
 import 'package:gmdex/components/player_card.dart';
 import 'package:gmdex/components/responsive_layout.dart';
 import 'package:gmdex/models/combat.dart';
@@ -43,12 +44,13 @@ class _EncounterBuildPageState extends State<EncounterBuildPage> {
   int? _selectedId; // creature id, so the highlight survives filtering
   String? playerSearchTerm;
   String? creatureSearchTerm;
-  String _typeFilter = '';
+  Set<String> _typeFilter = {};
   String _sizeFilter = '';
   String _sourceFilter = '';
   String _crMin = '';
   String _crMax = '';
   late Encounter currentEncounter;
+  Future<void>? _defaultNameLoad;
 
   double searchBarWidth = 275;
   double buttonWidth = 75;
@@ -79,7 +81,25 @@ class _EncounterBuildPageState extends State<EncounterBuildPage> {
             encounterNotes: initialEncounter.encounterNotes,
             hasStarted: widget.isCopy ? false : initialEncounter.hasStarted,
           );
+    if (initialEncounter == null) {
+      _defaultNameLoad = _loadDefaultName();
+    }
     _loadData();
+  }
+
+  Future<void> _loadDefaultName() async {
+    final name = database.encounters.name;
+    final query = database.selectOnly(database.encounters)..addColumns([name]);
+    final existingNames = (await query.get()).map((row) => row.read(name)).toSet();
+    var number = 1;
+    while (existingNames.contains('Encounter $number')) {
+      number++;
+    }
+    currentEncounter = Encounter(
+      name: 'Encounter $number',
+      currentTurnIndex: 0,
+      combatants: [],
+    );
   }
 
   Future<void> _loadData() async {
@@ -99,11 +119,8 @@ class _EncounterBuildPageState extends State<EncounterBuildPage> {
   }
 
   int get _activeCreatureFilterCount =>
-      [
-        _typeFilter,
-        _sizeFilter,
-        _sourceFilter,
-      ].where((filter) => filter.isNotEmpty).length +
+      [_sizeFilter, _sourceFilter].where((filter) => filter.isNotEmpty).length +
+      (_typeFilter.isNotEmpty ? 1 : 0) +
       (_crMin.isNotEmpty || _crMax.isNotEmpty ? 1 : 0);
 
   String _baseType(String? raw) =>
@@ -156,9 +173,7 @@ class _EncounterBuildPageState extends State<EncounterBuildPage> {
   List<String> get _challengeRatings => crToXp.keys.toList();
 
   void _resetStaleCreatureFilters() {
-    if (_typeFilter.isNotEmpty && !_creatureTypes.contains(_typeFilter)) {
-      _typeFilter = '';
-    }
+    _typeFilter.retainAll(_creatureTypes);
     if (_sizeFilter.isNotEmpty && !_creatureSizes.contains(_sizeFilter)) {
       _sizeFilter = '';
     }
@@ -222,7 +237,7 @@ class _EncounterBuildPageState extends State<EncounterBuildPage> {
   }
 
   Future<void> _showCreatureFilterDialog() async {
-    var type = _typeFilter;
+    var type = Set<String>.of(_typeFilter);
     var size = _sizeFilter;
     var source = _sourceFilter;
     var crMin = _crMin;
@@ -240,11 +255,11 @@ class _EncounterBuildPageState extends State<EncounterBuildPage> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  _creatureFilterDropdown(
-                    'Type',
-                    type,
-                    _creatureTypes,
-                    (value) => setLocal(() => type = value),
+                  MultiSelectFilter(
+                    label: 'Type',
+                    selected: type,
+                    options: _creatureTypes,
+                    onChanged: (value) => setLocal(() => type = value),
                     labelFor: _capitalize,
                   ),
                   _creatureFilterDropdown(
@@ -291,7 +306,7 @@ class _EncounterBuildPageState extends State<EncounterBuildPage> {
                 textStyle: Theme.of(context).textTheme.labelMedium,
               ),
               onPressed: () => setLocal(() {
-                type = '';
+                type = {};
                 size = '';
                 source = '';
                 crMin = '';
@@ -423,11 +438,25 @@ class _EncounterBuildPageState extends State<EncounterBuildPage> {
     );
   }
 
-  Future<void> _start() async {
+  bool _saveForm() {
     final form = _formKey.currentState;
-    if (form == null || !form.validate()) return;
-
+    if (form == null || !form.validate()) return false;
+    if (currentEncounter.combatants.any(
+      (combatant) => combatant.initiative == null,
+    )) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Enter a valid initiative for every combatant.'),
+        ),
+      );
+      return false;
+    }
     form.save();
+    return true;
+  }
+
+  Future<void> _start() async {
+    if (!_saveForm()) return;
 
     final encounterToRun = Encounter(
       id: currentEncounter.id,
@@ -468,8 +497,7 @@ class _EncounterBuildPageState extends State<EncounterBuildPage> {
   }
 
   Future<void> _save() async {
-    if (!_formKey.currentState!.validate()) return;
-    _formKey.currentState!.save();
+    if (!_saveForm()) return;
     final messenger = ScaffoldMessenger.of(context);
     try {
       final savedId = await saveEncounter(
@@ -511,7 +539,7 @@ class _EncounterBuildPageState extends State<EncounterBuildPage> {
       final matchesName =
           term.isEmpty || creature.name.toLowerCase().contains(term);
       final matchesType =
-          _typeFilter.isEmpty || _baseType(creature.type) == _typeFilter;
+          _typeFilter.isEmpty || _typeFilter.contains(_baseType(creature.type));
       final matchesSize =
           _sizeFilter.isEmpty ||
           (creature.size ?? '').toLowerCase() == _sizeFilter;
@@ -634,6 +662,7 @@ class _EncounterBuildPageState extends State<EncounterBuildPage> {
           combatant: combatant,
           onQuantityChanged: (_) => setState(() {}),
           onMaskedChanged: (_) => setState(() {}),
+          onAllyChanged: (_) => setState(() {}),
           onDelete: () =>
               setState(() => currentEncounter.combatants.remove(combatant)),
         );
@@ -717,6 +746,32 @@ class _EncounterBuildPageState extends State<EncounterBuildPage> {
 
   @override
   Widget build(BuildContext context) {
+    final defaultNameLoad = _defaultNameLoad;
+    if (defaultNameLoad != null) {
+      return FutureBuilder<void>(
+        future: defaultNameLoad,
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return Scaffold(
+              appBar: AppBar(),
+              body: Center(
+                child: Text('Could not load encounter names: ${snapshot.error}'),
+              ),
+            );
+          }
+          if (snapshot.connectionState != ConnectionState.done) {
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
+          }
+          return _buildLayout(context);
+        },
+      );
+    }
+    return _buildLayout(context);
+  }
+
+  Widget _buildLayout(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
         return ResponsiveLayout.isWide(

@@ -33,6 +33,11 @@ class _StatblockEditorForm extends State<StatblockEditorForm> {
   final _formKey = GlobalKey<FormState>();
 
   late final CreatureDraft _draft;
+  late final TextEditingController _nameController;
+  final _multiattackDescriptionController = TextEditingController();
+  CreatureActionDraft? _multiattackAction;
+  CreatureActionDraft? _generatedMultiattackAction;
+  String? _generatedMultiattackDescription;
   bool isStrChecked = false;
   bool isDexChecked = false;
   bool isConChecked = false;
@@ -229,6 +234,67 @@ class _StatblockEditorForm extends State<StatblockEditorForm> {
             {},
       ),
     );
+    _nameController = TextEditingController(
+      text: widget.creature == null
+          ? ''
+          : widget.isEditing
+          ? widget.creature!.name
+          : '${widget.creature!.name} (Copy)',
+    )..addListener(_updateMultiattackDescription);
+    _multiattackAction = _draft.actions!
+        .where(
+          (action) =>
+              action.type == ActionType.action &&
+              action.name.trim().toLowerCase() == 'multiattack',
+        )
+        .firstOrNull;
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _multiattackDescriptionController.dispose();
+    super.dispose();
+  }
+
+  String _multiattackDescription() {
+    final name = _nameController.text.trim();
+    return 'The ${name.isEmpty ? 'NAME' : name} makes two attacks, '
+        'two ATTACK attacks, or one of each.';
+  }
+
+  void _updateMultiattackDescription() {
+    if (_generatedMultiattackAction == null ||
+        _multiattackDescriptionController.text !=
+            _generatedMultiattackDescription) {
+      return;
+    }
+    final description = _multiattackDescription();
+    _generatedMultiattackDescription = description;
+    _multiattackDescriptionController.text = description;
+  }
+
+  void _setMultiattack(bool enabled) {
+    setState(() {
+      if (enabled) {
+        final description = _multiattackDescription();
+        final action = CreatureActionDraft(
+          name: 'Multiattack',
+          description: description,
+          type: ActionType.action,
+        );
+        _draft.actions!.add(action);
+        _multiattackAction = action;
+        _generatedMultiattackAction = action;
+        _generatedMultiattackDescription = description;
+        _multiattackDescriptionController.text = description;
+      } else {
+        _draft.actions!.remove(_multiattackAction);
+        _multiattackAction = null;
+        _generatedMultiattackAction = null;
+        _generatedMultiattackDescription = null;
+      }
+    });
   }
 
   void _addTrait() {
@@ -338,11 +404,7 @@ class _StatblockEditorForm extends State<StatblockEditorForm> {
               // ),
               StatblockSection(
                 child: TextFormField(
-                  initialValue: c == null
-                      ? null
-                      : widget.isEditing
-                      ? c.name
-                      : '${c.name} (Copy)',
+                  controller: _nameController,
                   style: Theme.of(context).textTheme.titleLarge,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(),
@@ -1231,14 +1293,33 @@ class _StatblockEditorForm extends State<StatblockEditorForm> {
                             ),
                           ),
                         ),
-                        SizedBox(
-                          height: 50,
-                          child: Center(
-                            child: Text(
-                              'Actions',
-                              style: Theme.of(context).textTheme.titleMedium,
+                        Row(
+                          children: [
+                            SizedBox(
+                              height: 50,
+                              child: Center(
+                                child: Text(
+                                  'Actions',
+                                  style: Theme.of(context).textTheme.titleMedium,
+                                ),
+                              ),
                             ),
-                          ),
+                            SizedBox(width: 50,),
+                            SizedBox(
+                              width: 50,
+                              child: StatblockCheckbox(
+                                initialValue: _multiattackAction != null,
+                                onChanged: _setMultiattack,
+                              ),
+                            ),
+                            SizedBox(
+                              width: 125,
+                              child: Text(
+                                'Multiattack',
+                                style: Theme.of(context).textTheme.titleMedium,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -1247,6 +1328,7 @@ class _StatblockEditorForm extends State<StatblockEditorForm> {
                       final action = entry.value;
 
                       return Column(
+                        key: ObjectKey(action),
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           StatblockEditSmallText(
@@ -1276,11 +1358,18 @@ class _StatblockEditorForm extends State<StatblockEditorForm> {
                           StatblockEditSmallText(
                             labelText: 'Description',
                             startingValue: action.description,
+                            controller: identical(
+                              action,
+                              _generatedMultiattackAction,
+                            )
+                                ? _multiattackDescriptionController
+                                : null,
                             onSaved: (value) =>
                                 _draft.actions![index].description = value,
                             maxLines: 4,
                           ),
                           const SizedBox(height: AppSpacing.spacingMedium),
+                          HorizontalDivider(),
                         ],
                       );
                     }),
@@ -1315,6 +1404,7 @@ class StatblockEditSmallText extends StatelessWidget {
     this.inputFormatters,
     this.width,
     this.maxLines,
+    this.controller,
   });
 
   final String labelText;
@@ -1325,6 +1415,7 @@ class StatblockEditSmallText extends StatelessWidget {
   final List<TextInputFormatter>? inputFormatters;
   final double? width;
   final int? maxLines;
+  final TextEditingController? controller;
 
   @override
   Widget build(BuildContext context) {
@@ -1337,7 +1428,8 @@ class StatblockEditSmallText extends StatelessWidget {
         ),
         child: TextFormField(
           maxLines: maxLines,
-          initialValue: startingValue,
+          initialValue: controller == null ? startingValue : null,
+          controller: controller,
           keyboardType: keyboardType,
           inputFormatters: inputFormatters,
           style: Theme.of(context).textTheme.labelSmall,

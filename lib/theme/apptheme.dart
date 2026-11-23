@@ -21,6 +21,7 @@ class AppColors {
   static const Color creatureCard = Color.fromARGB(255, 189, 109, 109);
   static const Color cardHighlight = Color.fromARGB(255, 0, 255, 0);
   static const Color cardHighlightFill = Color.fromARGB(255, 255, 0, 0);
+  static const Color cardAllyFill = Color.fromARGB(197, 38, 131, 236);
 
   AppColors._(); // Private constructor to prevent instantiation
 }

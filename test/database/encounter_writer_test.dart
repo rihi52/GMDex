@@ -56,6 +56,7 @@ void main() {
           exhaustionLevel: 3,
           isRestrained: true,
           isUnmasked: true,
+          isAlly: true,
         ),
       ],
     );
@@ -87,6 +88,7 @@ void main() {
       expect(savedCreature.exhaustionLevel, 3);
       expect(savedCreature.isRestrained, isTrue);
       expect(savedCreature.isUnmasked, isTrue);
+      expect(savedCreature.isAlly, isTrue);
       expect(savedCreature.nameOverride, 'Goblin Captain');
     }
 
@@ -101,6 +103,7 @@ void main() {
       expect(creature.exhaustionLevel, 3);
       expect(creature.isRestrained, isTrue);
       expect(creature.isUnmasked, isTrue);
+      expect(creature.isAlly, isTrue);
       expect(creature.name, 'Goblin Captain');
     }
     expect(
@@ -269,6 +272,7 @@ void main() {
     );
     expect(creatureLinks.map((link) => link.initiative), everyElement(8));
     expect(creatureLinks.map((link) => link.currentHitpoints), everyElement(7));
+    expect(creatureLinks.map((link) => link.isAlly), everyElement(false));
 
     final loadedEncounter = await loadEncounter(db, id);
     expect(loadedEncounter!.combatants, hasLength(2));
@@ -482,6 +486,7 @@ void main() {
         expect(creature.creatureId, 1);
         expect(creature.initiative, 9);
         expect(creature.currentHitpoints, 11);
+        expect(creature.isAlly, isFalse);
       }
 
       final columns = await db
@@ -522,6 +527,34 @@ void main() {
       );
     },
   );
+
+  test('upgrades version 19 creatures with ally defaulting to false', () async {
+    await db.close();
+    db = AppDatabase(
+      NativeDatabase.memory(
+        setup: (sqliteDb) {
+          sqliteDb.execute('''
+            CREATE TABLE encounter_creatures (
+              id INTEGER NOT NULL PRIMARY KEY,
+              name_override TEXT,
+              is_unmasked INTEGER NOT NULL DEFAULT 0
+            )
+          ''');
+          sqliteDb.execute(
+            "INSERT INTO encounter_creatures VALUES (1, 'Existing', 1)",
+          );
+          sqliteDb.execute('PRAGMA user_version = 19');
+        },
+      ),
+    );
+
+    final row = await db.customSelect(
+      'SELECT name_override, is_unmasked, is_ally FROM encounter_creatures',
+    ).getSingle();
+    expect(row.read<String>('name_override'), 'Existing');
+    expect(row.read<int>('is_unmasked'), 1);
+    expect(row.read<int>('is_ally'), 0);
+  });
 
   test('upgrades a version 2 database with encounter tables', () async {
     await db.close();

@@ -4,6 +4,7 @@ import 'dart:math' show min;
 import 'package:drift/drift.dart' show OrderingTerm;
 import 'package:flutter/material.dart';
 import 'package:gmdex/components/navigation_sidebar.dart';
+import 'package:gmdex/components/multi_select_filter.dart';
 import 'package:gmdex/components/notes_drawer.dart';
 import 'package:gmdex/components/responsive_layout.dart';
 import 'package:gmdex/components/spell_card.dart';
@@ -12,7 +13,7 @@ import 'package:gmdex/components/spell_edit.dart';
 import 'package:gmdex/database/database.dart';
 import 'package:gmdex/database/database_initialize.dart';
 import 'package:gmdex/database/spell_writer.dart';
-import 'package:gmdex/models/spell.dart' show spellSchoolName;
+import 'package:gmdex/models/spell.dart' show spellIsRitual, spellSchoolName;
 import 'package:gmdex/models/spell_draft.dart';
 import 'package:gmdex/theme/apptheme.dart';
 
@@ -125,8 +126,10 @@ class _BrowseSpellsWidgetState extends State<BrowseSpellsWidget> {
   SpellRow? _selectedSpell;
   String _searchTerm = '';
   String _levelFilter = '';
-  String _schoolFilter = '';
+  Set<String> _schoolFilter = {};
   String _sourceFilter = '';
+  bool _ritualFilter = false;
+  final _ritualById = <int, bool>{};
   bool _sortDescending = false;
   Object? _loadError;
 
@@ -155,12 +158,13 @@ class _BrowseSpellsWidgetState extends State<BrowseSpellsWidget> {
       final selectedId = _selectedSpell?.id;
       setState(() {
         _spells = spells;
+        _ritualById.clear();
         _loadError = null;
         _selectedSpell = selectedId == null
             ? null
             : spells.where((spell) => spell.id == selectedId).firstOrNull;
         if (!_levels.contains(_levelFilter)) _levelFilter = '';
-        if (!_schools.contains(_schoolFilter)) _schoolFilter = '';
+        _schoolFilter.retainAll(_schools);
         if (!_sources.contains(_sourceFilter)) _sourceFilter = '';
       });
     } catch (error) {
@@ -184,16 +188,23 @@ class _BrowseSpellsWidgetState extends State<BrowseSpellsWidget> {
     return _spells.where((spell) {
       return (term.isEmpty || spell.name.toLowerCase().contains(term)) &&
           (_levelFilter.isEmpty || spell.level.toString() == _levelFilter) &&
-          (_schoolFilter.isEmpty || spell.school == _schoolFilter) &&
-          (_sourceFilter.isEmpty || spell.source == _sourceFilter);
+          (_schoolFilter.isEmpty || _schoolFilter.contains(spell.school)) &&
+          (_sourceFilter.isEmpty || spell.source == _sourceFilter) &&
+          (!_ritualFilter ||
+              _ritualById.putIfAbsent(
+                spell.id,
+                () => spellIsRitual(spell.data),
+              ));
     }).toList();
   }
 
-  int get _activeFilterCount => [
-    _levelFilter,
-    _schoolFilter,
-    _sourceFilter,
-  ].where((filter) => filter.isNotEmpty).length;
+  int get _activeFilterCount =>
+      [
+        _levelFilter,
+        _sourceFilter,
+      ].where((filter) => filter.isNotEmpty).length +
+      (_schoolFilter.isNotEmpty ? 1 : 0) +
+      (_ritualFilter ? 1 : 0);
 
   void _selectSpell(SpellRow spell, bool isWide) {
     setState(() => _selectedSpell = spell);
@@ -322,8 +333,9 @@ class _BrowseSpellsWidgetState extends State<BrowseSpellsWidget> {
 
   Future<void> _showFilterDialog() async {
     var level = _levelFilter;
-    var school = _schoolFilter;
+    var school = Set<String>.of(_schoolFilter);
     var source = _sourceFilter;
+    var ritual = _ritualFilter;
 
     final applied = await showDialog<bool>(
       context: context,
@@ -346,12 +358,11 @@ class _BrowseSpellsWidgetState extends State<BrowseSpellsWidget> {
                     labelFor: (value) =>
                         value == '0' ? 'Cantrip' : 'Level $value',
                   ),
-                  _filterDropdown(
-                    context,
-                    'School',
-                    school,
-                    _schools,
-                    (value) => setLocal(() => school = value),
+                  MultiSelectFilter(
+                    label: 'School',
+                    selected: school,
+                    options: _schools,
+                    onChanged: (value) => setLocal(() => school = value),
                     labelFor: spellSchoolName,
                   ),
                   _filterDropdown(
@@ -360,6 +371,13 @@ class _BrowseSpellsWidgetState extends State<BrowseSpellsWidget> {
                     source,
                     _sources,
                     (value) => setLocal(() => source = value),
+                  ),
+                  CheckboxListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: Text('Ritual only', style: Theme.of(context).textTheme.bodyMedium),
+                    value: ritual,
+                    onChanged: (value) =>
+                        setLocal(() => ritual = value ?? false),
                   ),
                 ],
               ),
@@ -372,8 +390,9 @@ class _BrowseSpellsWidgetState extends State<BrowseSpellsWidget> {
               ),
               onPressed: () => setLocal(() {
                 level = '';
-                school = '';
+                school = {};
                 source = '';
+                ritual = false;
               }),
               child: const Text('Clear'),
             ),
@@ -401,6 +420,7 @@ class _BrowseSpellsWidgetState extends State<BrowseSpellsWidget> {
         _levelFilter = level;
         _schoolFilter = school;
         _sourceFilter = source;
+        _ritualFilter = ritual;
       });
     }
   }
@@ -445,7 +465,14 @@ class _BrowseSpellsWidgetState extends State<BrowseSpellsWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final visibleSpells = _visibleSpells;
+    List<SpellRow> visibleSpells;
+    FormatException? filterError;
+    try {
+      visibleSpells = _visibleSpells;
+    } on FormatException catch (error) {
+      visibleSpells = [];
+      filterError = error;
+    }
     return LayoutBuilder(
       builder: (context, constraints) {
         final isWide = ResponsiveLayout.isWide(
@@ -456,6 +483,8 @@ class _BrowseSpellsWidgetState extends State<BrowseSpellsWidget> {
 
         final spellList = _loadError != null
             ? Center(child: Text('Could not load spells: $_loadError'))
+            : filterError != null
+            ? Center(child: Text('Could not filter spells: $filterError'))
             : visibleSpells.isEmpty
             ? const Center(child: Text('No spells found.'))
             : ListView.builder(

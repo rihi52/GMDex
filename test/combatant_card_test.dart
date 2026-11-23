@@ -192,6 +192,29 @@ void main() {
 
       expect(find.text('Frightened'), findsNothing);
       expect(find.text('Enemy 1'), findsOneWidget);
+      Color? playerRowColor() {
+        final tile = find.ancestor(
+          of: find.text('Enemy 1'),
+          matching: find.byWidgetPredicate(
+            (widget) =>
+                widget is Container &&
+                widget.decoration is BoxDecoration &&
+                (widget.decoration as BoxDecoration).border != null,
+          ),
+        );
+        return (tester.widget<Container>(tile.first).decoration! as BoxDecoration)
+            .color;
+      }
+
+      expect(playerRowColor(), AppColors.creatureCard);
+      await tester.tap(find.byKey(const ValueKey('combatant-ally-checkbox')));
+      await tester.pump();
+      expect(playerRowColor(), AppColors.cardAllyFill);
+      expect(combatant.isUnmasked, isFalse);
+      await tester.tap(find.byKey(const ValueKey('combatant-ally-checkbox')));
+      await tester.pump();
+      expect(playerRowColor(), AppColors.creatureCard);
+
       await tester.enterText(find.byType(TextFormField).last, '30-18');
       await tester.pump();
       expect(combatant.currentHitPoints, 12);
@@ -211,7 +234,7 @@ void main() {
       expect(combatant.isFrightened, isFalse);
       expect(find.text('Frightened'), findsOneWidget);
 
-      await tester.tap(find.byType(Checkbox).last);
+      await tester.tap(find.byKey(const ValueKey('combatant-masked-checkbox')));
       await tester.pump();
       expect(combatant.isUnmasked, isTrue);
       expect(
@@ -223,7 +246,7 @@ void main() {
       );
       expect(find.text('Enemy 1'), findsNothing);
 
-      await tester.tap(find.byType(Checkbox).last);
+      await tester.tap(find.byKey(const ValueKey('combatant-masked-checkbox')));
       await tester.pump();
       expect(combatant.isUnmasked, isFalse);
       expect(find.text('Enemy 1'), findsOneWidget);
@@ -442,13 +465,14 @@ void main() {
         ),
       );
 
-      expect(tester.widget<Checkbox>(find.byType(Checkbox)).value, isTrue);
+      final mask = find.byKey(const ValueKey('combatant-masked-checkbox'));
+      expect(tester.widget<Checkbox>(mask).value, isTrue);
       expect(combatant.isUnmasked, isFalse);
 
-      await tester.tap(find.byType(Checkbox));
+      await tester.tap(mask);
       await tester.pump();
 
-      expect(tester.widget<Checkbox>(find.byType(Checkbox)).value, isFalse);
+      expect(tester.widget<Checkbox>(mask).value, isFalse);
       expect(combatant.isUnmasked, isTrue);
     },
     variant: TargetPlatformVariant.desktop(),
@@ -477,7 +501,8 @@ void main() {
           ),
         ),
       );
-      expect(find.byType(Checkbox), findsNothing);
+      expect(find.byKey(const ValueKey('combatant-masked-checkbox')), findsNothing);
+      expect(find.byKey(const ValueKey('combatant-ally-checkbox')), findsOneWidget);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -491,9 +516,79 @@ void main() {
           ),
         ),
       );
-      expect(find.byType(Checkbox), findsNothing);
+      expect(find.byKey(const ValueKey('combatant-masked-checkbox')), findsNothing);
+      expect(find.byKey(const ValueKey('combatant-ally-checkbox')), findsOneWidget);
     },
     variant: TargetPlatformVariant.mobile(),
+  );
+
+  testWidgets(
+    'ally toggles creature color independently of masking in both cards',
+    (tester) async {
+      tester.view.physicalSize = ResponsiveLayout.isMobilePlatform
+          ? const Size(375, 900)
+          : const Size(1200, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      for (final runtime in [false, true]) {
+        final combatant = Combatant(
+          name: 'Goblin',
+          isPlayer: false,
+          maxHitPoints: 7,
+          initiative: 10,
+          quantity: 1,
+          creatureId: 1,
+        );
+        var changes = 0;
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: StatefulBuilder(
+                  builder: (context, setState) => runtime
+                      ? RunCombatantCard(
+                          isCreature: true,
+                          combatant: combatant,
+                          selected: true,
+                          onDelete: () {},
+                          onInitiativeChanged: (_) {},
+                          onCombatantChanged: () => changes++,
+                        )
+                      : BuildCombatantCard(
+                          isCreature: true,
+                          combatant: combatant,
+                          selected: true,
+                          onDelete: () {},
+                          onAllyChanged: (_) => setState(() => changes++),
+                        ),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        final ally = find.byKey(const ValueKey('combatant-ally-checkbox'));
+        ListTile tile() => tester.widget<ListTile>(find.byType(ListTile).first);
+        expect(combatant.isAlly, isFalse);
+        expect(tile().tileColor, AppColors.creatureCard);
+        await tester.tap(ally);
+        await tester.pump();
+        expect(combatant.isAlly, isTrue);
+        expect(combatant.isUnmasked, isFalse);
+        expect(tile().tileColor, AppColors.cardAllyFill);
+        expect(tile().selectedTileColor, AppColors.cardAllyFill);
+        expect(changes, 1);
+        await tester.tap(ally);
+        await tester.pump();
+        expect(combatant.isAlly, isFalse);
+        expect(combatant.isUnmasked, isFalse);
+        expect(tile().tileColor, AppColors.creatureCard);
+        expect(changes, 2);
+      }
+    },
+    variant: TargetPlatformVariant.all(),
   );
 
   testWidgets('collapsed conditions tile indicates an active condition', (

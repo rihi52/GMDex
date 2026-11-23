@@ -85,6 +85,7 @@ class Combatant {
   bool isUnconscious;
   bool isTurn;
   bool isUnmasked;
+  bool isAlly;
 
   Combatant({
     required this.name,
@@ -113,5 +114,6 @@ class Combatant {
     this.isUnconscious = false,
     this.isTurn = false,
     this.isUnmasked = false,
+    this.isAlly = false,
   });
 }

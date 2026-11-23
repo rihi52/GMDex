@@ -73,6 +73,7 @@ class EncounterCreatures extends Table {
       boolean().withDefault(const Constant(false))();
   BoolColumn get isTurn => boolean().withDefault(const Constant(false))();
   BoolColumn get isUnmasked => boolean().withDefault(const Constant(false))();
+  BoolColumn get isAlly => boolean().withDefault(const Constant(false))();
   TextColumn get nameOverride => text().nullable()();
 }
 
@@ -390,6 +391,57 @@ class AppDatabase extends _$AppDatabase {
     });
   }
 
+  /// Repairs bare recharge tags left in bestiary text by older imports.
+  Future<void> repairBestiaryRechargeTags() async {
+    const tag = '{@recharge}';
+    const replacement = 'Recharge 6';
+    const columns = {
+      'creatures': [
+        'armor_class_type',
+        'armor_class_other',
+        'damage_vulnerabilities',
+        'damage_resistances',
+        'damage_immunities',
+        'condition_immunities',
+      ],
+      'creature_actions': ['name', 'description'],
+      'creature_traits': ['name', 'description'],
+      'creature_spellcastings': ['name', 'header_text', 'footer_text'],
+      'creature_spells': ['spell_name'],
+      'legendary_group_entries': ['title', 'body'],
+    };
+    const keyedColumns = {
+      'creature_senses': 'sense',
+      'creature_languages': 'language',
+      'creature_environments': 'environment',
+    };
+
+    await transaction(() async {
+      for (final entry in columns.entries) {
+        for (final column in entry.value) {
+          await customStatement(
+            'UPDATE "${entry.key}" SET "$column" = replace("$column", ?, ?) '
+            'WHERE instr("$column", ?) > 0',
+            [tag, replacement, tag],
+          );
+        }
+      }
+      for (final entry in keyedColumns.entries) {
+        // Normalized values can already exist under the same creature.
+        await customStatement(
+          'INSERT OR IGNORE INTO "${entry.key}" (creature_id, "${entry.value}") '
+          'SELECT creature_id, replace("${entry.value}", ?, ?) '
+          'FROM "${entry.key}" WHERE instr("${entry.value}", ?) > 0',
+          [tag, replacement, tag],
+        );
+        await customStatement(
+          'DELETE FROM "${entry.key}" WHERE instr("${entry.value}", ?) > 0',
+          [tag],
+        );
+      }
+    });
+  }
+
   Future<DateTime> getDatabaseCreatedAt() async {
     final rows = await customSelect(
       "SELECT value FROM database_metadata WHERE key = 'database_created_at'",
@@ -417,7 +469,7 @@ class AppDatabase extends _$AppDatabase {
   }
 
   @override
-  int get schemaVersion => 19;
+  int get schemaVersion => 20;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -663,6 +715,9 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from >= 16 && from < 18) {
         await m.addColumn(spells, spells.notes);
+      }
+      if (from >= 3 && from < 20) {
+        await m.addColumn(encounterCreatures, encounterCreatures.isAlly);
       }
       if (to >= 19) {
         await _ensureDatabaseMetadata();
